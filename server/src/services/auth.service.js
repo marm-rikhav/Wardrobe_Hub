@@ -113,7 +113,7 @@ export const refreshAccessToken = async (refreshToken) => {
   try {
     decoded = verifyRefreshToken(refreshToken);
   } catch (err) {
-    throw new ApiError(401, "Invalid or expired refresh token");
+    throw new ApiError(401, "Invalid or expired refresh token", [], err);
   }
 
   // Verify user still exists and is active

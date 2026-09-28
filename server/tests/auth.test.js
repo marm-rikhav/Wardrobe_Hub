@@ -261,6 +261,46 @@ describe("Authentication & Authorization API Tests", () => {
       assert.equal(body.success, false);
       assert.equal(body.message, "Refresh token is missing");
     });
+
+    it("should reject refresh when refresh token is invalid or corrupted (401 Unauthorized)", async () => {
+      const response = await fetch(`${baseUrl}/api/auth/refresh`, {
+        method: "POST",
+        headers: {
+          Cookie: "refreshToken=invalid.token.signature",
+        },
+      });
+
+      const body = await response.json();
+      assert.equal(response.status, 401);
+      assert.equal(body.success, false);
+      assert.equal(body.message, "Invalid or expired refresh token");
+    });
+
+    it("should reject refresh if user account is deactivated or deleted (401 Unauthorized)", async () => {
+      // Deactivate user temporarily
+      await prisma.user.update({
+        where: { email: testUser.email },
+        data: { isActive: false },
+      });
+
+      const response = await fetch(`${baseUrl}/api/auth/refresh`, {
+        method: "POST",
+        headers: {
+          Cookie: testUserRefreshTokenCookie,
+        },
+      });
+
+      const body = await response.json();
+      assert.equal(response.status, 401);
+      assert.equal(body.success, false);
+      assert.equal(body.message, "User not found or account deactivated");
+
+      // Restore user active state
+      await prisma.user.update({
+        where: { email: testUser.email },
+        data: { isActive: true },
+      });
+    });
   });
 
   // ==========================================
