@@ -3,3 +3,4 @@ datawithphase
 client/node_modules
 server/node_modules
 server/.env
+server/POSTMAN_TESTING_GUIDE.md
