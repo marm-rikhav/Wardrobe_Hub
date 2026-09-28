@@ -10,11 +10,13 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+
+
 enum Role {
   CUSTOMER
   ADMIN
 }
-
 
 model User {
   id           String   @id @default(uuid()) @db.Uuid
@@ -27,4 +29,82 @@ model User {
   createdAt    DateTime @default(now()) @map("created_at")
 
   @@map("users")
+}
+
+// ============ CATALOG ============
+
+model Category {
+  id       String  @id @default(uuid()) @db.Uuid
+  name     String  @unique @db.VarChar(100)
+  slug     String  @unique @db.VarChar(120)
+  imageUrl String? @map("image_url")
+  isActive Boolean @default(true) @map("is_active")
+
+  subcategories Subcategory[]
+
+  @@map("categories")
+}
+
+model Subcategory {
+  id         String @id @default(uuid()) @db.Uuid
+  categoryId String @map("category_id") @db.Uuid
+  name       String @db.VarChar(100)
+  slug       String @unique @db.VarChar(120)
+  isActive   Boolean @default(true) @map("is_active")
+
+  category Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  products Product[]
+
+  @@unique([categoryId, name])
+  @@map("subcategories")
+}
+
+model Product {
+  id            String   @id @default(uuid()) @db.Uuid
+  subcategoryId String   @map("subcategory_id") @db.Uuid
+  name          String   @db.VarChar(200)
+  slug          String   @unique @db.VarChar(220)
+  description   String?
+  brand         String?  @db.VarChar(100)
+  basePrice     Decimal  @map("base_price") @db.Decimal(10, 2)
+  discountPrice Decimal? @map("discount_price") @db.Decimal(10, 2)
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  subcategory Subcategory     @relation(fields: [subcategoryId], references: [id])
+  variants    ProductVariant[]
+  images      ProductImage[]
+
+  @@index([subcategoryId])
+  @@map("products")
+}
+
+// The "sub product": one size + color of a product
+model ProductVariant {
+  id        String   @id @default(uuid()) @db.Uuid
+  productId String   @map("product_id") @db.Uuid
+  sku       String   @unique @db.VarChar(50)
+  size      String   @db.VarChar(20)
+  color     String   @db.VarChar(30)
+  price     Decimal? @db.Decimal(10, 2)
+  stock     Int      @default(0)
+  isActive  Boolean  @default(true) @map("is_active")
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, size, color])
+  @@index([productId])
+  @@map("product_variants")
+}
+
+model ProductImage {
+  id        String  @id @default(uuid()) @db.Uuid
+  productId String  @map("product_id") @db.Uuid
+  color     String? @db.VarChar(30)
+  imageUrl  String  @map("image_url")
+  sortOrder Int     @default(0) @map("sort_order")
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_images")
 }
