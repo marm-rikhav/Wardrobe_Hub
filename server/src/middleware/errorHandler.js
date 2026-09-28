@@ -26,6 +26,14 @@ export const errorHandler = (err, req, res, next) => {
     errors = [{ field: target, message: `${target} already exists` }];
   }
 
+  // Handle Multer upload limits (e.g. file size > 2 MB)
+  if (err.name === "MulterError" || err.code === "LIMIT_FILE_SIZE") {
+    statusCode = 400;
+    if (err.code === "LIMIT_FILE_SIZE") {
+      message = "Image size exceeds the 2 MB limit. Maximum allowed size is 2 MB.";
+    }
+  }
+
   // Log non-operational or unexpected errors in development
   if (process.env.NODE_ENV !== "production") {
     console.error(`[Error] ${req.method} ${req.originalUrl}:`, err);

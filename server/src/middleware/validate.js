@@ -14,7 +14,14 @@ export const validate = (schema, target = "body") => {
     }
 
     // Replace req[target] with sanitized and validated data
-    req[target] = result.data;
+    if (target === "query") {
+      for (const key of Object.keys(req.query)) {
+        delete req.query[key];
+      }
+      Object.assign(req.query, result.data);
+    } else {
+      req[target] = result.data;
+    }
     return next();
   };
 };
