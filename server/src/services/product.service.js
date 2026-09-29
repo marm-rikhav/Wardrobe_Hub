@@ -13,7 +13,7 @@ const isUuid = (val) => Boolean(val && UUID_REGEX.test(val));
 export const formatProductPrices = (product) => {
   const base = Number(product.basePrice);
   const discount = product.discountPrice ? Number(product.discountPrice) : null;
-  const effectivePrice = discount !== null ? discount : base;
+  const effectivePrice = discount ?? base;
 
   const formattedVariants = product.variants
     ? product.variants.map((v) => {
@@ -21,7 +21,7 @@ export const formatProductPrices = (product) => {
         return {
           ...v,
           price: variantCustomPrice,
-          effectivePrice: variantCustomPrice !== null ? variantCustomPrice : effectivePrice,
+          effectivePrice: variantCustomPrice ?? effectivePrice,
         };
       })
     : [];
@@ -130,7 +130,7 @@ export const createProduct = async ({
       color: v.color.trim(),
       price: v.price || null,
       stock: v.stock,
-      isActive: v.isActive !== undefined ? v.isActive : true,
+      isActive: v.isActive ?? true,
     }));
 
     await tx.productVariant.createMany({
@@ -279,9 +279,9 @@ const updateExistingVariant = async (tx, productId, v) => {
       sku: v.sku ? v.sku.toUpperCase() : undefined,
       size: v.size || undefined,
       color: v.color || undefined,
-      price: v.price !== undefined ? v.price : undefined,
-      stock: v.stock !== undefined ? v.stock : undefined,
-      isActive: v.isActive !== undefined ? v.isActive : undefined,
+      price: v.price,
+      stock: v.stock,
+      isActive: v.isActive,
     },
   });
 };
@@ -320,7 +320,7 @@ const createNewVariant = async (tx, productId, v) => {
       color: v.color.trim(),
       price: v.price || null,
       stock: v.stock || 0,
-      isActive: v.isActive !== undefined ? v.isActive : true,
+      isActive: v.isActive ?? true,
     },
   });
 };
@@ -353,11 +353,11 @@ const updateProductScalars = async (tx, id, updateData, finalSlug) => {
       subcategoryId: updateData.subcategoryId || undefined,
       name: updateData.name || undefined,
       slug: finalSlug,
-      description: updateData.description !== undefined ? updateData.description : undefined,
-      brand: updateData.brand !== undefined ? updateData.brand : undefined,
+      description: updateData.description,
+      brand: updateData.brand,
       basePrice: updateData.basePrice || undefined,
-      discountPrice: updateData.discountPrice !== undefined ? updateData.discountPrice : undefined,
-      isActive: updateData.isActive !== undefined ? updateData.isActive : undefined,
+      discountPrice: updateData.discountPrice,
+      isActive: updateData.isActive,
     },
   });
 };
@@ -517,7 +517,7 @@ export const uploadProductImage = async (productId, fileBuffer, { color, sortOrd
       productId,
       imageUrl: uploadResult.secureUrl,
       color: color || null,
-      sortOrder: sortOrder !== undefined && sortOrder !== null ? Number(sortOrder) : existingImageCount,
+      sortOrder: Number(sortOrder ?? existingImageCount),
     },
   });
 };
