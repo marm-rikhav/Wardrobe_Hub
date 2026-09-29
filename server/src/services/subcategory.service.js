@@ -11,7 +11,7 @@ export const createSubcategory = async ({ categoryId, name, slug, isActive = tru
     where: { id: categoryId },
   });
 
-  if (!category || !category.isActive) {
+  if (!category?.isActive) {
     throw new ApiError(404, "Parent category not found or is currently inactive");
   }
 
@@ -98,6 +98,67 @@ export const getSubcategoryByIdAdmin = async (id) => {
 };
 
 /**
+ * Validate parent category change if categoryId is updated
+ */
+const validateParentCategoryChange = async (targetCategoryId, currentCategoryId) => {
+  if (!targetCategoryId || targetCategoryId === currentCategoryId) {
+    return;
+  }
+  const parentCategory = await prisma.category.findUnique({
+    where: { id: targetCategoryId },
+  });
+  if (!parentCategory?.isActive) {
+    throw new ApiError(404, "Target parent category not found or is currently inactive");
+  }
+};
+
+/**
+ * Resolve slug for subcategory update
+ */
+const resolveSubcategorySlug = (name, slug) => {
+  if (slug) {
+    return slugify(slug);
+  }
+  if (name) {
+    return slugify(name);
+  }
+  return undefined;
+};
+
+/**
+ * Check subcategory uniqueness constraints on name or slug update
+ */
+const validateSubcategoryUniqueness = async (id, targetCategoryId, name, slug) => {
+  const orConditions = [];
+  if (name) {
+    orConditions.push({ categoryId: targetCategoryId, name });
+  }
+  if (slug) {
+    orConditions.push({ slug });
+  }
+
+  if (orConditions.length === 0) {
+    return;
+  }
+
+  const duplicate = await prisma.subcategory.findFirst({
+    where: {
+      id: { not: id },
+      OR: orConditions,
+    },
+  });
+
+  if (!duplicate) {
+    return;
+  }
+
+  if (slug && duplicate.slug === slug) {
+    throw new ApiError(409, "Another subcategory already exists with this slug");
+  }
+  throw new ApiError(409, "Another subcategory with this name already exists in this category");
+};
+
+/**
  * Admin: Update subcategory
  */
 export const updateSubcategory = async (id, updateData) => {
@@ -109,43 +170,17 @@ export const updateSubcategory = async (id, updateData) => {
     throw new ApiError(404, "Subcategory not found");
   }
 
+  await validateParentCategoryChange(updateData.categoryId, existingSubcategory.categoryId);
+
   const dataToUpdate = { ...updateData };
+  const updatedSlug = resolveSubcategorySlug(updateData.name, updateData.slug);
+  if (updatedSlug) {
+    dataToUpdate.slug = updatedSlug;
+  }
+
   const targetCategoryId = updateData.categoryId || existingSubcategory.categoryId;
-
-  // Check parent category if changed
-  if (updateData.categoryId && updateData.categoryId !== existingSubcategory.categoryId) {
-    const parentCategory = await prisma.category.findUnique({
-      where: { id: updateData.categoryId },
-    });
-    if (!parentCategory || !parentCategory.isActive) {
-      throw new ApiError(404, "Target parent category not found or is currently inactive");
-    }
-  }
-
-  if (updateData.name && !updateData.slug) {
-    dataToUpdate.slug = slugify(updateData.name);
-  } else if (updateData.slug) {
-    dataToUpdate.slug = slugify(updateData.slug);
-  }
-
-  // Check uniqueness constraints if name or slug or categoryId changed
   if (dataToUpdate.name || dataToUpdate.slug || updateData.categoryId) {
-    const duplicate = await prisma.subcategory.findFirst({
-      where: {
-        id: { not: id },
-        OR: [
-          ...(dataToUpdate.name ? [{ categoryId: targetCategoryId, name: dataToUpdate.name }] : []),
-          ...(dataToUpdate.slug ? [{ slug: dataToUpdate.slug }] : []),
-        ],
-      },
-    });
-
-    if (duplicate) {
-      if (dataToUpdate.slug && duplicate.slug === dataToUpdate.slug) {
-        throw new ApiError(409, "Another subcategory already exists with this slug");
-      }
-      throw new ApiError(409, "Another subcategory with this name already exists in this category");
-    }
+    await validateSubcategoryUniqueness(id, targetCategoryId, dataToUpdate.name, dataToUpdate.slug);
   }
 
   return await prisma.subcategory.update({
