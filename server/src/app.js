@@ -14,6 +14,7 @@ import {
   publicProductRouter,
   adminProductRouter,
 } from "./routes/product.routes.js";
+import addressRoutes from "./routes/address.routes.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { ApiError } from "./utils/apiError.js";
 
@@ -23,11 +24,22 @@ const app = express();
 const allowedOrigins = [
   process.env.CLIENT_URL || "http://localhost:3000",
   process.env.ADMIN_URL || "http://localhost:5173",
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
+  "http://localhost:5173",
+  "http://localhost:5174",
 ];
 
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps, Postman or curl)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) !== -1 || /^http:\/\/localhost:\d+$/.test(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
   })
 );
@@ -48,6 +60,10 @@ app.get("/", (req, res) => {
 
 // Authentication Routes
 app.use("/api/auth", authRoutes);
+
+// Address Routes
+app.use("/api/addresses", addressRoutes);
+app.use("/api/user/addresses", addressRoutes);
 
 // Catalog Public Routes
 app.use("/api/categories", publicCategoryRouter);

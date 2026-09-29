@@ -160,9 +160,40 @@ export const getUserById = async (userId) => {
   return user;
 };
 
+/**
+ * Update user profile
+ */
+export const updateUserProfile = async (userId, { name, phone }) => {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user?.isActive) {
+    throw new ApiError(404, "User not found");
+  }
+
+  const dataToUpdate = {};
+  if (name !== undefined) dataToUpdate.name = name;
+  if (phone !== undefined) dataToUpdate.phone = phone;
+
+  const updatedUser = await prisma.user.update({
+    where: { id: userId },
+    data: dataToUpdate,
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      phone: true,
+      role: true,
+      isActive: true,
+      createdAt: true,
+    },
+  });
+
+  return updatedUser;
+};
+
 export default {
   register,
   login,
   refreshAccessToken,
   getUserById,
+  updateUserProfile,
 };

@@ -115,6 +115,26 @@ export const getCurrentUser = async (req, res, next) => {
 };
 
 /**
+ * Handle updating current user profile
+ */
+export const updateProfile = async (req, res, next) => {
+  try {
+    const { name, phone } = req.body;
+    const user = await authService.updateUserProfile(req.user.id, { name, phone });
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      data: {
+        user,
+      },
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+/**
  * Handle user logout (clear refresh token cookie)
  */
 export const logout = async (req, res, next) => {
@@ -135,5 +155,6 @@ export default {
   login,
   refreshToken,
   getCurrentUser,
+  updateProfile,
   logout,
 };
