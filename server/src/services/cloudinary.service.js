@@ -23,6 +23,14 @@ export const uploadImageStream = (fileBuffer, folder = "wardrobe-hub/products") 
       },
       (error, result) => {
         if (error || !result) {
+          const safeError = {
+            message: error?.message,
+            http_code: error?.http_code,
+            name: error?.name,
+            details: error?.error?.message || error?.message,
+          };
+          console.error("[Cloudinary Upload Error Details]:", safeError);
+
           return reject(
             new ApiError(500, "Failed to upload image to Cloudinary", [], error)
           );
