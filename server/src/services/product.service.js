@@ -156,7 +156,9 @@ export const createProduct = async ({
  * Admin: List products with pagination and filters
  */
 export const getAllProductsAdmin = async ({ page = 1, limit = 20, search, subcategoryId, categoryId, isActive }) => {
-  const skip = (page - 1) * limit;
+  const numericPage = Number(page) || 1;
+  const numericLimit = Number(limit) || 20;
+  const skip = (numericPage - 1) * numericLimit;
 
   const where = {};
 
@@ -185,7 +187,7 @@ export const getAllProductsAdmin = async ({ page = 1, limit = 20, search, subcat
     prisma.product.findMany({
       where,
       skip,
-      take: limit,
+      take: numericLimit,
       orderBy: { createdAt: "desc" },
       include: {
         subcategory: {
@@ -200,10 +202,10 @@ export const getAllProductsAdmin = async ({ page = 1, limit = 20, search, subcat
   return {
     products: products.map(formatProductPrices),
     pagination: {
-      page: Number(page),
-      limit: Number(limit),
+      page: numericPage,
+      limit: numericLimit,
       total,
-      totalPages: Math.ceil(total / limit) || 1,
+      totalPages: Math.ceil(total / numericLimit) || 1,
     },
   };
 };
