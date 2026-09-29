@@ -4,6 +4,9 @@ import { slugify } from "../utils/slugify.js";
 import cloudinaryService from "./cloudinary.service.js";
 import { validateImageBuffer } from "../utils/imageValidator.js";
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const isUuid = (val) => Boolean(val && UUID_REGEX.test(val));
+
 /**
  * Helper to compute effective price for a product or variant
  */
@@ -52,7 +55,7 @@ export const createProduct = async ({
     include: { category: true },
   });
 
-  if (!subcategory || !subcategory.isActive || !subcategory.category.isActive) {
+  if (!subcategory?.isActive || !subcategory?.category?.isActive) {
     throw new ApiError(404, "Parent subcategory or category not found or is currently inactive");
   }
 
@@ -232,6 +235,192 @@ export const getProductByIdAdmin = async (id) => {
 };
 
 /**
+ * Validate variant stock value
+ */
+const validateVariantStock = (v) => {
+  if (v.stock !== undefined && v.stock < 0) {
+    throw new ApiError(400, `Stock cannot be negative for variant SKU: ${v.sku || v.id}`);
+  }
+};
+
+/**
+ * Validate SKU uniqueness when modifying an existing variant
+ */
+const validateExistingVariantSku = async (tx, variantId, sku, currentSku) => {
+  const normalizedSku = sku ? sku.toUpperCase() : null;
+  if (!normalizedSku || normalizedSku === currentSku) {
+    return;
+  }
+  const skuConflict = await tx.productVariant.findFirst({
+    where: { id: { not: variantId }, sku: normalizedSku },
+  });
+  if (skuConflict) {
+    throw new ApiError(409, `SKU "${sku}" is already in use by another variant`);
+  }
+};
+
+/**
+ * Update an existing variant within a transaction
+ */
+const updateExistingVariant = async (tx, productId, v) => {
+  const existingVariant = await tx.productVariant.findFirst({
+    where: { id: v.id, productId },
+  });
+
+  if (!existingVariant) {
+    throw new ApiError(404, `Variant with ID "${v.id}" not found on this product`);
+  }
+
+  await validateExistingVariantSku(tx, v.id, v.sku, existingVariant.sku);
+
+  await tx.productVariant.update({
+    where: { id: v.id },
+    data: {
+      sku: v.sku ? v.sku.toUpperCase() : undefined,
+      size: v.size || undefined,
+      color: v.color || undefined,
+      price: v.price !== undefined ? v.price : undefined,
+      stock: v.stock !== undefined ? v.stock : undefined,
+      isActive: v.isActive !== undefined ? v.isActive : undefined,
+    },
+  });
+};
+
+/**
+ * Create a new variant for a product within a transaction
+ */
+const createNewVariant = async (tx, productId, v) => {
+  const normalizedSku = v.sku.trim().toUpperCase();
+  const skuConflict = await tx.productVariant.findUnique({
+    where: { sku: normalizedSku },
+  });
+  if (skuConflict) {
+    throw new ApiError(409, `SKU "${normalizedSku}" is already in use`);
+  }
+
+  const pairConflict = await tx.productVariant.findFirst({
+    where: {
+      productId,
+      size: v.size.trim(),
+      color: v.color.trim(),
+    },
+  });
+  if (pairConflict) {
+    throw new ApiError(
+      409,
+      `Variant with size "${v.size}" and color "${v.color}" already exists for this product`
+    );
+  }
+
+  await tx.productVariant.create({
+    data: {
+      productId,
+      sku: normalizedSku,
+      size: v.size.trim(),
+      color: v.color.trim(),
+      price: v.price || null,
+      stock: v.stock || 0,
+      isActive: v.isActive !== undefined ? v.isActive : true,
+    },
+  });
+};
+
+/**
+ * Process all variants for a product update
+ */
+const processVariantsUpdate = async (tx, productId, variants) => {
+  if (!Array.isArray(variants)) {
+    return;
+  }
+
+  for (const v of variants) {
+    validateVariantStock(v);
+    if (v.id) {
+      await updateExistingVariant(tx, productId, v);
+    } else {
+      await createNewVariant(tx, productId, v);
+    }
+  }
+};
+
+/**
+ * Update scalar attributes of a product
+ */
+const updateProductScalars = async (tx, id, updateData, finalSlug) => {
+  return await tx.product.update({
+    where: { id },
+    data: {
+      subcategoryId: updateData.subcategoryId || undefined,
+      name: updateData.name || undefined,
+      slug: finalSlug,
+      description: updateData.description !== undefined ? updateData.description : undefined,
+      brand: updateData.brand !== undefined ? updateData.brand : undefined,
+      basePrice: updateData.basePrice || undefined,
+      discountPrice: updateData.discountPrice !== undefined ? updateData.discountPrice : undefined,
+      isActive: updateData.isActive !== undefined ? updateData.isActive : undefined,
+    },
+  });
+};
+
+/**
+ * Fetch updated product with full relation tree
+ */
+const fetchUpdatedProduct = async (tx, id) => {
+  return await tx.product.findUnique({
+    where: { id },
+    include: {
+      subcategory: { include: { category: true } },
+      variants: true,
+      images: { orderBy: { sortOrder: "asc" } },
+    },
+  });
+};
+
+/**
+ * Validate subcategory change if requested
+ */
+const validateSubcategoryChange = async (targetSubcategoryId, currentSubcategoryId) => {
+  if (!targetSubcategoryId || targetSubcategoryId === currentSubcategoryId) {
+    return;
+  }
+  const subcategory = await prisma.subcategory.findUnique({
+    where: { id: targetSubcategoryId },
+    include: { category: true },
+  });
+  if (!subcategory?.isActive || !subcategory?.category?.isActive) {
+    throw new ApiError(404, "Target subcategory not found or is currently inactive");
+  }
+};
+
+/**
+ * Determine final slug for product update
+ */
+const resolveProductSlug = (existingProduct, updateData) => {
+  if (updateData.slug) {
+    return slugify(updateData.slug);
+  }
+  if (updateData.name && updateData.name !== existingProduct.name) {
+    return slugify(updateData.name);
+  }
+  return existingProduct.slug;
+};
+
+/**
+ * Ensure slug uniqueness when product slug changes
+ */
+const validateSlugUniqueness = async (productId, newSlug, currentSlug) => {
+  if (newSlug === currentSlug) {
+    return;
+  }
+  const slugExists = await prisma.product.findFirst({
+    where: { id: { not: productId }, slug: newSlug },
+  });
+  if (slugExists) {
+    throw new ApiError(409, "A product with this slug already exists");
+  }
+};
+
+/**
  * Admin: Update product details and/or variants atomically
  */
 export const updateProduct = async (id, updateData) => {
@@ -244,136 +433,15 @@ export const updateProduct = async (id, updateData) => {
     throw new ApiError(404, "Product not found");
   }
 
-  // Validate subcategory if changed
-  if (updateData.subcategoryId && updateData.subcategoryId !== existingProduct.subcategoryId) {
-    const subcategory = await prisma.subcategory.findUnique({
-      where: { id: updateData.subcategoryId },
-      include: { category: true },
-    });
-    if (!subcategory || !subcategory.isActive || !subcategory.category.isActive) {
-      throw new ApiError(404, "Target subcategory not found or is currently inactive");
-    }
-  }
+  await validateSubcategoryChange(updateData.subcategoryId, existingProduct.subcategoryId);
 
-  // Handle slug change
-  let finalSlug = existingProduct.slug;
-  if (updateData.slug) {
-    finalSlug = slugify(updateData.slug);
-  } else if (updateData.name && updateData.name !== existingProduct.name) {
-    finalSlug = slugify(updateData.name);
-  }
-
-  if (finalSlug !== existingProduct.slug) {
-    const slugExists = await prisma.product.findFirst({
-      where: { id: { not: id }, slug: finalSlug },
-    });
-    if (slugExists) {
-      throw new ApiError(409, "A product with this slug already exists");
-    }
-  }
+  const finalSlug = resolveProductSlug(existingProduct, updateData);
+  await validateSlugUniqueness(id, finalSlug, existingProduct.slug);
 
   return await prisma.$transaction(async (tx) => {
-    // 1. Update product scalar fields
-    await tx.product.update({
-      where: { id },
-      data: {
-        subcategoryId: updateData.subcategoryId || undefined,
-        name: updateData.name || undefined,
-        slug: finalSlug,
-        description: updateData.description !== undefined ? updateData.description : undefined,
-        brand: updateData.brand !== undefined ? updateData.brand : undefined,
-        basePrice: updateData.basePrice || undefined,
-        discountPrice: updateData.discountPrice !== undefined ? updateData.discountPrice : undefined,
-        isActive: updateData.isActive !== undefined ? updateData.isActive : undefined,
-      },
-    });
-
-    // 2. Handle variants if provided
-    if (Array.isArray(updateData.variants)) {
-      for (const v of updateData.variants) {
-        if (v.stock !== undefined && v.stock < 0) {
-          throw new ApiError(400, `Stock cannot be negative for variant SKU: ${v.sku || v.id}`);
-        }
-
-        if (v.id) {
-          // Update existing variant
-          const existingVariant = await tx.productVariant.findFirst({
-            where: { id: v.id, productId: id },
-          });
-
-          if (!existingVariant) {
-            throw new ApiError(404, `Variant with ID "${v.id}" not found on this product`);
-          }
-
-          // Check SKU uniqueness if changed
-          if (v.sku && v.sku.toUpperCase() !== existingVariant.sku) {
-            const skuConflict = await tx.productVariant.findFirst({
-              where: { id: { not: v.id }, sku: v.sku.toUpperCase() },
-            });
-            if (skuConflict) {
-              throw new ApiError(409, `SKU "${v.sku}" is already in use by another variant`);
-            }
-          }
-
-          await tx.productVariant.update({
-            where: { id: v.id },
-            data: {
-              sku: v.sku ? v.sku.toUpperCase() : undefined,
-              size: v.size || undefined,
-              color: v.color || undefined,
-              price: v.price !== undefined ? v.price : undefined,
-              stock: v.stock !== undefined ? v.stock : undefined,
-              isActive: v.isActive !== undefined ? v.isActive : undefined,
-            },
-          });
-        } else {
-          // Create new variant for this product
-          const normalizedSku = v.sku.trim().toUpperCase();
-          const skuConflict = await tx.productVariant.findUnique({
-            where: { sku: normalizedSku },
-          });
-          if (skuConflict) {
-            throw new ApiError(409, `SKU "${normalizedSku}" is already in use`);
-          }
-
-          const pairConflict = await tx.productVariant.findFirst({
-            where: {
-              productId: id,
-              size: v.size.trim(),
-              color: v.color.trim(),
-            },
-          });
-          if (pairConflict) {
-            throw new ApiError(
-              409,
-              `Variant with size "${v.size}" and color "${v.color}" already exists for this product`
-            );
-          }
-
-          await tx.productVariant.create({
-            data: {
-              productId: id,
-              sku: normalizedSku,
-              size: v.size.trim(),
-              color: v.color.trim(),
-              price: v.price || null,
-              stock: v.stock || 0,
-              isActive: v.isActive !== undefined ? v.isActive : true,
-            },
-          });
-        }
-      }
-    }
-
-    const updated = await tx.product.findUnique({
-      where: { id },
-      include: {
-        subcategory: { include: { category: true } },
-        variants: true,
-        images: { orderBy: { sortOrder: "asc" } },
-      },
-    });
-
+    await updateProductScalars(tx, id, updateData, finalSlug);
+    await processVariantsUpdate(tx, id, updateData.variants);
+    const updated = await fetchUpdatedProduct(tx, id);
     return formatProductPrices(updated);
   });
 };
@@ -414,8 +482,7 @@ export const deleteProduct = async (id) => {
  */
 export const uploadProductImage = async (productId, fileBuffer, { color, sortOrder } = {}) => {
   // 1. Validate UUID format
-  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(productId);
-  if (!isUuid) {
+  if (!isUuid(productId)) {
     throw new ApiError(404, "Product not found");
   }
 
@@ -474,6 +541,149 @@ export const deleteProductImage = async (productId, imageId) => {
   return { message: "Image deleted successfully" };
 };
 
+const SORT_MAPPINGS = {
+  price_asc: { basePrice: "asc" },
+  price_desc: { basePrice: "desc" },
+};
+
+const buildProductOrderBy = (sort) => {
+  return SORT_MAPPINGS[sort] || { createdAt: "desc" };
+};
+
+const buildSearchFilter = (search) => {
+  if (!search) {
+    return null;
+  }
+  return [
+    { name: { contains: search, mode: "insensitive" } },
+    { brand: { contains: search, mode: "insensitive" } },
+    { description: { contains: search, mode: "insensitive" } },
+  ];
+};
+
+const applyCategoryFilter = (where, category) => {
+  if (!category) {
+    return;
+  }
+  where.subcategory = {
+    ...where.subcategory,
+    category: {
+      isActive: true,
+      ...(isUuid(category) ? { id: category } : { slug: category }),
+    },
+  };
+};
+
+const applySubcategoryFilter = (where, subcategory) => {
+  if (!subcategory) {
+    return;
+  }
+  where.subcategory = {
+    ...where.subcategory,
+    ...(isUuid(subcategory) ? { id: subcategory } : { slug: subcategory }),
+  };
+};
+
+const applyVariantFilters = (where, size, color) => {
+  if (!size && !color) {
+    return;
+  }
+  const variantConditions = { isActive: true };
+  if (size) {
+    variantConditions.size = { equals: size, mode: "insensitive" };
+  }
+  if (color) {
+    variantConditions.color = { equals: color, mode: "insensitive" };
+  }
+  where.variants = { some: variantConditions };
+};
+
+const buildPriceRange = (minPrice, maxPrice) => {
+  if (minPrice === undefined && maxPrice === undefined) {
+    return null;
+  }
+  const priceRange = {};
+  if (minPrice !== undefined) {
+    priceRange.gte = minPrice;
+  }
+  if (maxPrice !== undefined) {
+    priceRange.lte = maxPrice;
+  }
+  return priceRange;
+};
+
+const buildPriceConditions = (priceRange) => {
+  if (!priceRange) {
+    return null;
+  }
+  return [
+    { discountPrice: { not: null, ...priceRange } },
+    { discountPrice: null, basePrice: priceRange },
+    {
+      variants: {
+        some: {
+          isActive: true,
+          price: priceRange,
+        },
+      },
+    },
+  ];
+};
+
+const combineFilters = (where, searchConditions, priceConditions) => {
+  if (searchConditions && priceConditions) {
+    where.AND = [{ OR: searchConditions }, { OR: priceConditions }];
+  } else if (searchConditions) {
+    where.OR = searchConditions;
+  } else if (priceConditions) {
+    where.OR = priceConditions;
+  }
+};
+
+const buildPublicProductsWhere = ({
+  search,
+  category,
+  subcategory,
+  size,
+  color,
+  minPrice,
+  maxPrice,
+}) => {
+  const where = {
+    isActive: true,
+    subcategory: {
+      isActive: true,
+      category: {
+        isActive: true,
+      },
+    },
+  };
+
+  applyCategoryFilter(where, category);
+  applySubcategoryFilter(where, subcategory);
+  applyVariantFilters(where, size, color);
+
+  const searchConditions = buildSearchFilter(search);
+  const priceRange = buildPriceRange(minPrice, maxPrice);
+  const priceConditions = buildPriceConditions(priceRange);
+  combineFilters(where, searchConditions, priceConditions);
+
+  return where;
+};
+
+const buildPagination = (page, limit, total) => {
+  const pageNum = Number(page);
+  const limitNum = Number(limit);
+  return {
+    page: pageNum,
+    limit: limitNum,
+    total,
+    totalPages: Math.ceil(total / limitNum) || 1,
+    hasNextPage: pageNum * limitNum < total,
+    hasPrevPage: pageNum > 1,
+  };
+};
+
 /**
  * Public: List active products with search, multi-filters, sorting, and pagination
  */
@@ -491,105 +701,16 @@ export const getPublicProducts = async ({
 }) => {
   const skip = (Number(page) - 1) * Number(limit);
   const take = Number(limit);
-
-  // Base requirement: Only active products under active subcategories & categories
-  const where = {
-    isActive: true,
-    subcategory: {
-      isActive: true,
-      category: {
-        isActive: true,
-      },
-    },
-  };
-
-  // 1. Search filter
-  if (search) {
-    where.OR = [
-      { name: { contains: search, mode: "insensitive" } },
-      { brand: { contains: search, mode: "insensitive" } },
-      { description: { contains: search, mode: "insensitive" } },
-    ];
-  }
-
-  // 2. Category filter
-  if (category) {
-    const isCategoryUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(category);
-    where.subcategory = {
-      ...where.subcategory,
-      category: {
-        isActive: true,
-        ...(isCategoryUuid ? { id: category } : { slug: category }),
-      },
-    };
-  }
-
-  // 3. Subcategory filter
-  if (subcategory) {
-    const isSubcategoryUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(subcategory);
-    where.subcategory = {
-      ...where.subcategory,
-      ...(isSubcategoryUuid ? { id: subcategory } : { slug: subcategory }),
-    };
-  }
-
-  // 4. Variant filters (size / color)
-  const variantConditions = { isActive: true };
-  let hasVariantFilter = false;
-
-  if (size) {
-    variantConditions.size = { equals: size, mode: "insensitive" };
-    hasVariantFilter = true;
-  }
-
-  if (color) {
-    variantConditions.color = { equals: color, mode: "insensitive" };
-    hasVariantFilter = true;
-  }
-
-  if (hasVariantFilter) {
-    where.variants = {
-      some: variantConditions,
-    };
-  }
-
-  // 5. Price filtering
-  if (minPrice !== undefined || maxPrice !== undefined) {
-    const priceRange = {};
-    if (minPrice !== undefined) priceRange.gte = minPrice;
-    if (maxPrice !== undefined) priceRange.lte = maxPrice;
-
-    const priceConditions = [
-      // Product has discountPrice in range
-      { discountPrice: { not: null, ...priceRange } },
-      // Product has no discountPrice, but basePrice in range
-      { discountPrice: null, basePrice: priceRange },
-      // Product has active variant with custom price in range
-      {
-        variants: {
-          some: {
-            isActive: true,
-            price: priceRange,
-          },
-        },
-      },
-    ];
-
-    if (where.OR) {
-      where.AND = [{ OR: where.OR }, { OR: priceConditions }];
-      delete where.OR;
-    } else {
-      where.OR = priceConditions;
-    }
-  }
-
-  // 6. Sorting
-  let orderBy = { createdAt: "desc" };
-  if (sort === "price_asc") {
-    orderBy = { basePrice: "asc" };
-  } else if (sort === "price_desc") {
-    orderBy = { basePrice: "desc" };
-  }
+  const where = buildPublicProductsWhere({
+    search,
+    category,
+    subcategory,
+    size,
+    color,
+    minPrice,
+    maxPrice,
+  });
+  const orderBy = buildProductOrderBy(sort);
 
   const [total, products] = await Promise.all([
     prisma.product.count({ where }),
@@ -615,14 +736,7 @@ export const getPublicProducts = async ({
 
   return {
     products: products.map(formatProductPrices),
-    pagination: {
-      page: Number(page),
-      limit: Number(limit),
-      total,
-      totalPages: Math.ceil(total / limit) || 1,
-      hasNextPage: page * limit < total,
-      hasPrevPage: page > 1,
-    },
+    pagination: buildPagination(page, limit, total),
   };
 };
 
