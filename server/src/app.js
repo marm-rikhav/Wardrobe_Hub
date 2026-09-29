@@ -20,9 +20,14 @@ import { ApiError } from "./utils/apiError.js";
 const app = express();
 
 // Enable CORS with credentials for cookies and frontend communication
+const allowedOrigins = [
+  process.env.CLIENT_URL || "http://localhost:3000",
+  process.env.ADMIN_URL || "http://localhost:5173",
+];
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    origin: allowedOrigins,
     credentials: true,
   })
 );
