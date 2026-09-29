@@ -20,7 +20,9 @@ function createTestPng(width = 1200, height = 1500) {
   }
   function crc32(buf) {
     let c = 0xffffffff;
-    for (let i = 0; i < buf.length; i++) c = crcTable[(c ^ buf[i]) & 0xff] ^ (c >>> 8);
+    for (const byte of buf) {
+      c = crcTable[(c ^ byte) & 0xff] ^ (c >>> 8);
+    }
     return (c ^ 0xffffffff) >>> 0;
   }
   function makeChunk(type, data) {
@@ -85,7 +87,6 @@ describe("Catalog Backend Tests (Admin & Public)", () => {
   let createdCategoryId;
   let createdCategorySlug;
   let createdSubcategoryId;
-  let createdSubcategorySlug;
   let createdProductId;
   let createdProductSlug;
 
@@ -274,7 +275,6 @@ describe("Catalog Backend Tests (Admin & Public)", () => {
       assert.equal(body.data.subcategory.categoryId, createdCategoryId);
 
       createdSubcategoryId = body.data.subcategory.id;
-      createdSubcategorySlug = body.data.subcategory.slug;
     });
 
     it("Rejects duplicate subcategory name in the same category (409 Conflict)", async () => {
@@ -458,7 +458,6 @@ describe("Catalog Backend Tests (Admin & Public)", () => {
         body: JSON.stringify(badPricePayload),
       });
 
-      const body = await res.json();
       assert.equal(res.status, 400);
     });
 
