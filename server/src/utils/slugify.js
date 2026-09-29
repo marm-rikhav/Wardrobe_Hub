@@ -10,9 +10,9 @@ export const slugify = (text) => {
     .toString()
     .toLowerCase()
     .trim()
-    .replace(/[^\w\s-]/g, "") // Remove non-word characters (except spaces & dashes)
-    .replace(/[\s_-]+/g, "-") // Replace spaces and underscores with a single dash
-    .replace(/^-+|-+$/g, ""); // Strip leading/trailing dashes
+    .replaceAll(/[^\w\s-]/g, "") // Remove non-word characters (except spaces & dashes)
+    .replaceAll(/[\s_-]+/g, "-") // Replace spaces and underscores with a single dash
+    .replaceAll(/(?:^-+)|(?:-+$)/g, ""); // Strip leading/trailing dashes
 };
 
 export default slugify;
