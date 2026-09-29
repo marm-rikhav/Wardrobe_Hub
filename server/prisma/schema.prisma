@@ -1,7 +1,6 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
+// This is your Prisma schema file.
+// Learn more about Prisma:
+// https://pris.ly/d/prisma-schema
 
 generator client {
   provider = "prisma-client-js"
@@ -11,12 +10,39 @@ datasource db {
   provider = "postgresql"
 }
 
-
+// ============================================================
+// ENUMS
+// ============================================================
 
 enum Role {
   CUSTOMER
   ADMIN
 }
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  RETURNED
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+  REFUNDED
+  FAILED
+}
+
+enum PaymentMethod {
+  ONLINE
+  COD
+}
+
+// ============================================================
+// USERS
+// ============================================================
 
 model User {
   id           String   @id @default(uuid()) @db.Uuid
@@ -28,10 +54,39 @@ model User {
   isActive     Boolean  @default(true) @map("is_active")
   createdAt    DateTime @default(now()) @map("created_at")
 
+  addresses Address[]
+  cart      Cart?
+  orders    Order[]
+
   @@map("users")
 }
 
-// ============ CATALOG ============
+// ============================================================
+// ADDRESSES
+// ============================================================
+
+model Address {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  name       String   @db.VarChar(100)
+  phone      String   @db.VarChar(20)
+  address    String
+  city       String   @db.VarChar(100)
+  state      String   @db.VarChar(100)
+  postalCode String   @map("postal_code") @db.VarChar(20)
+  country    String   @default("India") @db.VarChar(100)
+  isDefault  Boolean  @default(false) @map("is_default")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("addresses")
+}
+
+// ============================================================
+// CATALOG
+// ============================================================
 
 model Category {
   id       String  @id @default(uuid()) @db.Uuid
@@ -46,16 +101,17 @@ model Category {
 }
 
 model Subcategory {
-  id         String @id @default(uuid()) @db.Uuid
-  categoryId String @map("category_id") @db.Uuid
-  name       String @db.VarChar(100)
-  slug       String @unique @db.VarChar(120)
+  id         String  @id @default(uuid()) @db.Uuid
+  categoryId String  @map("category_id") @db.Uuid
+  name       String  @db.VarChar(100)
+  slug       String  @unique @db.VarChar(120)
   isActive   Boolean @default(true) @map("is_active")
 
   category Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   products Product[]
 
   @@unique([categoryId, name])
+  @@index([categoryId])
   @@map("subcategories")
 }
 
@@ -71,7 +127,7 @@ model Product {
   isActive      Boolean  @default(true) @map("is_active")
   createdAt     DateTime @default(now()) @map("created_at")
 
-  subcategory Subcategory     @relation(fields: [subcategoryId], references: [id])
+  subcategory Subcategory      @relation(fields: [subcategoryId], references: [id])
   variants    ProductVariant[]
   images      ProductImage[]
 
@@ -79,7 +135,7 @@ model Product {
   @@map("products")
 }
 
-// The "sub product": one size + color of a product
+// One product can have multiple size + color variants.
 model ProductVariant {
   id        String   @id @default(uuid()) @db.Uuid
   productId String   @map("product_id") @db.Uuid
@@ -90,7 +146,9 @@ model ProductVariant {
   stock     Int      @default(0)
   isActive  Boolean  @default(true) @map("is_active")
 
-  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  product    Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  cartItems  CartItem[]
+  orderItems OrderItem[]
 
   @@unique([productId, size, color])
   @@index([productId])
@@ -106,5 +164,118 @@ model ProductImage {
 
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
+  @@index([productId])
   @@map("product_images")
+}
+
+// ============================================================
+// CART
+// ============================================================
+
+model Cart {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @unique @map("user_id") @db.Uuid
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items CartItem[]
+
+  @@map("carts")
+}
+
+model CartItem {
+  id        String @id @default(uuid()) @db.Uuid
+  cartId    String @map("cart_id") @db.Uuid
+  variantId String @map("variant_id") @db.Uuid
+  quantity  Int
+
+  cart    Cart           @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  variant ProductVariant @relation(fields: [variantId], references: [id])
+
+  @@unique([cartId, variantId])
+  @@index([cartId])
+  @@index([variantId])
+  @@map("cart_items")
+}
+
+// ============================================================
+// ORDERS
+// ============================================================
+
+model Order {
+  id          String @id @default(uuid()) @db.Uuid
+  orderNumber String @unique @map("order_number") @db.VarChar(30)
+  userId      String @map("user_id") @db.Uuid
+
+  // Complete shipping address snapshot.
+  // Changes to the user's saved address will not affect old orders.
+  shipName       String @map("ship_name") @db.VarChar(100)
+  shipPhone      String @map("ship_phone") @db.VarChar(20)
+  shipAddress    String @map("ship_address")
+  shipCity       String @map("ship_city") @db.VarChar(100)
+  shipState      String @map("ship_state") @db.VarChar(100)
+  shipPostalCode String @map("ship_postal_code") @db.VarChar(20)
+  shipCountry    String @default("India") @map("ship_country") @db.VarChar(100)
+
+  subtotal    Decimal @db.Decimal(10, 2)
+  shippingFee Decimal @default(0) @map("shipping_fee") @db.Decimal(10, 2)
+  total       Decimal @db.Decimal(10, 2)
+
+  status        OrderStatus   @default(PENDING)
+  paymentStatus PaymentStatus @default(UNPAID) @map("payment_status")
+  paymentMethod PaymentMethod @default(ONLINE) @map("payment_method")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user     User        @relation(fields: [userId], references: [id])
+  items    OrderItem[]
+  payments Payment[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String @id @default(uuid()) @db.Uuid
+  orderId   String @map("order_id") @db.Uuid
+  variantId String @map("variant_id") @db.Uuid
+
+  // Product information snapshot.
+  productName String @map("product_name") @db.VarChar(200)
+  size        String @db.VarChar(20)
+  color       String @db.VarChar(30)
+
+  // Price at the time of purchase.
+  unitPrice Decimal @map("unit_price") @db.Decimal(10, 2)
+
+  quantity Int
+
+  order   Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  variant ProductVariant @relation(fields: [variantId], references: [id])
+
+  @@index([orderId])
+  @@index([variantId])
+  @@map("order_items")
+}
+
+// ============================================================
+// PAYMENTS
+// ============================================================
+
+model Payment {
+  id           String   @id @default(uuid()) @db.Uuid
+  orderId      String   @map("order_id") @db.Uuid
+  gateway      String?  @db.VarChar(30)
+  gatewayTxnId String?  @map("gateway_txn_id") @db.VarChar(100)
+  amount       Decimal  @db.Decimal(10, 2)
+  status       String   @db.VarChar(20)
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  order Order @relation(fields: [orderId], references: [id])
+
+  @@index([orderId])
+  @@index([gatewayTxnId])
+  @@map("payments")
 }
