@@ -15,7 +15,7 @@ publicSubcategoryRouter.get("/:idOrSlug", subcategoryController.getSubcategoryBy
 
 // Admin subcategory routes mounted at /api/admin/subcategories
 export const adminSubcategoryRouter = Router();
-adminCategoryCheck: adminSubcategoryRouter.use(requireAuth, requireAdmin);
+adminSubcategoryRouter.use(requireAuth, requireAdmin);
 
 adminSubcategoryRouter.post(
   "/",
