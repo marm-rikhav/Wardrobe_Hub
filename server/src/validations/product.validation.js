@@ -1,11 +1,12 @@
 import { z } from "zod";
 
 export const variantSchema = z.object({
-  id: z.string().uuid("Invalid variant ID").optional(),
+  id: z.string().uuid("Invalid variant ID format").optional(),
   sku: z
     .string("SKU is required")
     .trim()
-    .min(2, "SKU must be at least 2 characters")
+    .refine((val) => val.length > 0, "SKU is required")
+    .refine((val) => val.length === 0 || val.length >= 2, "SKU must be at least 2 characters")
     .max(50, "SKU cannot exceed 50 characters")
     .toUpperCase(),
   size: z
@@ -19,13 +20,13 @@ export const variantSchema = z.object({
     .min(1, "Color is required")
     .max(30, "Color cannot exceed 30 characters"),
   price: z
-    .number("Variant price must be a number")
+    .number("Variant price must be a valid number")
     .positive("Variant price must be greater than 0")
     .nullable()
     .optional(),
   stock: z
-    .number("Stock must be an integer")
-    .int("Stock must be an integer")
+    .number("Stock is required and must be a number")
+    .int("Stock must be a whole number")
     .min(0, "Stock cannot be negative (must be >= 0)"),
   isActive: z.boolean().optional(),
 });
@@ -33,31 +34,43 @@ export const variantSchema = z.object({
 export const createProductSchema = z
   .object({
     subcategoryId: z
-      .string("Subcategory ID is required")
-      .uuid("Invalid subcategory ID format (must be UUID)"),
+      .string("Subcategory is required")
+      .refine((val) => Boolean(val && val.trim()), "Subcategory is required")
+      .refine(
+        (val) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(val),
+        "Invalid subcategory ID format (must be UUID)"
+      ),
     name: z
       .string("Product name is required")
       .trim()
-      .min(2, "Product name must be at least 2 characters long")
+      .refine((val) => val.length > 0, "Product name is required")
+      .refine((val) => val.length === 0 || val.length >= 2, "Product name must be at least 2 characters long")
       .max(200, "Product name cannot exceed 200 characters"),
     slug: z
       .string()
       .trim()
       .max(220, "Slug cannot exceed 220 characters")
       .optional(),
-    description: z.string().trim().optional(),
-    brand: z.string().trim().max(100, "Brand cannot exceed 100 characters").optional(),
+    description: z
+      .string("Description is required")
+      .trim()
+      .min(1, "Description is required"),
+    brand: z
+      .string("Brand is required")
+      .trim()
+      .min(1, "Brand is required")
+      .max(100, "Brand cannot exceed 100 characters"),
     basePrice: z
-      .number("Base price is required")
+      .number("Base price is required and must be a number")
       .positive("Base price must be greater than 0"),
     discountPrice: z
-      .number("Discount price must be a number")
+      .number("Discount price must be a valid number")
       .positive("Discount price must be greater than 0")
       .nullable()
       .optional(),
     isActive: z.boolean().optional(),
     variants: z
-      .array(variantSchema)
+      .array(variantSchema, "A product must have at least one variant (size + color)")
       .min(1, "A product must have at least one variant (size + color)"),
   })
   .refine(
