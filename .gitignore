@@ -4,3 +4,6 @@ client/node_modules
 server/node_modules
 server/.env
 server/POSTMAN_TESTING_GUIDE.md
+admin/node_modules
+admin/.env
+admin/dist
