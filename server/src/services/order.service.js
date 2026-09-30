@@ -1,5 +1,12 @@
 import prisma from "../lib/prisma.js";
 import { ApiError } from "../utils/apiError.js";
+import {
+  sendOrderConfirmedEmail,
+  sendOrderShippedEmail,
+  sendOrderDeliveredEmail,
+  sendOrderCancelledEmail,
+} from "./email.service.js";
+
 
 export const ORDER_STATUS_VALUES = [
   "PENDING",
@@ -139,6 +146,14 @@ export const formatOrder = (order) => {
 };
 
 const orderIncludeOptions = {
+  user: {
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      phone: true,
+    },
+  },
   items: {
     include: {
       variant: {
@@ -161,6 +176,7 @@ const orderIncludeOptions = {
     orderBy: { createdAt: "desc" },
   },
 };
+
 
 /**
  * Create a new customer order atomically using prisma.$transaction.
@@ -328,8 +344,14 @@ export const createOrder = async (userId, { addressId, paymentMethod }) => {
       include: orderIncludeOptions,
     });
 
-    return formatOrder(createdOrder);
+    const formatted = formatOrder(createdOrder);
+    sendOrderConfirmedEmail(formatted, formatted.customer?.email).catch((err) => {
+      console.error("[EmailService] Error dispatching order confirmation email:", err?.message || err);
+    });
+
+    return formatted;
   });
+
 };
 
 /**
@@ -487,8 +509,14 @@ const cancelOrderInternal = async (tx, orderId, userId = null) => {
     },
   });
 
-  return formatOrder(updatedOrder);
+  const formatted = formatOrder(updatedOrder);
+  sendOrderCancelledEmail(formatted, formatted.customer?.email).catch((err) => {
+    console.error("[EmailService] Error dispatching order cancellation email:", err?.message || err);
+  });
+
+  return formatted;
 };
+
 
 /**
  * Customer: Cancel own order and restore inventory stock safely
@@ -572,8 +600,26 @@ export const updateOrderStatusAdmin = async (orderId, newStatus) => {
       include: adminOrderIncludeOptions,
     });
 
-    return formatOrder(updatedOrder);
+    const formatted = formatOrder(updatedOrder);
+    const customerEmail = formatted.customer?.email;
+
+    if (upperStatus === "CONFIRMED") {
+      sendOrderConfirmedEmail(formatted, customerEmail).catch((err) => {
+        console.error("[EmailService] Error dispatching order confirmation email:", err?.message || err);
+      });
+    } else if (upperStatus === "SHIPPED") {
+      sendOrderShippedEmail(formatted, customerEmail).catch((err) => {
+        console.error("[EmailService] Error dispatching order shipped email:", err?.message || err);
+      });
+    } else if (upperStatus === "DELIVERED") {
+      sendOrderDeliveredEmail(formatted, customerEmail).catch((err) => {
+        console.error("[EmailService] Error dispatching order delivered email:", err?.message || err);
+      });
+    }
+
+    return formatted;
   });
+
 };
 
 /**

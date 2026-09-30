@@ -1,5 +1,10 @@
 import prisma from "../lib/prisma.js";
 import { ApiError } from "../utils/apiError.js";
+import {
+  sendReturnRequestSubmittedEmail,
+  sendReturnRequestStatusUpdatedEmail,
+} from "./email.service.js";
+
 
 /**
  * Format a ReturnRequest record for client/admin consumption without exposing customer ID.
@@ -94,9 +99,15 @@ export const createReturnRequest = async (userId, orderId, { type, reason, detai
       },
     });
 
-    return formatReturnRequest(created);
+    const formatted = formatReturnRequest(created);
+    sendReturnRequestSubmittedEmail(formatted, created.order, created.user?.email).catch((err) => {
+      console.error("[EmailService] Error dispatching return request submitted email:", err?.message || err);
+    });
+
+    return formatted;
   });
 };
+
 
 /**
  * Customer: Get return/exchange request status for an order.
@@ -290,9 +301,15 @@ export const updateReturnRequestStatusAdmin = async (id, { status, adminResponse
       },
     });
 
+    const formatted = formatReturnRequest(updated);
+    sendReturnRequestStatusUpdatedEmail(formatted, updated.order, updated.user?.email).catch((err) => {
+      console.error("[EmailService] Error dispatching return request status email:", err?.message || err);
+    });
+
     return formatReturnRequest(updated);
   });
 };
+
 
 export default {
   formatReturnRequest,
