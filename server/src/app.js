@@ -64,21 +64,21 @@ app.use("/api/auth/login", authLimiter);
 app.use("/api/auth/register", authLimiter);
 
 // Enable CORS with credentials for cookies and frontend communication
-const allowedOrigins = [
+const allowedOrigins = new Set([
   process.env.CLIENT_URL || "http://localhost:3000",
   process.env.ADMIN_URL || "http://localhost:5173",
   "http://localhost:3000",
   "http://127.0.0.1:3000",
   "http://localhost:5173",
   "http://localhost:5174",
-];
+]);
 
 app.use(
   cors({
     origin: (origin, callback) => {
       // Allow requests with no origin (like mobile apps, Postman or curl)
       if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin) || /^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin)) {
+      if (allowedOrigins.has(origin) || /^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin)) {
         return callback(null, true);
       }
       return callback(new Error("Not allowed by CORS"));
