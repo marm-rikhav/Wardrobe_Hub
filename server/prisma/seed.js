@@ -9,20 +9,20 @@ async function main() {
     {
       name: "Men",
       slug: "men",
-      imageUrl: "https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&w=800&q=80",
-      subcategories: ["Shirts", "T-Shirts", "Jeans", "Trousers", "Jackets"],
+      imageUrl: null,
+      subcategories: ["Shirts", "Jeans", "Wallets", "Watches"],
     },
     {
       name: "Women",
       slug: "women",
-      imageUrl: "https://images.unsplash.com/photo-1525507119028-ed4c629a60a3?auto=format&fit=crop&w=800&q=80",
-      subcategories: ["Dresses", "Tops", "Jeans", "Skirts", "Outerwear"],
+      imageUrl: null,
+      subcategories: ["Shirts", "Jeans", "Wallets", "Watches"],
     },
     {
       name: "Kids",
       slug: "kids",
-      imageUrl: "https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?auto=format&fit=crop&w=800&q=80",
-      subcategories: ["Boys Clothing", "Girls Clothing", "Baby", "Activewear"],
+      imageUrl: null,
+      subcategories: ["Shirts", "Jeans", "Wallets", "Watches"],
     },
   ];
 

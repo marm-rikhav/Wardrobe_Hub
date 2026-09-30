@@ -16,7 +16,7 @@ export const createSubcategory = async ({ categoryId, name, slug, isActive = tru
   }
 
   // 2. Generate slug
-  const finalSlug = slug ? slugify(slug) : slugify(name);
+  const finalSlug = slug ? slugify(slug) : slugify(`${category.slug}-${name}`);
 
   if (!finalSlug) {
     throw new ApiError(400, "Unable to generate a valid slug for this subcategory");

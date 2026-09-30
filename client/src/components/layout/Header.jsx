@@ -28,8 +28,10 @@ import CloseIcon from '@mui/icons-material/Close';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
+import ReceiptLongOutlinedIcon from '@mui/icons-material/ReceiptLongOutlined';
 import { useAuth } from '../../hooks/useAuth.js';
 import { useCategories } from '../../hooks/useCategories.js';
+import { useCart } from '../../hooks/useCart.js';
 
 const SearchContainer = styled('form')(({ theme }) => ({
   position: 'relative',
@@ -74,6 +76,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 export const Header = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const { categories } = useCategories();
+  const { totalItems } = useCart();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -216,13 +219,16 @@ export const Header = () => {
               <SearchIcon />
             </IconButton>
 
-            {/* Cart Icon (Phase 5 UI Only) */}
+            {/* Cart Icon */}
             <IconButton
+              component={Link}
+              to="/cart"
               color="inherit"
               sx={{ ml: 0.5 }}
-              title="Cart (Coming in Phase 6)"
+              title="Shopping Cart"
+              aria-label="shopping cart"
             >
-              <Badge badgeContent={0} color="secondary">
+              <Badge badgeContent={totalItems} color="secondary">
                 <ShoppingBagOutlinedIcon />
               </Badge>
             </IconButton>
@@ -278,6 +284,14 @@ export const Header = () => {
                   >
                     <AccountCircleOutlinedIcon sx={{ mr: 1.5, fontSize: 20 }} />
                     Profile
+                  </MenuItem>
+                  <MenuItem
+                    component={Link}
+                    to="/orders"
+                    onClick={handleAccountClose}
+                  >
+                    <ReceiptLongOutlinedIcon sx={{ mr: 1.5, fontSize: 20 }} />
+                    My Orders
                   </MenuItem>
                   <MenuItem
                     component={Link}
@@ -399,6 +413,17 @@ export const Header = () => {
               <ListItemText primary="All Products" />
             </ListItemButton>
           </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton
+              component={Link}
+              to="/cart"
+              onClick={() => setMobileDrawerOpen(false)}
+            >
+              <ListItemText
+                primary={`Shopping Cart ${totalItems > 0 ? `(${totalItems})` : ''}`}
+              />
+            </ListItemButton>
+          </ListItem>
           <Divider sx={{ my: 1 }} />
           <Typography variant="caption" color="text.secondary" sx={{ px: 2, py: 0.5, display: 'block', fontWeight: 600 }}>
             CATEGORIES
@@ -427,6 +452,15 @@ export const Header = () => {
                   onClick={() => setMobileDrawerOpen(false)}
                 >
                   <ListItemText primary="My Profile" />
+                </ListItemButton>
+              </ListItem>
+              <ListItem disablePadding>
+                <ListItemButton
+                  component={Link}
+                  to="/orders"
+                  onClick={() => setMobileDrawerOpen(false)}
+                >
+                  <ListItemText primary="My Orders" />
                 </ListItemButton>
               </ListItem>
               <ListItem disablePadding>

@@ -10,8 +10,11 @@ import {
   Divider,
   Chip,
   Paper,
+  Snackbar,
+  Alert,
+  CircularProgress,
 } from '@mui/material';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import ShoppingBagOutlinedIcon from '@mui/icons-material/ShoppingBagOutlined';
 import productApi from '../../api/product.api.js';
@@ -21,6 +24,8 @@ import StockStatus from '../../components/products/StockStatus.jsx';
 import Loading from '../../components/common/Loading.jsx';
 import ErrorMessage from '../../components/common/ErrorMessage.jsx';
 import { formatPrice } from '../../utils/formatters.js';
+import { useAuth } from '../../hooks/useAuth.js';
+import { useCart } from '../../hooks/useCart.js';
 
 export const ProductDetail = () => {
   const { id } = useParams(); // Can be slug or id
@@ -28,10 +33,40 @@ export const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { isAuthenticated } = useAuth();
+  const { addItem, actionLoading } = useCart();
+
   // Variant selection state
   const [selectedSize, setSelectedSize] = useState('');
   const [selectedColor, setSelectedColor] = useState('');
   const [selectedVariant, setSelectedVariant] = useState(null);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+
+  const handleAddToCart = async () => {
+    if (!selectedVariant) return;
+
+    if (!isAuthenticated) {
+      navigate('/login', { state: { from: location } });
+      return;
+    }
+
+    const resultAction = await addItem(selectedVariant.id, 1);
+    if (!resultAction.error) {
+      setSnackbar({
+        open: true,
+        message: `Added "${product.name}" (${selectedVariant.size}/${selectedVariant.color}) to cart!`,
+        severity: 'success',
+      });
+    } else {
+      setSnackbar({
+        open: true,
+        message: resultAction.payload || 'Failed to add item to cart',
+        severity: 'error',
+      });
+    }
+  };
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -280,19 +315,27 @@ export const ProductDetail = () => {
                 </Box>
               </Paper>
 
-              {/* Add to Cart (Phase 6 placeholder) */}
+              {/* Add to Cart */}
               <Box sx={{ mt: 1 }}>
                 <Button
                   fullWidth
                   variant="contained"
                   color="primary"
                   size="large"
+                  onClick={handleAddToCart}
                   disabled={
                     !selectedVariant ||
                     isOutOfStock ||
-                    isCombinationUnavailable
+                    isCombinationUnavailable ||
+                    actionLoading
                   }
-                  startIcon={<ShoppingBagOutlinedIcon />}
+                  startIcon={
+                    actionLoading ? (
+                      <CircularProgress size={20} color="inherit" />
+                    ) : (
+                      <ShoppingBagOutlinedIcon />
+                    )
+                  }
                   sx={{
                     py: 1.8,
                     fontWeight: 600,
@@ -300,11 +343,13 @@ export const ProductDetail = () => {
                     backgroundColor: 'primary.main',
                   }}
                 >
-                  {isCombinationUnavailable
+                  {actionLoading
+                    ? 'Adding to Cart...'
+                    : isCombinationUnavailable
                     ? 'Variant Unavailable'
                     : isOutOfStock
                     ? 'Out of Stock'
-                    : 'Add to Cart (Coming in Phase 6)'}
+                    : 'Add to Cart'}
                 </Button>
                 <Typography
                   variant="caption"
@@ -336,6 +381,34 @@ export const ProductDetail = () => {
           </Grid>
         </Grid>
       </Container>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+          severity={snackbar.severity}
+          sx={{ width: '100%', boxShadow: 3 }}
+          action={
+            snackbar.severity === 'success' ? (
+              <Button
+                component={Link}
+                to="/cart"
+                color="inherit"
+                size="small"
+                sx={{ fontWeight: 700 }}
+              >
+                View Cart
+              </Button>
+            ) : null
+          }
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

@@ -11,6 +11,10 @@ import Login from '../pages/auth/Login.jsx';
 import Register from '../pages/auth/Register.jsx';
 import Profile from '../pages/profile/Profile.jsx';
 import Addresses from '../pages/profile/Addresses.jsx';
+import Cart from '../pages/cart/Cart.jsx';
+import Checkout from '../pages/checkout/Checkout.jsx';
+import OrderHistory from '../pages/orders/OrderHistory.jsx';
+import OrderDetail from '../pages/orders/OrderDetail.jsx';
 import NotFound from '../pages/NotFound.jsx';
 
 export const AppRoutes = () => {
@@ -38,6 +42,38 @@ export const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <Addresses />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="cart"
+          element={
+            <ProtectedRoute>
+              <Cart />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="checkout"
+          element={
+            <ProtectedRoute>
+              <Checkout />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="orders"
+          element={
+            <ProtectedRoute>
+              <OrderHistory />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="orders/:id"
+          element={
+            <ProtectedRoute>
+              <OrderDetail />
             </ProtectedRoute>
           }
         />

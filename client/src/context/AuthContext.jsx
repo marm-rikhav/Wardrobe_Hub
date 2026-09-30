@@ -3,6 +3,9 @@ import PropTypes from 'prop-types';
 import authApi from '../api/auth.api.js';
 import { setAuthCallbacks } from '../api/axios.js';
 import { setAccessToken, clearAccessToken } from '../utils/storage.js';
+import store from '../store/store.js';
+import { fetchCart } from '../store/cart/cartThunks.js';
+import { resetCart } from '../store/cart/cartSlice.js';
 
 const AuthContext = createContext(null);
 
@@ -21,6 +24,7 @@ export const AuthProvider = ({ children }) => {
     clearAccessToken();
     setTokenState(null);
     setUser(null);
+    store.dispatch(resetCart());
   }, []);
 
   // Register Axios callbacks to keep AuthContext and Axios interceptor in sync
@@ -49,6 +53,9 @@ export const AuthProvider = ({ children }) => {
         const userResult = await authApi.getCurrentUser();
         const userData = userResult?.data?.user;
         setUser(userData || null);
+        if (userData) {
+          store.dispatch(fetchCart());
+        }
         return true;
       }
     } catch {
@@ -74,6 +81,9 @@ export const AuthProvider = ({ children }) => {
         handleTokenUpdate(newToken);
       }
       setUser(loggedUser || null);
+      if (loggedUser) {
+        store.dispatch(fetchCart());
+      }
       return { success: true, user: loggedUser };
     } catch (error) {
       handleAuthFailed();
@@ -96,6 +106,9 @@ export const AuthProvider = ({ children }) => {
         handleTokenUpdate(newToken);
       }
       setUser(newUser || null);
+      if (newUser) {
+        store.dispatch(fetchCart());
+      }
       return { success: true, user: newUser };
     } catch (error) {
       handleAuthFailed();
