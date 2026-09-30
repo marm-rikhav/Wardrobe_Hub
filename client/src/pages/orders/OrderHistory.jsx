@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import {
   Container,
   Box,
@@ -27,6 +27,25 @@ import {
   selectOrderLoading,
   selectOrderError,
 } from '../../store/order/orderSlice.js';
+
+const getPaymentStatusColor = (status) => {
+  if (status === 'PAID') return 'success.main';
+  if (status === 'CANCELLED') return 'error.main';
+  return 'warning.main';
+};
+
+const getPaymentStatusLabel = (status) => {
+  switch (status) {
+    case 'PENDING':
+      return 'Pending';
+    case 'PAID':
+      return 'Paid';
+    case 'CANCELLED':
+      return 'Cancelled';
+    default:
+      return status;
+  }
+};
 
 export const OrderHistory = () => {
   const navigate = useNavigate();
@@ -161,21 +180,10 @@ export const OrderHistory = () => {
                         <Box
                           component="span"
                           sx={{
-                            color:
-                              order.paymentStatus === 'PAID'
-                                ? 'success.main'
-                                : order.paymentStatus === 'CANCELLED'
-                                ? 'error.main'
-                                : 'warning.main',
+                            color: getPaymentStatusColor(order.paymentStatus),
                           }}
                         >
-                          {order.paymentStatus === 'PENDING'
-                            ? 'Pending'
-                            : order.paymentStatus === 'PAID'
-                            ? 'Paid'
-                            : order.paymentStatus === 'CANCELLED'
-                            ? 'Cancelled'
-                            : order.paymentStatus}
+                          {getPaymentStatusLabel(order.paymentStatus)}
                         </Box>
                       </Typography>
                     </Box>

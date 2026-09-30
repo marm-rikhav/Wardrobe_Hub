@@ -5,8 +5,8 @@ import { Chip } from '@mui/material';
 export const OrderStatusChip = ({ status = 'PENDING', size = 'small' }) => {
   const normalized = (status || '').toUpperCase();
 
-  let color = 'default';
-  let label = normalized;
+  let color;
+  let label;
 
   switch (normalized) {
     case 'PENDING':

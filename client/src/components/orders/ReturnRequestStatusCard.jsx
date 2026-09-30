@@ -43,7 +43,11 @@ export const ReturnRequestStatusCard = ({ request }) => {
   if (!request) return null;
 
   const isReturn = request.type === 'RETURN';
+  const requestType = isReturn ? 'return' : 'exchange';
   const statusInfo = getStatusColor(request.status);
+  const rejectionMessage = request.adminResponse
+    ? `Rejection Reason: ${request.adminResponse}`
+    : `Your ${requestType} request could not be approved at this time.`;
 
   return (
     <Paper
@@ -129,9 +133,7 @@ export const ReturnRequestStatusCard = ({ request }) => {
             Request Rejected
           </Typography>
           <Typography variant="body2">
-            {request.adminResponse
-              ? `Rejection Reason: ${request.adminResponse}`
-              : `Your ${isReturn ? 'return' : 'exchange'} request could not be approved at this time.`}
+            {rejectionMessage}
           </Typography>
         </Alert>
       )}

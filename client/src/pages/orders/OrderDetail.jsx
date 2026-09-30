@@ -516,7 +516,7 @@ export const OrderDetail = () => {
       <Container maxWidth="lg" sx={{ py: 6 }}>
         <ErrorMessage
           title="Order Not Found"
-          error={error || 'Unable to display details for this order.'}
+          error={error}
         />
         <Button
           component={Link}

@@ -71,7 +71,9 @@ export const AddressCard = ({
           justifyContent: 'space-between',
         }}
       >
-        {!address.isDefault ? (
+        {address.isDefault ? (
+          <Box />
+        ) : (
           <Button
             size="small"
             color="primary"
@@ -80,8 +82,6 @@ export const AddressCard = ({
           >
             Set as Default
           </Button>
-        ) : (
-          <Box />
         )}
 
         <Box sx={{ display: 'flex', gap: 1 }}>

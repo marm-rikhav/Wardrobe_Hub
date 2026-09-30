@@ -53,17 +53,17 @@ export const ProductDetail = () => {
     }
 
     const resultAction = await addItem(selectedVariant.id, 1);
-    if (!resultAction.error) {
-      setSnackbar({
-        open: true,
-        message: `Added "${product.name}" (${selectedVariant.size}/${selectedVariant.color}) to cart!`,
-        severity: 'success',
-      });
-    } else {
+    if (resultAction.error) {
       setSnackbar({
         open: true,
         message: resultAction.payload || 'Failed to add item to cart',
         severity: 'error',
+      });
+    } else {
+      setSnackbar({
+        open: true,
+        message: `Added "${product.name}" (${selectedVariant.size}/${selectedVariant.color}) to cart!`,
+        severity: 'success',
       });
     }
   };
@@ -99,7 +99,7 @@ export const ProductDetail = () => {
 
   // Synchronize variant matching whenever size or color changes
   useEffect(() => {
-    if (!product || !product.variants) return;
+    if (!product?.variants) return;
 
     if (selectedSize && selectedColor) {
       const match = product.variants.find(
@@ -143,6 +143,15 @@ export const ProductDetail = () => {
 
   const isOutOfStock = Boolean(selectedVariant && (selectedVariant.stock ?? 0) <= 0);
   const isCombinationUnavailable = Boolean(selectedSize && selectedColor && !selectedVariant);
+
+  let addToCartButtonText = 'Add to Cart';
+  if (actionLoading) {
+    addToCartButtonText = 'Adding to Cart...';
+  } else if (isCombinationUnavailable) {
+    addToCartButtonText = 'Variant Unavailable';
+  } else if (isOutOfStock) {
+    addToCartButtonText = 'Out of Stock';
+  }
 
   return (
     <Box sx={{ py: { xs: 3, md: 6 } }}>
@@ -343,13 +352,7 @@ export const ProductDetail = () => {
                     backgroundColor: 'primary.main',
                   }}
                 >
-                  {actionLoading
-                    ? 'Adding to Cart...'
-                    : isCombinationUnavailable
-                    ? 'Variant Unavailable'
-                    : isOutOfStock
-                    ? 'Out of Stock'
-                    : 'Add to Cart'}
+                  {addToCartButtonText}
                 </Button>
                 <Typography
                   variant="caption"

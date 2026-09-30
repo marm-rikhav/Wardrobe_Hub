@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   Container,
-  Grid,
   Box,
   Typography,
   Paper,
@@ -10,7 +9,7 @@ import {
   Avatar,
   Divider,
 } from '@mui/material';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import ProfileForm from '../../components/profile/ProfileForm.jsx';

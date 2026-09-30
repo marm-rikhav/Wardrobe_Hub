@@ -1,8 +1,8 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import authApi from '../api/auth.api.js';
 import { setAuthCallbacks } from '../api/axios.js';
-import { setAccessToken, clearAccessToken } from '../utils/storage.js';
+import { setAccessToken as setStoredAccessToken, clearAccessToken } from '../utils/storage.js';
 import store from '../store/store.js';
 import { fetchCart } from '../store/cart/cartThunks.js';
 import { resetCart } from '../store/cart/cartSlice.js';
@@ -11,18 +11,18 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [accessToken, setTokenState] = useState(null);
+  const [accessToken, setAccessToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // Sync token state and in-memory store
   const handleTokenUpdate = useCallback((newToken) => {
+    setStoredAccessToken(newToken);
     setAccessToken(newToken);
-    setTokenState(newToken);
   }, []);
 
   const handleAuthFailed = useCallback(() => {
     clearAccessToken();
-    setTokenState(null);
+    setAccessToken(null);
     setUser(null);
     store.dispatch(resetCart());
   }, []);
@@ -74,7 +74,7 @@ export const AuthProvider = ({ children }) => {
   }, [refreshSession, handleAuthFailed]);
 
   // Login handler
-  const login = async (credentials) => {
+  const login = useCallback(async (credentials) => {
     setLoading(true);
     try {
       const response = await authApi.login(credentials);
@@ -96,10 +96,10 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [handleTokenUpdate, handleAuthFailed]);
 
   // Register handler
-  const register = async (userData) => {
+  const register = useCallback(async (userData) => {
     setLoading(true);
     try {
       const response = await authApi.register(userData);
@@ -121,10 +121,10 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [handleTokenUpdate, handleAuthFailed]);
 
   // Logout handler
-  const logout = async () => {
+  const logout = useCallback(async () => {
     setLoading(true);
     try {
       await authApi.logout();
@@ -134,24 +134,27 @@ export const AuthProvider = ({ children }) => {
       handleAuthFailed();
       setLoading(false);
     }
-  };
+  }, [handleAuthFailed]);
 
   // Update user state locally when profile is edited
-  const updateUser = (updatedUser) => {
+  const updateUser = useCallback((updatedUser) => {
     setUser((prev) => ({ ...prev, ...updatedUser }));
-  };
+  }, []);
 
-  const value = {
-    user,
-    accessToken,
-    isAuthenticated: Boolean(accessToken && user),
-    loading,
-    login,
-    register,
-    logout,
-    refreshSession,
-    updateUser,
-  };
+  const value = useMemo(
+    () => ({
+      user,
+      accessToken,
+      isAuthenticated: Boolean(accessToken && user),
+      loading,
+      login,
+      register,
+      logout,
+      refreshSession,
+      updateUser,
+    }),
+    [user, accessToken, loading, login, register, logout, refreshSession, updateUser]
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

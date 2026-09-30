@@ -25,7 +25,7 @@ export const AddressForm = ({
   isSubmitting = false,
   error = null,
 }) => {
-  const isEditing = Boolean(initialData && initialData.id);
+  const isEditing = Boolean(initialData?.id);
 
   const {
     register,
@@ -76,6 +76,13 @@ export const AddressForm = ({
   const onFormSubmit = async (data) => {
     await onSubmitAddress(data);
   };
+
+  let submitButtonLabel = 'Save Address';
+  if (isSubmitting) {
+    submitButtonLabel = 'Saving...';
+  } else if (isEditing) {
+    submitButtonLabel = 'Update Address';
+  }
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -197,7 +204,7 @@ export const AddressForm = ({
             disabled={isSubmitting}
             sx={{ fontWeight: 600 }}
           >
-            {isSubmitting ? 'Saving...' : isEditing ? 'Update Address' : 'Save Address'}
+            {submitButtonLabel}
           </Button>
         </DialogActions>
       </Box>

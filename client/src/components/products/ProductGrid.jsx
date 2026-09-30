@@ -13,10 +13,11 @@ export const ProductGrid = ({
   onResetFilters,
 }) => {
   if (loading) {
+    const skeletonItems = Array.from({ length: skeletonCount }, (_, i) => `product-skeleton-${i}`);
     return (
       <Grid container spacing={{ xs: 2, sm: 2.5, md: 3 }}>
-        {Array.from(new Array(skeletonCount)).map((_, index) => (
-          <Grid item key={index} xs={6} sm={4} md={4} lg={3}>
+        {skeletonItems.map((skeletonId) => (
+          <Grid item key={skeletonId} xs={6} sm={4} md={4} lg={3}>
             <Box sx={{ width: '100%' }}>
               <Skeleton
                 variant="rectangular"

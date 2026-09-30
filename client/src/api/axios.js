@@ -53,7 +53,7 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     // If no response (network error) or error isn't 401, reject immediately
-    if (!error.response || error.response.status !== 401) {
+    if (error.response?.status !== 401) {
       throw error;
     }
 

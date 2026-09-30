@@ -420,7 +420,7 @@ export const Header = () => {
               onClick={() => setMobileDrawerOpen(false)}
             >
               <ListItemText
-                primary={`Shopping Cart ${totalItems > 0 ? `(${totalItems})` : ''}`}
+                primary={totalItems > 0 ? `Shopping Cart (${totalItems})` : 'Shopping Cart'}
               />
             </ListItemButton>
           </ListItem>

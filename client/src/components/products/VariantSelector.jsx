@@ -83,7 +83,7 @@ export const VariantSelector = ({
                   px: 1,
                   py: 2,
                   borderColor: isSelected ? 'primary.main' : 'divider',
-                  textDecoration: !available ? 'line-through' : 'none',
+                  textDecoration: available ? 'none' : 'line-through',
                 }}
               />
             );
@@ -119,8 +119,8 @@ export const VariantSelector = ({
                   px: 2,
                   fontWeight: isSelected ? 700 : 500,
                   borderColor: isSelected ? 'primary.main' : 'divider',
-                  textDecoration: !available ? 'line-through' : 'none',
-                  opacity: !available ? 0.45 : 1,
+                  textDecoration: available ? 'none' : 'line-through',
+                  opacity: available ? 1 : 0.45,
                 }}
               >
                 {size}
