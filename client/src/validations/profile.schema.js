@@ -14,7 +14,7 @@ export const profileSchema = z.object({
   phone: z
     .string()
     .trim()
-    .max(20, 'Phone cannot exceed 20 characters')
+    .max(10, 'Phone cannot exceed 10 characters')
     .optional()
     .or(z.literal('')),
 });
