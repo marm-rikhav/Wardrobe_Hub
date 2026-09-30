@@ -73,7 +73,7 @@ apiClient.interceptors.response.use(
 
     // If there is no response (e.g. network failure) or no original config, reject
     if (!error.response || !originalRequest) {
-      return Promise.reject(error);
+      throw error;
     }
 
     const status = error.response.status;
@@ -95,7 +95,9 @@ apiClient.interceptors.response.use(
             originalRequest.headers.Authorization = `Bearer ${token}`;
             return apiClient(originalRequest);
           })
-          .catch((err) => Promise.reject(err));
+          .catch((err) => {
+            throw err;
+          });
       }
 
       originalRequest._retry = true;
@@ -131,13 +133,13 @@ apiClient.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError, null);
         notifyAuthFailure();
-        return Promise.reject(refreshError);
+        throw refreshError;
       } finally {
         isRefreshing = false;
       }
     }
 
-    return Promise.reject(error);
+    throw error;
   }
 );
 
