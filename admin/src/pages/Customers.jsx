@@ -87,7 +87,7 @@ export const Customers = () => {
   };
 
   const handleChangeRowsPerPage = (event) => {
-    const newLimit = parseInt(event.target.value, 10);
+    const newLimit = Number.parseInt(event.target.value, 10);
     setPagination((prev) => ({ ...prev, limit: newLimit, page: 1 }));
   };
 
