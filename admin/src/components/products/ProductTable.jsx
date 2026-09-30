@@ -289,7 +289,7 @@ export const ProductTable = ({
         rowsPerPage={limit}
         page={page - 1}
         onPageChange={(e, newPage) => onPageChange(newPage + 1)}
-        onRowsPerPageChange={(e) => onRowsPerPageChange(parseInt(e.target.value, 10))}
+        onRowsPerPageChange={(e) => onRowsPerPageChange(Number.parseInt(e.target.value, 10))}
       />
     </Paper>
   );

@@ -38,7 +38,7 @@ export const ProductListing = () => {
       minPrice: searchParams.get('minPrice') || '',
       maxPrice: searchParams.get('maxPrice') || '',
       sort: searchParams.get('sort') || 'newest',
-      page: parseInt(searchParams.get('page') || '1', 10),
+      page: Number.parseInt(searchParams.get('page') || '1', 10),
       limit: DEFAULT_PAGE_LIMIT,
     };
   }, [searchParams]);

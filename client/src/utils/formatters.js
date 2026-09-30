@@ -2,7 +2,7 @@
  * Formats a numeric price into INR currency (e.g. ₹1,499)
  */
 export const formatPrice = (price) => {
-  if (price === undefined || price === null || isNaN(Number(price))) {
+  if (price === undefined || price === null || Number.isNaN(Number(price))) {
     return '₹0';
   }
   const numericPrice = Number(price);
