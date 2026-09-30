@@ -63,7 +63,10 @@ export const AuthProvider = ({ children }) => {
       }
     };
 
-    checkAuth();
+    checkAuth().catch(() => {
+      setUser(null);
+      setLoading(false);
+    });
   }, [handleAuthFailure]);
 
   /**

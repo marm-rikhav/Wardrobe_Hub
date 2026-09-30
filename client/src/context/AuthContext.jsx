@@ -68,8 +68,10 @@ export const AuthProvider = ({ children }) => {
   }, [handleTokenUpdate, handleAuthFailed]);
 
   useEffect(() => {
-    refreshSession();
-  }, [refreshSession]);
+    refreshSession().catch(() => {
+      handleAuthFailed();
+    });
+  }, [refreshSession, handleAuthFailed]);
 
   // Login handler
   const login = async (credentials) => {
