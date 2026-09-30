@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import prisma from "../lib/prisma.js";
 import { ApiError } from "../utils/apiError.js";
 import {
@@ -275,8 +276,8 @@ export const createOrder = async (userId, { addressId, paymentMethod }) => {
     const shippingFee = 0;
     const total = Math.round((subtotal + shippingFee) * 100) / 100;
 
-    // 9. Generate unique orderNumber
-    const orderNumber = `WH-${Date.now().toString(36).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
+    // 9. Generate unique orderNumber using CSPRNG
+    const orderNumber = `WH-${Date.now().toString(36).toUpperCase()}-${crypto.randomInt(1000, 10000)}`;
 
     // 10 & 11. Create order with address snapshot and item snapshots
     const order = await tx.order.create({
