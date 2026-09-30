@@ -17,6 +17,7 @@ import {
 import addressRoutes from "./routes/address.routes.js";
 import cartRoutes from "./routes/cart.routes.js";
 import orderRoutes, { adminOrderRouter } from "./routes/order.routes.js";
+import { adminReturnRouter, customerReturnRouter } from "./routes/returnRequest.routes.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { ApiError } from "./utils/apiError.js";
 
@@ -70,6 +71,7 @@ app.use("/api/user/addresses", addressRoutes);
 // Customer Cart & Orders Routes
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/return-requests", customerReturnRouter);
 
 // Catalog Public Routes
 app.use("/api/categories", publicCategoryRouter);
@@ -81,6 +83,8 @@ app.use("/api/admin/categories", adminCategoryRouter);
 app.use("/api/admin/subcategories", adminSubcategoryRouter);
 app.use("/api/admin/products", adminProductRouter);
 app.use("/api/admin/orders", adminOrderRouter);
+app.use("/api/admin/return-requests", adminReturnRouter);
+app.use("/api/admin/returns", adminReturnRouter);
 
 // Catch-all for undefined routes
 app.use((req, res, next) => {

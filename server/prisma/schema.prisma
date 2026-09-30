@@ -42,6 +42,17 @@ enum PaymentMethod {
   COD
 }
 
+enum ReturnRequestType {
+  RETURN
+  EXCHANGE
+}
+
+enum ReturnRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 // ============================================================
 // USERS
 // ============================================================
@@ -59,6 +70,7 @@ model User {
   addresses Address[]
   cart      Cart?
   orders    Order[]
+  returnRequests ReturnRequest[]
 
   @@map("users")
 }
@@ -229,9 +241,10 @@ model Order {
 
   createdAt DateTime @default(now()) @map("created_at")
 
-  user     User        @relation(fields: [userId], references: [id])
-  items    OrderItem[]
-  payments Payment[]
+  user           User            @relation(fields: [userId], references: [id])
+  items          OrderItem[]
+  payments       Payment[]
+  returnRequests ReturnRequest[]
 
   @@index([userId])
   @@index([status])
@@ -280,4 +293,30 @@ model Payment {
   @@index([orderId])
   @@index([gatewayTxnId])
   @@map("payments")
+}
+
+// ============================================================
+// RETURN / EXCHANGE REQUESTS
+// ============================================================
+
+model ReturnRequest {
+  id            String              @id @default(uuid()) @db.Uuid
+  orderId       String              @map("order_id") @db.Uuid
+  userId        String              @map("user_id") @db.Uuid
+  type          ReturnRequestType
+  reason        String
+  details       String?
+  status        ReturnRequestStatus @default(PENDING)
+  adminResponse String?             @map("admin_response")
+  createdAt     DateTime            @default(now()) @map("created_at")
+  updatedAt     DateTime            @updatedAt @map("updated_at")
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([userId])
+  @@index([status])
+  @@index([type])
+  @@map("return_requests")
 }

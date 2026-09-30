@@ -11,6 +11,9 @@ import {
   adminOrderQuerySchema,
 } from "../validations/order.validation.js";
 
+import returnRequestController from "../controllers/returnRequest.controller.js";
+import { createReturnRequestSchema } from "../validations/returnRequest.validation.js";
+
 // Customer order router mounted at /api/orders
 const router = Router();
 router.use(requireAuth);
@@ -19,6 +22,23 @@ router.post("/", validate(createOrderSchema), orderController.createOrder);
 router.get("/", orderController.getUserOrders);
 router.get("/:id", orderController.getUserOrderById);
 router.patch("/:id/cancel", validate(orderIdParamSchema, "params"), orderController.cancelCustomerOrder);
+router.post(
+  "/:id/return-request",
+  validate(orderIdParamSchema, "params"),
+  validate(createReturnRequestSchema, "body"),
+  returnRequestController.createReturnRequest
+);
+router.post(
+  "/:id/returns",
+  validate(orderIdParamSchema, "params"),
+  validate(createReturnRequestSchema, "body"),
+  returnRequestController.createReturnRequest
+);
+router.get(
+  "/:id/return-request",
+  validate(orderIdParamSchema, "params"),
+  returnRequestController.getReturnRequestByOrderId
+);
 
 // Admin order router mounted at /api/admin/orders
 export const adminOrderRouter = Router();

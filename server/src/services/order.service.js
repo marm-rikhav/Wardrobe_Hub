@@ -46,6 +46,9 @@ const adminOrderIncludeOptions = {
   payments: {
     orderBy: { createdAt: "desc" },
   },
+  returnRequests: {
+    orderBy: { createdAt: "desc" },
+  },
 };
 
 /**
@@ -88,6 +91,18 @@ export const formatOrder = (order) => {
     createdAt: p.createdAt,
   }));
 
+  const returnRequests = (order.returnRequests || []).map((req) => ({
+    id: req.id,
+    orderId: req.orderId,
+    type: req.type,
+    reason: req.reason,
+    details: req.details || null,
+    status: req.status,
+    adminResponse: req.adminResponse || null,
+    createdAt: req.createdAt,
+    updatedAt: req.updatedAt,
+  }));
+
   return {
     id: order.id,
     orderNumber: order.orderNumber,
@@ -119,6 +134,7 @@ export const formatOrder = (order) => {
     items,
     itemCount: items.reduce((sum, item) => sum + item.quantity, 0),
     payments,
+    returnRequests,
   };
 };
 
@@ -139,6 +155,9 @@ const orderIncludeOptions = {
     },
   },
   payments: {
+    orderBy: { createdAt: "desc" },
+  },
+  returnRequests: {
     orderBy: { createdAt: "desc" },
   },
 };
@@ -501,35 +520,60 @@ export const updateOrderStatusAdmin = async (orderId, newStatus) => {
     });
   }
 
-  const existingOrder = await prisma.order.findUnique({
-    where: { id: orderId },
+  return await prisma.$transaction(async (tx) => {
+    const existingOrder = await tx.order.findUnique({
+      where: { id: orderId },
+    });
+
+    if (!existingOrder) {
+      throw new ApiError(404, "Order not found");
+    }
+
+    const currentStatus = existingOrder.status;
+
+    // Validate state transition rule
+    const allowedTransitions = VALID_STATUS_TRANSITIONS[currentStatus] || [];
+    if (!allowedTransitions.includes(upperStatus)) {
+      throw new ApiError(
+        400,
+        `Cannot transition order status from "${currentStatus}" to "${upperStatus}". Allowed transitions: ${
+          allowedTransitions.length > 0 ? allowedTransitions.join(", ") : "None (terminal status)"
+        }`
+      );
+    }
+
+    // Automatically mark COD orders as PAID when transitioning to DELIVERED
+    const isCodDelivered = upperStatus === "DELIVERED" && existingOrder.paymentMethod === "COD";
+    const updateData = { status: upperStatus };
+
+    if (isCodDelivered) {
+      updateData.paymentStatus = "PAID";
+    }
+
+    await tx.order.update({
+      where: { id: orderId },
+      data: updateData,
+    });
+
+    if (isCodDelivered) {
+      await tx.payment.updateMany({
+        where: {
+          orderId,
+          status: { in: ["PENDING", "UNPAID"] },
+        },
+        data: {
+          status: "PAID",
+        },
+      });
+    }
+
+    const updatedOrder = await tx.order.findUnique({
+      where: { id: orderId },
+      include: adminOrderIncludeOptions,
+    });
+
+    return formatOrder(updatedOrder);
   });
-
-  if (!existingOrder) {
-    throw new ApiError(404, "Order not found");
-  }
-
-  const currentStatus = existingOrder.status;
-
-  // Validate state transition rule
-  const allowedTransitions = VALID_STATUS_TRANSITIONS[currentStatus] || [];
-  if (!allowedTransitions.includes(upperStatus)) {
-    throw new ApiError(
-      400,
-      `Cannot transition order status from "${currentStatus}" to "${upperStatus}". Allowed transitions: ${
-        allowedTransitions.length > 0 ? allowedTransitions.join(", ") : "None (terminal status)"
-      }`
-    );
-  }
-
-  // Update order status only (strictly leaving stock, snapshot data, and financial totals intact)
-  const updatedOrder = await prisma.order.update({
-    where: { id: orderId },
-    data: { status: upperStatus },
-    include: adminOrderIncludeOptions,
-  });
-
-  return formatOrder(updatedOrder);
 };
 
 /**

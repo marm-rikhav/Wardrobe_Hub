@@ -8,7 +8,8 @@
     "dev": "nodemon src/server.js",
     "test": "node --test tests/auth.test.js tests/catalog.test.js",
     "test:auth": "node --test tests/auth.test.js",
-    "test:catalog": "node --test tests/catalog.test.js"
+    "test:catalog": "node --test tests/catalog.test.js",
+    "test:orders": "node --test tests/order_returns.test.js tests/cod_payments.test.js tests/admin_orders.test.js"
   },
   "keywords": [],
   "author": "",
