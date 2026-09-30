@@ -5,23 +5,129 @@ on:
     branches:
       - main
 
-
 jobs:
   build:
     name: Build and analyze
     runs-on: windows-latest
-    
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - uses: SonarSource/sonarqube-scan-action@v6
+          fetch-depth: 0
+
+      # Run SonarQube analysis
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-      # If you wish to fail your job when the Quality Gate is red, uncomment the
-      # following lines. This would typically be used to fail a deployment.
-      # - uses: SonarSource/sonarqube-quality-gate-action@v1
-      #   timeout-minutes: 5
-      #   env:
-      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      # Export SonarQube issues
+      - name: Export SonarQube Issues
+        shell: pwsh
+        env:
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          $projectKey = "Wardrobe_Hub"
+
+          $headers = @{
+            Authorization = "Bearer $env:SONAR_TOKEN"
+          }
+
+          $allIssues = @()
+          $page = 1
+          $pageSize = 500
+
+          Write-Host "Fetching SonarQube issues..."
+
+          do {
+              $url = "$env:SONAR_HOST_URL/api/issues/search?componentKeys=$projectKey&resolved=false&ps=$pageSize&p=$page"
+
+              Write-Host "Fetching page $page..."
+
+              $response = Invoke-RestMethod `
+                  -Uri $url `
+                  -Headers $headers `
+                  -Method Get
+
+              if ($response.issues) {
+                  $allIssues += $response.issues
+              }
+
+              $total = $response.total
+              $fetched = $page * $pageSize
+
+              Write-Host "Fetched $($allIssues.Count) / $total issues"
+
+              $page++
+
+          } while ($fetched -lt $total)
+
+          Write-Host "Total issues fetched: $($allIssues.Count)"
+
+          # Keep maintainability-related issues / code smells
+          $maintainabilityIssues = $allIssues | Where-Object {
+              $_.type -eq "CODE_SMELL"
+          }
+
+          Write-Host "Maintainability / Code Smell issues: $($maintainabilityIssues.Count)"
+
+          # Create JSON
+          $maintainabilityIssues |
+              ConvertTo-Json -Depth 20 |
+              Out-File "sonarqube-maintainability-issues.json" -Encoding utf8
+
+          # Create Markdown report
+          $markdown = @"
+          # SonarQube Maintainability Issues
+
+          **Project:** Wardrobe_Hub
+
+          **Total issues:** $($maintainabilityIssues.Count)
+
+          Generated automatically by GitHub Actions.
+
+          ---
+
+          "@
+
+          $number = 1
+
+          foreach ($issue in $maintainabilityIssues) {
+
+              $file = $issue.component -replace "^$projectKey:", ""
+
+              $markdown += @"
+          ## $number. $($issue.message)
+
+          - **Issue Key:** $($issue.key)
+          - **Rule:** $($issue.rule)
+          - **Severity:** $($issue.severity)
+          - **Type:** $($issue.type)
+          - **File:** ``$file``
+          - **Line:** $($issue.line)
+          - **Status:** $($issue.status)
+          - **Effort:** $($issue.effort)
+
+          ---
+
+          "@
+
+              $number++
+          }
+
+          $markdown |
+              Out-File "sonarqube-maintainability-issues.md" -Encoding utf8
+
+          Write-Host "Reports created successfully."
+
+      # Upload reports to GitHub Actions
+      - name: Upload SonarQube Issue Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: sonarqube-maintainability-issues
+          path: |
+            sonarqube-maintainability-issues.md
+            sonarqube-maintainability-issues.json
