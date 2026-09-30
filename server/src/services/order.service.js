@@ -205,21 +205,21 @@ export const createOrder = async (userId, { addressId, paymentMethod }) => {
     });
 
     // 2. Verify cart is not empty
-    if (!cart || !cart.items || cart.items.length === 0) {
+    if (!cart?.items?.length) {
       throw new ApiError(400, "Your cart is empty. Please add items before placing an order");
     }
 
     // 3, 4, 5, 6. Verify products, variants, and stock availability
     for (const item of cart.items) {
       const variant = item.variant;
-      if (!variant || !variant.isActive) {
+      if (!variant?.isActive) {
         throw new ApiError(
           400,
           `The variant "${variant?.sku || "item"}" is no longer active or available`
         );
       }
 
-      if (!variant.product || !variant.product.isActive) {
+      if (!variant.product?.isActive) {
         throw new ApiError(
           400,
           `The product "${variant.product?.name || "item"}" is no longer active`
@@ -254,8 +254,8 @@ export const createOrder = async (userId, { addressId, paymentMethod }) => {
       const product = variant.product;
 
       const base = Number(product.basePrice);
-      const discount = product.discountPrice != null ? Number(product.discountPrice) : null;
-      const customPrice = variant.price != null ? Number(variant.price) : null;
+      const discount = product.discountPrice == null ? null : Number(product.discountPrice);
+      const customPrice = variant.price == null ? null : Number(variant.price);
       const unitPrice = customPrice ?? (discount ?? base);
 
       const itemTotal = Math.round(unitPrice * item.quantity * 100) / 100;

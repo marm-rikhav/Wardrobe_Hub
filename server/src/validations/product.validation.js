@@ -35,7 +35,7 @@ export const createProductSchema = z
   .object({
     subcategoryId: z
       .string("Subcategory is required")
-      .refine((val) => Boolean(val && val.trim()), "Subcategory is required")
+      .refine((val) => Boolean(val?.trim()), "Subcategory is required")
       .refine(
         (val) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(val),
         "Invalid subcategory ID format (must be UUID)"

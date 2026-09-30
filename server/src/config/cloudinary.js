@@ -8,4 +8,5 @@ cloudinary.config({
   secure: true,
 });
 
-export default cloudinary;
+const cloudinaryClient = cloudinary;
+export default cloudinaryClient;

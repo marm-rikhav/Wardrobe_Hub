@@ -20,9 +20,9 @@ export const formatCart = (cart) => {
     const product = variant?.product;
 
     // Price calculation: variant custom price takes precedence over product discount / base price
-    const base = product?.basePrice != null ? Number(product.basePrice) : 0;
-    const discount = product?.discountPrice != null ? Number(product.discountPrice) : null;
-    const variantCustom = variant?.price != null ? Number(variant.price) : null;
+    const base = product?.basePrice == null ? 0 : Number(product.basePrice);
+    const discount = product?.discountPrice == null ? null : Number(product.discountPrice);
+    const variantCustom = variant?.price == null ? null : Number(variant.price);
     const effectivePrice = variantCustom ?? (discount ?? base);
 
     // Pick best matching image for the variant's color, or fall back to first image
@@ -128,11 +128,11 @@ export const addItemToCart = async (userId, { variantId, quantity = 1 }) => {
     include: { product: true },
   });
 
-  if (!variant || !variant.isActive) {
+  if (!variant?.isActive) {
     throw new ApiError(404, "Product variant not found or is currently inactive");
   }
 
-  if (!variant.product || !variant.product.isActive) {
+  if (!variant.product?.isActive) {
     throw new ApiError(400, "Product is currently inactive");
   }
 

@@ -13,7 +13,7 @@ export const getAllCustomersAdmin = async ({ page = 1, limit = 20, search }) => 
     role: "CUSTOMER",
   };
 
-  if (search && search.trim()) {
+  if (search?.trim()) {
     const q = search.trim();
     where.OR = [
       { name: { contains: q, mode: "insensitive" } },
