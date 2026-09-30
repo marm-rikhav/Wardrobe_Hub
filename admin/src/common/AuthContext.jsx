@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useState, useEffect, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import authService from '../services/authService.js';
 import {
@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }) => {
         if (token) {
           // Token exists, verify and get user
           const currentUser = await authService.getCurrentUser();
-          if (currentUser && currentUser.role === 'ADMIN') {
+          if (currentUser?.role === 'ADMIN') {
             setUser(currentUser);
           } else {
             // Not an admin or invalid
@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }) => {
           try {
             await authService.refreshToken();
             const currentUser = await authService.getCurrentUser();
-            if (currentUser && currentUser.role === 'ADMIN') {
+            if (currentUser?.role === 'ADMIN') {
               setUser(currentUser);
             } else {
               await authService.logout();
@@ -69,7 +69,7 @@ export const AuthProvider = ({ children }) => {
   /**
    * Log in user and verify admin role
    */
-  const login = async (credentials) => {
+  const login = useCallback(async (credentials) => {
     const { user: loggedInUser } = await authService.login(credentials);
 
     if (loggedInUser.role !== 'ADMIN') {
@@ -79,26 +79,29 @@ export const AuthProvider = ({ children }) => {
 
     setUser(loggedInUser);
     return loggedInUser;
-  };
+  }, []);
 
   /**
    * Log out user and clear state
    */
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       await authService.logout();
     } finally {
       setUser(null);
     }
-  };
+  }, []);
 
-  const value = {
-    user,
-    isAuthenticated: Boolean(user && user.role === 'ADMIN'),
-    loading,
-    login,
-    logout,
-  };
+  const value = useMemo(
+    () => ({
+      user,
+      isAuthenticated: Boolean(user?.role === 'ADMIN'),
+      loading,
+      login,
+      logout,
+    }),
+    [user, loading, login, logout]
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
