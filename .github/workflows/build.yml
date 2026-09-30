@@ -97,9 +97,9 @@ jobs:
 
           foreach ($issue in $maintainabilityIssues) {
 
-              $file = $issue.component -replace "^$projectKey:", ""
+           $file = $issue.component -replace "^${projectKey}:", ""
 
-              $markdown += @"
+            $markdown += @"
           ## $number. $($issue.message)
 
           - **Issue Key:** $($issue.key)
@@ -115,7 +115,7 @@ jobs:
 
           "@
 
-              $number++
+             $number++
           }
 
           $markdown |
