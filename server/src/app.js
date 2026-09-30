@@ -16,7 +16,7 @@ import {
 } from "./routes/product.routes.js";
 import addressRoutes from "./routes/address.routes.js";
 import cartRoutes from "./routes/cart.routes.js";
-import orderRoutes from "./routes/order.routes.js";
+import orderRoutes, { adminOrderRouter } from "./routes/order.routes.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { ApiError } from "./utils/apiError.js";
 
@@ -80,6 +80,7 @@ app.use("/api/products", publicProductRouter);
 app.use("/api/admin/categories", adminCategoryRouter);
 app.use("/api/admin/subcategories", adminSubcategoryRouter);
 app.use("/api/admin/products", adminProductRouter);
+app.use("/api/admin/orders", adminOrderRouter);
 
 // Catch-all for undefined routes
 app.use((req, res, next) => {

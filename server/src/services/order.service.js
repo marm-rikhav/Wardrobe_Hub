@@ -1,6 +1,50 @@
 import prisma from "../lib/prisma.js";
 import { ApiError } from "../utils/apiError.js";
 
+export const ORDER_STATUS_VALUES = [
+  "PENDING",
+  "CONFIRMED",
+  "SHIPPED",
+  "DELIVERED",
+  "CANCELLED",
+  "RETURNED",
+];
+
+export const VALID_STATUS_TRANSITIONS = {
+  PENDING: ["CONFIRMED", "SHIPPED", "CANCELLED"],
+  CONFIRMED: ["SHIPPED", "CANCELLED"],
+  SHIPPED: ["DELIVERED", "RETURNED"],
+  DELIVERED: ["RETURNED"],
+  CANCELLED: [],
+  RETURNED: [],
+};
+
+const adminOrderIncludeOptions = {
+  user: {
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      phone: true,
+    },
+  },
+  items: {
+    include: {
+      variant: {
+        include: {
+          product: {
+            include: {
+              images: {
+                orderBy: { sortOrder: "asc" },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+};
+
 /**
  * Format raw Prisma order for frontend consumption, preserving historical snapshots
  */
@@ -51,6 +95,14 @@ export const formatOrder = (order) => {
       postalCode: order.shipPostalCode,
       country: order.shipCountry,
     },
+    customer: order.user
+      ? {
+          id: order.user.id,
+          name: order.user.name,
+          email: order.user.email,
+          phone: order.user.phone,
+        }
+      : null,
     items,
     itemCount: items.reduce((sum, item) => sum + item.quantity, 0),
   };
@@ -254,9 +306,112 @@ export const getUserOrderById = async (userId, orderId) => {
   return formatOrder(order);
 };
 
+/**
+ * Admin: Fetch orders with optional status filter and pagination
+ */
+export const getAllOrdersAdmin = async ({ status, page, limit }) => {
+  const where = {};
+  if (status && status !== "ALL") {
+    const upperStatus = status.toUpperCase();
+    if (!ORDER_STATUS_VALUES.includes(upperStatus)) {
+      throw new ApiError(400, `Invalid order status "${status}". Allowed values: ${ORDER_STATUS_VALUES.join(", ")}`);
+    }
+    where.status = upperStatus;
+  }
+
+  const numericPage = page ? Number(page) : undefined;
+  const numericLimit = limit ? Number(limit) : undefined;
+  const skip = numericPage && numericLimit ? (numericPage - 1) * numericLimit : undefined;
+  const take = numericLimit;
+
+  const [total, orders] = await Promise.all([
+    prisma.order.count({ where }),
+    prisma.order.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip,
+      take,
+      include: adminOrderIncludeOptions,
+    }),
+  ]);
+
+  return {
+    orders: orders.map(formatOrder),
+    pagination: {
+      total,
+      page: numericPage || 1,
+      limit: numericLimit || total,
+      totalPages: numericLimit ? Math.ceil(total / numericLimit) : 1,
+    },
+  };
+};
+
+/**
+ * Admin: Fetch single order by ID
+ */
+export const getOrderByIdAdmin = async (orderId) => {
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    include: adminOrderIncludeOptions,
+  });
+
+  if (!order) {
+    throw new ApiError(404, "Order not found");
+  }
+
+  return formatOrder(order);
+};
+
+/**
+ * Admin: Update order status with transition validation
+ * Does NOT modify stock, item prices, or address snapshots
+ */
+export const updateOrderStatusAdmin = async (orderId, newStatus) => {
+  const upperStatus = (newStatus || "").toUpperCase();
+
+  if (!ORDER_STATUS_VALUES.includes(upperStatus)) {
+    throw new ApiError(400, `Invalid order status value "${newStatus}". Allowed values: ${ORDER_STATUS_VALUES.join(", ")}`);
+  }
+
+  const existingOrder = await prisma.order.findUnique({
+    where: { id: orderId },
+  });
+
+  if (!existingOrder) {
+    throw new ApiError(404, "Order not found");
+  }
+
+  const currentStatus = existingOrder.status;
+
+  // Validate state transition rule
+  const allowedTransitions = VALID_STATUS_TRANSITIONS[currentStatus] || [];
+  if (!allowedTransitions.includes(upperStatus)) {
+    throw new ApiError(
+      400,
+      `Cannot transition order status from "${currentStatus}" to "${upperStatus}". Allowed transitions: ${
+        allowedTransitions.length > 0 ? allowedTransitions.join(", ") : "None (terminal status)"
+      }`
+    );
+  }
+
+  // Update order status only (strictly leaving stock, snapshot data, and financial totals intact)
+  const updatedOrder = await prisma.order.update({
+    where: { id: orderId },
+    data: { status: upperStatus },
+    include: adminOrderIncludeOptions,
+  });
+
+  return formatOrder(updatedOrder);
+};
+
 export default {
   createOrder,
   getUserOrders,
   getUserOrderById,
   formatOrder,
+  getAllOrdersAdmin,
+  getOrderByIdAdmin,
+  updateOrderStatusAdmin,
+  ORDER_STATUS_VALUES,
+  VALID_STATUS_TRANSITIONS,
 };
