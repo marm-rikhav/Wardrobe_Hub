@@ -30,9 +30,11 @@ enum OrderStatus {
 
 enum PaymentStatus {
   UNPAID
+  PENDING
   PAID
   REFUNDED
   FAILED
+  CANCELLED
 }
 
 enum PaymentMethod {

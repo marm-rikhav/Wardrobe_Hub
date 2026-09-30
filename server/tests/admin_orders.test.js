@@ -179,7 +179,7 @@ describe("Admin Orders API Tests", () => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${customerToken}`,
       },
-      body: JSON.stringify({ addressId: testAddressId }),
+      body: JSON.stringify({ addressId: testAddressId, paymentMethod: "COD" }),
     });
     const orderBody = await orderRes.json();
     testOrderId = orderBody.data.order.id;

@@ -96,11 +96,48 @@ export const updateOrderStatusAdmin = async (req, res, next) => {
   }
 };
 
+/**
+ * Customer: Cancel order
+ */
+export const cancelCustomerOrder = async (req, res, next) => {
+  try {
+    const order = await orderService.cancelCustomerOrder(req.user.id, req.params.id);
+    return res.status(200).json({
+      success: true,
+      message: "Order cancelled successfully",
+      data: { order },
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+/**
+ * Admin: Update order payment status
+ */
+export const updateOrderPaymentStatusAdmin = async (req, res, next) => {
+  try {
+    const order = await orderService.updateOrderPaymentStatusAdmin(
+      req.params.id,
+      req.body.paymentStatus
+    );
+    return res.status(200).json({
+      success: true,
+      message: `Order payment status updated to ${order.paymentStatus}`,
+      data: { order },
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
 export default {
   createOrder,
   getUserOrders,
   getUserOrderById,
+  cancelCustomerOrder,
   getAllOrdersAdmin,
   getOrderByIdAdmin,
   updateOrderStatusAdmin,
+  updateOrderPaymentStatusAdmin,
 };

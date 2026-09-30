@@ -43,6 +43,9 @@ const adminOrderIncludeOptions = {
       },
     },
   },
+  payments: {
+    orderBy: { createdAt: "desc" },
+  },
 };
 
 /**
@@ -75,6 +78,16 @@ export const formatOrder = (order) => {
     };
   });
 
+  const payments = (order.payments || []).map((p) => ({
+    id: p.id,
+    orderId: p.orderId,
+    gateway: p.gateway,
+    gatewayTxnId: p.gatewayTxnId,
+    amount: Number(p.amount),
+    status: p.status,
+    createdAt: p.createdAt,
+  }));
+
   return {
     id: order.id,
     orderNumber: order.orderNumber,
@@ -105,6 +118,7 @@ export const formatOrder = (order) => {
       : null,
     items,
     itemCount: items.reduce((sum, item) => sum + item.quantity, 0),
+    payments,
   };
 };
 
@@ -124,13 +138,20 @@ const orderIncludeOptions = {
       },
     },
   },
+  payments: {
+    orderBy: { createdAt: "desc" },
+  },
 };
 
 /**
  * Create a new customer order atomically using prisma.$transaction.
  * Enforces stock safety, snapshot preservation, price revalidation, and cart clearing.
  */
-export const createOrder = async (userId, { addressId }) => {
+export const createOrder = async (userId, { addressId, paymentMethod }) => {
+  if (!paymentMethod || paymentMethod.trim().toUpperCase() !== "COD") {
+    throw new ApiError(400, "Invalid payment method. Only Cash on Delivery (COD) is supported.");
+  }
+
   return await prisma.$transaction(async (tx) => {
     // 1. Get customer's cart
     const cart = await tx.cart.findUnique({
@@ -238,16 +259,26 @@ export const createOrder = async (userId, { addressId }) => {
         shippingFee,
         total,
         status: "PENDING",
-        paymentStatus: "UNPAID",
-        paymentMethod: "ONLINE",
+        paymentStatus: "PENDING",
+        paymentMethod: "COD",
         items: {
           create: orderItemsData,
         },
       },
-      include: orderIncludeOptions,
     });
 
-    // 12 & 13. Safely reduce stock for every variant using conditional atomic decrement
+    // 12. Create COD payment record in payments table
+    await tx.payment.create({
+      data: {
+        orderId: order.id,
+        gateway: "COD",
+        gatewayTxnId: null,
+        amount: total,
+        status: "PENDING",
+      },
+    });
+
+    // 13. Safely reduce stock for every variant using conditional atomic decrement
     for (const item of cart.items) {
       const reduction = await tx.productVariant.updateMany({
         where: {
@@ -273,7 +304,12 @@ export const createOrder = async (userId, { addressId }) => {
     });
 
     // 15. Return the newly created order
-    return formatOrder(order);
+    const createdOrder = await tx.order.findUnique({
+      where: { id: order.id },
+      include: orderIncludeOptions,
+    });
+
+    return formatOrder(createdOrder);
   });
 };
 
@@ -363,14 +399,106 @@ export const getOrderByIdAdmin = async (orderId) => {
 };
 
 /**
+ * Shared cancellation transaction:
+ * - Checks that order exists (and belongs to user if userId is provided)
+ * - Checks that order is not already CANCELLED
+ * - Checks that order is in a cancellable status (PENDING or CONFIRMED)
+ * - Atomically and safely restores inventory stock for each variant using stored order-item snapshot
+ * - Updates order status to CANCELLED and paymentStatus to CANCELLED
+ * - Updates payment record status to CANCELLED
+ * - Returns formatted order
+ */
+const cancelOrderInternal = async (tx, orderId, userId = null) => {
+  const where = userId ? { id: orderId, userId } : { id: orderId };
+  const existingOrder = await tx.order.findFirst({
+    where,
+    include: {
+      items: true,
+      payments: true,
+    },
+  });
+
+  if (!existingOrder) {
+    throw new ApiError(
+      404,
+      userId ? "Order not found or you do not have permission to view it" : "Order not found"
+    );
+  }
+
+  if (existingOrder.status === "CANCELLED") {
+    throw new ApiError(400, "Order is already cancelled");
+  }
+
+  const cancellableStatuses = ["PENDING", "CONFIRMED"];
+  if (!cancellableStatuses.includes(existingOrder.status)) {
+    throw new ApiError(
+      400,
+      `Cannot cancel order in status "${existingOrder.status}". Only PENDING or CONFIRMED orders can be cancelled.`
+    );
+  }
+
+  // Restore inventory stock for each variant using stored order-item snapshot
+  for (const item of existingOrder.items) {
+    await tx.productVariant.update({
+      where: { id: item.variantId },
+      data: {
+        stock: { increment: item.quantity },
+      },
+    });
+  }
+
+  // Update order status and payment status
+  const updatedOrder = await tx.order.update({
+    where: { id: orderId },
+    data: {
+      status: "CANCELLED",
+      paymentStatus: "CANCELLED",
+    },
+    include: userId ? orderIncludeOptions : adminOrderIncludeOptions,
+  });
+
+  // Update payment records
+  await tx.payment.updateMany({
+    where: {
+      orderId,
+      status: { in: ["PENDING", "UNPAID"] },
+    },
+    data: {
+      status: "CANCELLED",
+    },
+  });
+
+  return formatOrder(updatedOrder);
+};
+
+/**
+ * Customer: Cancel own order and restore inventory stock safely
+ */
+export const cancelCustomerOrder = async (userId, orderId) => {
+  return await prisma.$transaction(async (tx) => {
+    return cancelOrderInternal(tx, orderId, userId);
+  });
+};
+
+/**
  * Admin: Update order status with transition validation
- * Does NOT modify stock, item prices, or address snapshots
+ * When transitioned to CANCELLED, stock is safely restored
  */
 export const updateOrderStatusAdmin = async (orderId, newStatus) => {
   const upperStatus = (newStatus || "").toUpperCase();
 
   if (!ORDER_STATUS_VALUES.includes(upperStatus)) {
-    throw new ApiError(400, `Invalid order status value "${newStatus}". Allowed values: ${ORDER_STATUS_VALUES.join(", ")}`);
+    throw new ApiError(
+      400,
+      `Invalid order status value "${newStatus}". Allowed values: ${ORDER_STATUS_VALUES.join(", ")}`
+    );
+  }
+
+  // If transitioning to CANCELLED, execute atomic cancellation and stock restoration
+  if (upperStatus === "CANCELLED") {
+    return await prisma.$transaction(async (tx) => {
+      return cancelOrderInternal(tx, orderId, null);
+    });
   }
 
   const existingOrder = await prisma.order.findUnique({
@@ -404,14 +532,82 @@ export const updateOrderStatusAdmin = async (orderId, newStatus) => {
   return formatOrder(updatedOrder);
 };
 
+/**
+ * Admin: Update payment status (e.g. mark COD as PAID upon collection)
+ */
+export const updateOrderPaymentStatusAdmin = async (orderId, newPaymentStatus) => {
+  const upperPaymentStatus = (newPaymentStatus || "").toUpperCase();
+  const validPaymentStatuses = ["PAID", "CANCELLED", "REFUNDED", "FAILED"];
+
+  if (!validPaymentStatuses.includes(upperPaymentStatus)) {
+    throw new ApiError(
+      400,
+      `Invalid payment status "${newPaymentStatus}". Allowed values: ${validPaymentStatuses.join(", ")}`
+    );
+  }
+
+  return await prisma.$transaction(async (tx) => {
+    const existingOrder = await tx.order.findUnique({
+      where: { id: orderId },
+      include: { payments: true },
+    });
+
+    if (!existingOrder) {
+      throw new ApiError(404, "Order not found");
+    }
+
+    if (existingOrder.status === "CANCELLED" && upperPaymentStatus === "PAID") {
+      throw new ApiError(400, "Cannot mark payment as PAID for a cancelled order");
+    }
+
+    if (existingOrder.paymentStatus === "CANCELLED" && upperPaymentStatus === "PAID") {
+      throw new ApiError(400, "Cannot mark payment as PAID for a cancelled payment");
+    }
+
+    if (existingOrder.paymentStatus === "PAID" && upperPaymentStatus === "PAID") {
+      const refreshed = await tx.order.findUnique({
+        where: { id: orderId },
+        include: adminOrderIncludeOptions,
+      });
+      return formatOrder(refreshed);
+    }
+
+    if (existingOrder.paymentStatus === "PAID" && upperPaymentStatus !== "REFUNDED") {
+      throw new ApiError(
+        400,
+        `Cannot change payment status from PAID to ${upperPaymentStatus}. Only refund is permitted.`
+      );
+    }
+
+    await tx.order.update({
+      where: { id: orderId },
+      data: { paymentStatus: upperPaymentStatus },
+    });
+
+    await tx.payment.updateMany({
+      where: { orderId },
+      data: { status: upperPaymentStatus },
+    });
+
+    const updatedOrder = await tx.order.findUnique({
+      where: { id: orderId },
+      include: adminOrderIncludeOptions,
+    });
+
+    return formatOrder(updatedOrder);
+  });
+};
+
 export default {
   createOrder,
   getUserOrders,
   getUserOrderById,
+  cancelCustomerOrder,
   formatOrder,
   getAllOrdersAdmin,
   getOrderByIdAdmin,
   updateOrderStatusAdmin,
+  updateOrderPaymentStatusAdmin,
   ORDER_STATUS_VALUES,
   VALID_STATUS_TRANSITIONS,
 };

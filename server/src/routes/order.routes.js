@@ -7,6 +7,7 @@ import {
   createOrderSchema,
   orderIdParamSchema,
   updateOrderStatusSchema,
+  updatePaymentStatusSchema,
   adminOrderQuerySchema,
 } from "../validations/order.validation.js";
 
@@ -17,6 +18,7 @@ router.use(requireAuth);
 router.post("/", validate(createOrderSchema), orderController.createOrder);
 router.get("/", orderController.getUserOrders);
 router.get("/:id", orderController.getUserOrderById);
+router.patch("/:id/cancel", validate(orderIdParamSchema, "params"), orderController.cancelCustomerOrder);
 
 // Admin order router mounted at /api/admin/orders
 export const adminOrderRouter = Router();
@@ -39,6 +41,13 @@ adminOrderRouter.patch(
   validate(orderIdParamSchema, "params"),
   validate(updateOrderStatusSchema, "body"),
   orderController.updateOrderStatusAdmin
+);
+
+adminOrderRouter.patch(
+  "/:id/payment-status",
+  validate(orderIdParamSchema, "params"),
+  validate(updatePaymentStatusSchema, "body"),
+  orderController.updateOrderPaymentStatusAdmin
 );
 
 export default router;
