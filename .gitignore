@@ -16,4 +16,19 @@ admin/dist
 *.log
 .env
 .env.*
-!.env.example
+!.env.example
+
+# Test files and directories
+tests/
+test/
+__tests__/
+server/tests/
+*.test.js
+*.test.jsx
+*.test.ts
+*.test.tsx
+*.spec.js
+*.spec.jsx
+*.spec.ts
+*.spec.tsx
+
