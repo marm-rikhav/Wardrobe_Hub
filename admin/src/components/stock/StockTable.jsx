@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import {
   Table,
   TableBody,
@@ -235,6 +236,28 @@ export const StockTable = ({
       </TableContainer>
     </Paper>
   );
+};
+
+StockTable.propTypes = {
+  items: PropTypes.arrayOf(
+    PropTypes.shape({
+      product: PropTypes.shape({
+        id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+        title: PropTypes.string,
+        images: PropTypes.arrayOf(PropTypes.object),
+      }),
+      variant: PropTypes.shape({
+        id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+        sku: PropTypes.string,
+        size: PropTypes.string,
+        color: PropTypes.string,
+        stock: PropTypes.number,
+        isActive: PropTypes.bool,
+      }),
+    })
+  ),
+  loading: PropTypes.bool,
+  onUpdateStock: PropTypes.func.isRequired,
 };
 
 export default StockTable;

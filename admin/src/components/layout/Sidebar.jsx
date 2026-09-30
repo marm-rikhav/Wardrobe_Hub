@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -508,6 +509,14 @@ export const Sidebar = ({
       </Drawer>
     </Box>
   );
+};
+
+Sidebar.propTypes = {
+  collapsed: PropTypes.bool,
+  onToggleCollapse: PropTypes.func,
+  mobileOpen: PropTypes.bool,
+  onCloseMobile: PropTypes.func,
+  isMobile: PropTypes.bool,
 };
 
 export default Sidebar;

@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -140,6 +141,28 @@ export const StockUpdateDialog = ({
       </form>
     </Dialog>
   );
+};
+
+StockUpdateDialog.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
+  record: PropTypes.shape({
+    product: PropTypes.shape({
+      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      title: PropTypes.string,
+      brand: PropTypes.string,
+    }),
+    variant: PropTypes.shape({
+      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      sku: PropTypes.string,
+      size: PropTypes.string,
+      color: PropTypes.string,
+      stock: PropTypes.number,
+    }),
+  }),
+  loading: PropTypes.bool,
+  error: PropTypes.node,
 };
 
 export default StockUpdateDialog;

@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import {
   Table,
   TableBody,
@@ -208,6 +209,24 @@ export const CategoryTable = ({
       </TableContainer>
     </Paper>
   );
+};
+
+CategoryTable.propTypes = {
+  categories: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+      name: PropTypes.string.isRequired,
+      slug: PropTypes.string.isRequired,
+      imageUrl: PropTypes.string,
+      isActive: PropTypes.bool,
+      _count: PropTypes.shape({
+        subcategories: PropTypes.number,
+      }),
+    })
+  ),
+  loading: PropTypes.bool,
+  onEdit: PropTypes.func.isRequired,
+  onToggleStatus: PropTypes.func.isRequired,
 };
 
 export default CategoryTable;

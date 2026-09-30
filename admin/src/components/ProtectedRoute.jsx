@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { Box, CircularProgress, Typography } from '@mui/material';
 import useAuth from '../hooks/useAuth.js';
@@ -37,6 +38,10 @@ export const ProtectedRoute = ({ children }) => {
   }
 
   return children ? children : <Outlet />;
+};
+
+ProtectedRoute.propTypes = {
+  children: PropTypes.node,
 };
 
 export default ProtectedRoute;

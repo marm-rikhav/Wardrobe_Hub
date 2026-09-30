@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -422,6 +423,23 @@ export const VariantManager = ({
       </Dialog>
     </Box>
   );
+};
+
+VariantManager.propTypes = {
+  variants: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      sku: PropTypes.string,
+      size: PropTypes.string,
+      color: PropTypes.string,
+      price: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      stock: PropTypes.number,
+      isActive: PropTypes.bool,
+    })
+  ),
+  onChange: PropTypes.func.isRequired,
+  disabled: PropTypes.bool,
+  error: PropTypes.node,
 };
 
 export default VariantManager;

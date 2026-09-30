@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import PropTypes from 'prop-types';
 import {
   Box,
   Typography,
@@ -405,6 +406,22 @@ export const ProductImageUpload = ({
       </Dialog>
     </Box>
   );
+};
+
+ProductImageUpload.propTypes = {
+  productId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  images: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      url: PropTypes.string.isRequired,
+      publicId: PropTypes.string,
+      colorTag: PropTypes.string,
+      sortOrder: PropTypes.number,
+      isPrimary: PropTypes.bool,
+    })
+  ),
+  onImagesUpdated: PropTypes.func,
+  disabled: PropTypes.bool,
 };
 
 export default ProductImageUpload;

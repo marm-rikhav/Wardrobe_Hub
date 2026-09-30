@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import {
   Table,
   TableBody,
@@ -198,6 +199,27 @@ export const SubcategoryTable = ({
       </TableContainer>
     </Paper>
   );
+};
+
+SubcategoryTable.propTypes = {
+  subcategories: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+      name: PropTypes.string.isRequired,
+      slug: PropTypes.string.isRequired,
+      isActive: PropTypes.bool,
+      category: PropTypes.shape({
+        id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+        name: PropTypes.string,
+      }),
+      _count: PropTypes.shape({
+        products: PropTypes.number,
+      }),
+    })
+  ),
+  loading: PropTypes.bool,
+  onEdit: PropTypes.func.isRequired,
+  onToggleStatus: PropTypes.func.isRequired,
 };
 
 export default SubcategoryTable;

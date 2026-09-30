@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import {
   Table,
   TableBody,
@@ -292,6 +293,45 @@ export const ProductTable = ({
       />
     </Paper>
   );
+};
+
+ProductTable.propTypes = {
+  products: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+      title: PropTypes.string.isRequired,
+      slug: PropTypes.string,
+      brand: PropTypes.string,
+      basePrice: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      isActive: PropTypes.bool,
+      category: PropTypes.shape({
+        name: PropTypes.string,
+      }),
+      subcategory: PropTypes.shape({
+        name: PropTypes.string,
+      }),
+      images: PropTypes.arrayOf(
+        PropTypes.shape({
+          url: PropTypes.string,
+          altText: PropTypes.string,
+          isPrimary: PropTypes.bool,
+        })
+      ),
+      variants: PropTypes.arrayOf(PropTypes.object),
+    })
+  ),
+  pagination: PropTypes.shape({
+    page: PropTypes.number,
+    limit: PropTypes.number,
+    total: PropTypes.number,
+    totalPages: PropTypes.number,
+  }),
+  loading: PropTypes.bool,
+  onPageChange: PropTypes.func,
+  onRowsPerPageChange: PropTypes.func,
+  onEdit: PropTypes.func,
+  onManageImages: PropTypes.func,
+  onToggleStatus: PropTypes.func,
 };
 
 export default ProductTable;

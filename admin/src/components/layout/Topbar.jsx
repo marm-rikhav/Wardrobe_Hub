@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   AppBar,
@@ -146,6 +147,13 @@ export const Topbar = ({ onToggleMobile, onToggleCollapse, collapsed, isMobile }
       </Toolbar>
     </AppBar>
   );
+};
+
+Topbar.propTypes = {
+  onToggleMobile: PropTypes.func,
+  onToggleCollapse: PropTypes.func,
+  collapsed: PropTypes.bool,
+  isMobile: PropTypes.bool,
 };
 
 export default Topbar;
