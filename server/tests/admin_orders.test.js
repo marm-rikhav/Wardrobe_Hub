@@ -48,6 +48,7 @@ describe("Admin Orders API Tests", () => {
       const orderIds = orders.map((o) => o.id);
 
       if (orderIds.length > 0) {
+        await prisma.payment.deleteMany({ where: { orderId: { in: orderIds } } });
         await prisma.orderItem.deleteMany({ where: { orderId: { in: orderIds } } });
         await prisma.order.deleteMany({ where: { id: { in: orderIds } } });
       }
@@ -107,7 +108,7 @@ describe("Admin Orders API Tests", () => {
     // 3. Create test catalog entity
     const category = await prisma.category.create({
       data: {
-        name: "Admin Order Category",
+        name: `Admin Order Category ${Date.now()}`,
         slug: `adm-order-cat-${Date.now()}`,
       },
     });
