@@ -15,34 +15,30 @@ import { Link, useNavigate } from 'react-router-dom';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import ReceiptLongOutlinedIcon from '@mui/icons-material/ReceiptLongOutlined';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import orderApi from '../../api/order.api.js';
 import OrderStatusChip from '../../components/orders/OrderStatusChip.jsx';
 import Loading from '../../components/common/Loading.jsx';
 import EmptyState from '../../components/common/EmptyState.jsx';
 import { formatPrice, formatDate } from '../../utils/formatters.js';
 
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchUserOrders } from '../../store/order/orderThunks.js';
+import {
+  selectOrders,
+  selectOrderLoading,
+  selectOrderError,
+} from '../../store/order/orderSlice.js';
+
 export const OrderHistory = () => {
   const navigate = useNavigate();
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const dispatch = useDispatch();
+
+  const orders = useSelector(selectOrders);
+  const loading = useSelector(selectOrderLoading);
+  const error = useSelector(selectOrderError);
 
   useEffect(() => {
-    const fetchOrders = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await orderApi.getOrders();
-        setOrders(response.data?.orders || []);
-      } catch (err) {
-        setError(err.response?.data?.message || err.message || 'Failed to load orders');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchOrders();
-  }, []);
+    dispatch(fetchUserOrders());
+  }, [dispatch]);
 
   if (loading) {
     return <Loading fullScreen message="Loading your order history..." />;

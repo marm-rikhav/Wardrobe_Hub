@@ -10,74 +10,139 @@ import {
   Alert,
   Breadcrumbs,
   Link as MuiLink,
+  Snackbar,
 } from '@mui/material';
 import { useParams, Link, useLocation } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import PaymentOutlinedIcon from '@mui/icons-material/PaymentOutlined';
-import orderApi from '../../api/order.api.js';
+import AssignmentReturnOutlinedIcon from '@mui/icons-material/AssignmentReturnOutlined';
+import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
 import OrderStatusChip from '../../components/orders/OrderStatusChip.jsx';
+import ReturnRequestDialog from '../../components/orders/ReturnRequestDialog.jsx';
+import ReturnRequestStatusCard from '../../components/orders/ReturnRequestStatusCard.jsx';
 import Loading from '../../components/common/Loading.jsx';
 import ErrorMessage from '../../components/common/ErrorMessage.jsx';
 import ConfirmDialog from '../../components/common/ConfirmDialog.jsx';
 import { formatPrice, formatDate } from '../../utils/formatters.js';
+import {
+  fetchOrderById,
+  cancelOrder,
+  createReturnRequest,
+} from '../../store/order/orderThunks.js';
+import {
+  selectCurrentOrder,
+  selectReturnRequest,
+  selectOrderLoading,
+  selectOrderActionLoading,
+  selectOrderError,
+  selectOrderSuccessMessage,
+  clearOrderError,
+  clearSuccessMessage,
+} from '../../store/order/orderSlice.js';
 
 export const OrderDetail = () => {
   const { id } = useParams();
   const location = useLocation();
-  const [order, setOrder] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const dispatch = useDispatch();
+
+  const order = useSelector(selectCurrentOrder);
+  const returnRequest = useSelector(selectReturnRequest);
+  const loading = useSelector(selectOrderLoading);
+  const actionLoading = useSelector(selectOrderActionLoading);
+  const error = useSelector(selectOrderError);
+  const successMessage = useSelector(selectOrderSuccessMessage);
+
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
-  const [isCancelling, setIsCancelling] = useState(false);
-  const [cancelError, setCancelError] = useState(null);
+  const [returnDialogOpen, setReturnDialogOpen] = useState(false);
+  const [returnDialogType, setReturnDialogType] = useState('RETURN');
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success',
+  });
 
   const orderJustPlaced = Boolean(location.state?.orderJustPlaced);
 
   useEffect(() => {
-    const fetchOrder = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await orderApi.getOrderById(id);
-        setOrder(response.data?.order || null);
-      } catch (err) {
-        setError(
-          err.response?.data?.message ||
-          err.message ||
-          'Failed to load order details'
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
     if (id) {
-      fetchOrder();
+      dispatch(fetchOrderById(id));
     }
-  }, [id]);
+  }, [id, dispatch]);
+
+  useEffect(() => {
+    if (successMessage) {
+      setSnackbar({
+        open: true,
+        message: successMessage,
+        severity: 'success',
+      });
+      dispatch(clearSuccessMessage());
+    }
+  }, [successMessage, dispatch]);
+
+  const handleCloseSnackbar = () => {
+    setSnackbar((prev) => ({ ...prev, open: false }));
+  };
 
   const handleCancelOrder = async () => {
-    setIsCancelling(true);
-    setCancelError(null);
+    if (!order) return;
     try {
-      const response = await orderApi.cancelOrder(order.id);
-      setOrder(response.data?.order || { ...order, status: 'CANCELLED', paymentStatus: 'CANCELLED' });
+      await dispatch(cancelOrder(order.id)).unwrap();
       setCancelDialogOpen(false);
+      setSnackbar({
+        open: true,
+        message: 'Order cancelled successfully',
+        severity: 'success',
+      });
     } catch (err) {
-      setCancelError(err.response?.data?.message || err.message || 'Failed to cancel order');
-    } finally {
-      setIsCancelling(false);
+      setSnackbar({
+        open: true,
+        message: err || 'Failed to cancel order',
+        severity: 'error',
+      });
     }
   };
 
-  if (loading) {
+  const handleOpenReturnDialog = (type) => {
+    setReturnDialogType(type);
+    setReturnDialogOpen(true);
+  };
+
+  const handleSubmitReturnRequest = async ({ type, reason, details }) => {
+    if (!order) return;
+    try {
+      await dispatch(
+        createReturnRequest({
+          orderId: order.id,
+          type,
+          reason,
+          details,
+        })
+      ).unwrap();
+      setReturnDialogOpen(false);
+      setSnackbar({
+        open: true,
+        message: `${type === 'RETURN' ? 'Return' : 'Exchange'} request submitted successfully`,
+        severity: 'success',
+      });
+    } catch (err) {
+      setSnackbar({
+        open: true,
+        message: err || 'Failed to submit request',
+        severity: 'error',
+      });
+    }
+  };
+
+  if (loading && !order) {
     return <Loading fullScreen message="Loading order details..." />;
   }
 
-  if (error || !order) {
+  if (error && !order) {
     return (
       <Container maxWidth="lg" sx={{ py: 6 }}>
         <ErrorMessage
@@ -97,7 +162,16 @@ export const OrderDetail = () => {
     );
   }
 
-  const { shippingAddress, items } = order;
+  if (!order) {
+    return null;
+  }
+
+  const { shippingAddress, items = [] } = order;
+  const isCancellable = ['PENDING', 'CONFIRMED'].includes(order.status);
+  const isDelivered = order.status === 'DELIVERED';
+  const hasActiveReturnRequest =
+    Boolean(returnRequest) &&
+    ['PENDING', 'APPROVED'].includes(returnRequest?.status);
 
   return (
     <Box sx={{ py: { xs: 3, md: 5 }, minHeight: '80vh' }}>
@@ -131,14 +205,14 @@ export const OrderDetail = () => {
           </Typography>
         </Breadcrumbs>
 
-        {/* Cancel Error Alert */}
-        {cancelError && (
+        {/* Error Alert if action failed */}
+        {error && (
           <Alert
             severity="error"
-            onClose={() => setCancelError(null)}
+            onClose={() => dispatch(clearOrderError())}
             sx={{ mb: 3, borderRadius: 2 }}
           >
-            {cancelError}
+            {error}
           </Alert>
         )}
 
@@ -157,6 +231,9 @@ export const OrderDetail = () => {
             </Typography>
           </Alert>
         )}
+
+        {/* Return/Exchange Status Card if a request exists */}
+        {returnRequest && <ReturnRequestStatusCard request={returnRequest} />}
 
         {/* Order Header Summary */}
         <Paper
@@ -306,7 +383,7 @@ export const OrderDetail = () => {
               </Box>
             </Paper>
 
-            <Box sx={{ mt: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+            <Box sx={{ mt: 3, display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
               <Button
                 component={Link}
                 to="/orders"
@@ -326,15 +403,44 @@ export const OrderDetail = () => {
               >
                 Continue Shopping
               </Button>
-              {['PENDING', 'CONFIRMED'].includes(order.status) && (
+
+              {/* Order Cancellation Option (for PENDING or CONFIRMED) */}
+              {isCancellable && (
                 <Button
                   variant="outlined"
                   color="error"
                   onClick={() => setCancelDialogOpen(true)}
+                  disabled={actionLoading}
                   sx={{ textTransform: 'none', fontWeight: 600, ml: { xs: 0, sm: 'auto' } }}
                 >
                   Cancel Order
                 </Button>
+              )}
+
+              {/* Return / Exchange Options (for DELIVERED orders with no active request) */}
+              {isDelivered && !hasActiveReturnRequest && (
+                <Box sx={{ display: 'flex', gap: 1.5, ml: { xs: 0, sm: 'auto' } }}>
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    startIcon={<AssignmentReturnOutlinedIcon />}
+                    onClick={() => handleOpenReturnDialog('RETURN')}
+                    disabled={actionLoading}
+                    sx={{ textTransform: 'none', fontWeight: 600 }}
+                  >
+                    Return
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="secondary"
+                    startIcon={<SwapHorizOutlinedIcon />}
+                    onClick={() => handleOpenReturnDialog('EXCHANGE')}
+                    disabled={actionLoading}
+                    sx={{ textTransform: 'none', fontWeight: 600 }}
+                  >
+                    Exchange
+                  </Button>
+                </Box>
               )}
             </Box>
           </Grid>
@@ -489,10 +595,37 @@ export const OrderDetail = () => {
         confirmText="Yes, Cancel Order"
         cancelText="Keep Order"
         confirmColor="error"
-        loading={isCancelling}
+        loading={actionLoading}
         onConfirm={handleCancelOrder}
         onClose={() => setCancelDialogOpen(false)}
       />
+
+      {/* Return / Exchange Request Dialog */}
+      <ReturnRequestDialog
+        open={returnDialogOpen}
+        orderNumber={order?.orderNumber}
+        initialType={returnDialogType}
+        loading={actionLoading}
+        onClose={() => setReturnDialogOpen(false)}
+        onSubmit={handleSubmitReturnRequest}
+      />
+
+      {/* Feedback Snackbar */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={5000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
