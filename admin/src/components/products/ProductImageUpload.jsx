@@ -277,26 +277,7 @@ export const ProductImageUpload = ({
             style={{ display: 'none' }}
           />
 
-          {!selectedFile ? (
-            <Box sx={{ textAlign: 'center', py: 2 }}>
-              <CloudUploadOutlined sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
-              <Typography variant="subtitle2" fontWeight={600} gutterBottom>
-                Upload Product Photo
-              </Typography>
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
-                Supports JPG, PNG, WebP up to 2MB (Recommended dimensions: 1200x1500px, 4:5 ratio)
-              </Typography>
-              <Button
-                variant="contained"
-                color="primary"
-                size="small"
-                startIcon={<CloudUploadOutlined />}
-                onClick={() => fileInputRef.current?.click()}
-              >
-                Choose File
-              </Button>
-            </Box>
-          ) : (
+          {selectedFile ? (
             <Box>
               <Typography variant="subtitle2" fontWeight={700} gutterBottom>
                 Ready to Upload: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(0)} KB)
@@ -376,6 +357,25 @@ export const ProductImageUpload = ({
                   </Box>
                 </Grid>
               </Grid>
+            </Box>
+          ) : (
+            <Box sx={{ textAlign: 'center', py: 2 }}>
+              <CloudUploadOutlined sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
+              <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+                Upload Product Photo
+              </Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
+                Supports JPG, PNG, WebP up to 2MB (Recommended dimensions: 1200x1500px, 4:5 ratio)
+              </Typography>
+              <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                startIcon={<CloudUploadOutlined />}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                Choose File
+              </Button>
             </Box>
           )}
         </Paper>

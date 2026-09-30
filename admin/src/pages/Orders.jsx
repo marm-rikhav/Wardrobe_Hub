@@ -1,4 +1,1 @@
-import Orders from './orders/Orders.jsx';
-
-export { Orders };
-export default Orders;
+export { default, default as Orders } from './orders/Orders.jsx';

@@ -111,6 +111,36 @@ export const Customers = () => {
     });
   };
 
+  let customersContent = null;
+  if (loading) {
+    customersContent = (
+      <Box sx={{ p: 3 }}>
+        {[1, 2, 3, 4, 5].map((i) => (
+          <Skeleton key={i} variant="rectangular" height={52} sx={{ my: 1, borderRadius: 1 }} />
+        ))}
+      </Box>
+    );
+  } else if (customers.length === 0) {
+    customersContent = (
+      <Box sx={{ py: 8, px: 3, textAlign: 'center' }}>
+        <PeopleOutlineIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 1.5, opacity: 0.5 }} />
+        <Typography variant="h6" fontWeight={600} gutterBottom>
+          {activeSearch ? 'No matching customers found' : 'No customers registered yet'}
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2, maxWidth: 400, mx: 'auto' }}>
+          {activeSearch
+            ? `No customer accounts match "${activeSearch}". Try checking spelling or using a different keyword.`
+            : 'Customer profiles will appear here once users register on the storefront.'}
+        </Typography>
+        {activeSearch && (
+          <Button variant="outlined" size="small" onClick={handleClearSearch}>
+            Clear Search Filter
+          </Button>
+        )}
+      </Box>
+    );
+  }
+
   return (
     <Box sx={{ width: '100%', maxWidth: 1200, mx: 'auto' }}>
       {/* Header */}
@@ -216,30 +246,7 @@ export const Customers = () => {
 
       {/* Customers Table Card */}
       <Card sx={{ border: '1px solid', borderColor: 'divider' }}>
-        {loading ? (
-          <Box sx={{ p: 3 }}>
-            {[1, 2, 3, 4, 5].map((i) => (
-              <Skeleton key={i} variant="rectangular" height={52} sx={{ my: 1, borderRadius: 1 }} />
-            ))}
-          </Box>
-        ) : customers.length === 0 ? (
-          <Box sx={{ py: 8, px: 3, textAlign: 'center' }}>
-            <PeopleOutlineIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 1.5, opacity: 0.5 }} />
-            <Typography variant="h6" fontWeight={600} gutterBottom>
-              {activeSearch ? 'No matching customers found' : 'No customers registered yet'}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2, maxWidth: 400, mx: 'auto' }}>
-              {activeSearch
-                ? `No customer accounts match "${activeSearch}". Try checking spelling or using a different keyword.`
-                : 'Customer profiles will appear here once users register on the storefront.'}
-            </Typography>
-            {activeSearch && (
-              <Button variant="outlined" size="small" onClick={handleClearSearch}>
-                Clear Search Filter
-              </Button>
-            )}
-          </Box>
-        ) : (
+        {customersContent || (
           <>
             <TableContainer component={Paper} elevation={0}>
               <Table sx={{ minWidth: 650 }}>

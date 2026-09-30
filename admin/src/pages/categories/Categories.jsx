@@ -127,7 +127,7 @@ export const Categories = () => {
     return categories.filter(
       (cat) =>
         cat.name.toLowerCase().includes(q) ||
-        (cat.slug && cat.slug.toLowerCase().includes(q))
+        cat.slug?.toLowerCase().includes(q)
     );
   }, [categories, searchQuery]);
 

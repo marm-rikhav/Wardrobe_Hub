@@ -108,6 +108,50 @@ export const StockTable = ({
               const isOutOfStock = variant.stock === 0;
               const isLowStock = variant.stock > 0 && variant.stock <= 5;
 
+              let stockTextColor = 'success.main';
+              if (isOutOfStock) {
+                stockTextColor = 'error.main';
+              } else if (isLowStock) {
+                stockTextColor = '#D35400';
+              }
+
+              let stockBadge = (
+                <Chip
+                  size="small"
+                  label="In Stock"
+                  color="success"
+                  sx={{
+                    bgcolor: 'rgba(47, 125, 79, 0.12)',
+                    color: '#2F7D4F',
+                    fontWeight: 700,
+                    fontSize: '0.75rem',
+                  }}
+                />
+              );
+              if (isOutOfStock) {
+                stockBadge = (
+                  <Chip
+                    size="small"
+                    label="Out of Stock"
+                    color="error"
+                    sx={{ fontWeight: 700, fontSize: '0.75rem' }}
+                  />
+                );
+              } else if (isLowStock) {
+                stockBadge = (
+                  <Chip
+                    size="small"
+                    label="Low Stock"
+                    sx={{
+                      bgcolor: 'rgba(211, 84, 0, 0.12)',
+                      color: '#D35400',
+                      fontWeight: 700,
+                      fontSize: '0.75rem',
+                    }}
+                  />
+                );
+              }
+
               return (
                 <TableRow
                   key={variant.id || `${product.id}-${variant.sku}`}
@@ -169,11 +213,7 @@ export const StockTable = ({
                       variant="body2"
                       fontWeight={700}
                       sx={{
-                        color: isOutOfStock
-                          ? 'error.main'
-                          : isLowStock
-                          ? '#D35400'
-                          : 'success.main',
+                        color: stockTextColor,
                       }}
                     >
                       {variant.stock} units
@@ -182,37 +222,7 @@ export const StockTable = ({
 
                   {/* Stock Status Badge */}
                   <TableCell align="center">
-                    {isOutOfStock ? (
-                      <Chip
-                        size="small"
-                        label="Out of Stock"
-                        color="error"
-                        sx={{ fontWeight: 700, fontSize: '0.75rem' }}
-                      />
-                    ) : isLowStock ? (
-                      <Chip
-                        size="small"
-                        label="Low Stock"
-                        sx={{
-                          bgcolor: 'rgba(211, 84, 0, 0.12)',
-                          color: '#D35400',
-                          fontWeight: 700,
-                          fontSize: '0.75rem',
-                        }}
-                      />
-                    ) : (
-                      <Chip
-                        size="small"
-                        label="In Stock"
-                        color="success"
-                        sx={{
-                          bgcolor: 'rgba(47, 125, 79, 0.12)',
-                          color: '#2F7D4F',
-                          fontWeight: 700,
-                          fontSize: '0.75rem',
-                        }}
-                      />
-                    )}
+                    {stockBadge}
                   </TableCell>
 
                   {/* Action */}

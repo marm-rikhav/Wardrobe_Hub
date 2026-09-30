@@ -46,7 +46,7 @@ export const productSchema = z
       .max(200, 'Product name cannot exceed 200 characters'),
     subcategoryId: z
       .string('Please select a subcategory')
-      .refine((val) => Boolean(val && val.trim()), 'Please select a subcategory')
+      .refine((val) => Boolean(val?.trim()), 'Please select a subcategory')
       .refine(
         (val) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(val),
         'Please select a valid subcategory'

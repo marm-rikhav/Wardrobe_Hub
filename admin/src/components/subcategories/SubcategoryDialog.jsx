@@ -80,6 +80,13 @@ export const SubcategoryDialog = ({
     onSubmit(payload);
   };
 
+  let submitButtonLabel = 'Create Subcategory';
+  if (loading) {
+    submitButtonLabel = 'Saving...';
+  } else if (isEditing) {
+    submitButtonLabel = 'Save Changes';
+  }
+
   return (
     <Dialog
       open={open}
@@ -119,7 +126,7 @@ export const SubcategoryDialog = ({
                 >
                   {categories.map((cat) => (
                     <MenuItem key={cat.id} value={cat.id}>
-                      {cat.name} {!cat.isActive ? '(Inactive)' : ''}
+                      {cat.name} {cat.isActive ? '' : '(Inactive)'}
                     </MenuItem>
                   ))}
                 </Select>
@@ -197,7 +204,7 @@ export const SubcategoryDialog = ({
             disabled={loading}
             startIcon={loading ? <CircularProgress size={16} color="inherit" /> : null}
           >
-            {loading ? 'Saving...' : isEditing ? 'Save Changes' : 'Create Subcategory'}
+            {submitButtonLabel}
           </Button>
         </DialogActions>
       </form>

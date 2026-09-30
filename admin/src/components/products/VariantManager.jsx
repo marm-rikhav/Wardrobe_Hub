@@ -33,6 +33,12 @@ import {
 } from '@mui/icons-material';
 import { variantSchema } from '../../common/validation/productSchemas.js';
 
+const getStockChipColor = (stock) => {
+  if (stock === 0) return 'error';
+  if (stock <= 5) return 'warning';
+  return 'success';
+};
+
 export const VariantManager = ({
   variants = [],
   onChange,
@@ -138,11 +144,11 @@ export const VariantManager = ({
     };
 
     let nextVariants;
-    if (editingIndex !== null) {
+    if (editingIndex === null) {
+      nextVariants = [...variants, updatedVariant];
+    } else {
       nextVariants = [...variants];
       nextVariants[editingIndex] = updatedVariant;
-    } else {
-      nextVariants = [...variants, updatedVariant];
     }
 
     onChange(nextVariants);
@@ -250,13 +256,7 @@ export const VariantManager = ({
                     <Chip
                       size="small"
                       label={variant.stock}
-                      color={
-                        variant.stock === 0
-                          ? 'error'
-                          : variant.stock <= 5
-                          ? 'warning'
-                          : 'success'
-                      }
+                      color={getStockChipColor(variant.stock)}
                       sx={{ fontWeight: 700, minWidth: 32 }}
                     />
                   </TableCell>
@@ -308,7 +308,7 @@ export const VariantManager = ({
         PaperProps={{ sx: { borderRadius: 2, p: 1 } }}
       >
         <DialogTitle sx={{ fontWeight: 700 }}>
-          {editingIndex !== null ? 'Edit Variant' : 'Add Product Variant'}
+          {editingIndex === null ? 'Add Product Variant' : 'Edit Variant'}
         </DialogTitle>
 
         <form onSubmit={handleSubmit(onSaveVariant)} noValidate>
@@ -416,7 +416,7 @@ export const VariantManager = ({
               Cancel
             </Button>
             <Button type="submit" variant="contained" color="primary">
-              {editingIndex !== null ? 'Save Variant' : 'Add Variant'}
+              {editingIndex === null ? 'Add Variant' : 'Save Variant'}
             </Button>
           </DialogActions>
         </form>

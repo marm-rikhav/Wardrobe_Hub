@@ -77,6 +77,61 @@ export const Dashboard = () => {
     });
   };
 
+  let lowStockContent = null;
+  if (loading) {
+    lowStockContent = (
+      <Box sx={{ p: 2 }}>
+        {[1, 2, 3].map((i) => (
+          <Skeleton key={i} variant="rectangular" height={48} sx={{ my: 1, borderRadius: 1 }} />
+        ))}
+      </Box>
+    );
+  } else if (!stats?.lowStockVariants || stats.lowStockVariants.length === 0) {
+    lowStockContent = (
+      <Box
+        sx={{
+          py: 6,
+          px: 3,
+          textAlign: 'center',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
+        <CheckCircleOutlineIcon sx={{ fontSize: 44, color: 'success.main', mb: 1 }} />
+        <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+          Inventory is Healthy
+        </Typography>
+        <Typography variant="body2" color="text.secondary" maxWidth={360}>
+          All active product variants currently have more than 5 units in stock.
+        </Typography>
+      </Box>
+    );
+  }
+
+  let recentOrdersContent = null;
+  if (loading) {
+    recentOrdersContent = (
+      <Box sx={{ p: 2 }}>
+        {[1, 2, 3].map((i) => (
+          <Skeleton key={i} variant="rectangular" height={48} sx={{ my: 1, borderRadius: 1 }} />
+        ))}
+      </Box>
+    );
+  } else if (!stats?.recentOrders || stats.recentOrders.length === 0) {
+    recentOrdersContent = (
+      <Box sx={{ py: 6, px: 3, textAlign: 'center' }}>
+        <ShoppingBagOutlined sx={{ fontSize: 44, color: 'text.secondary', mb: 1, opacity: 0.5 }} />
+        <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+          No Orders Yet
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Customer orders will be displayed here in real time.
+        </Typography>
+      </Box>
+    );
+  }
+
   return (
     <Box sx={{ width: '100%', maxWidth: 1200, mx: 'auto' }}>
       {/* Header */}
@@ -373,32 +428,7 @@ export const Dashboard = () => {
               </Button>
             </Box>
 
-            {loading ? (
-              <Box sx={{ p: 2 }}>
-                {[1, 2, 3].map((i) => (
-                  <Skeleton key={i} variant="rectangular" height={48} sx={{ my: 1, borderRadius: 1 }} />
-                ))}
-              </Box>
-            ) : !stats?.lowStockVariants || stats.lowStockVariants.length === 0 ? (
-              <Box
-                sx={{
-                  py: 6,
-                  px: 3,
-                  textAlign: 'center',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                }}
-              >
-                <CheckCircleOutlineIcon sx={{ fontSize: 44, color: 'success.main', mb: 1 }} />
-                <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-                  Inventory is Healthy
-                </Typography>
-                <Typography variant="body2" color="text.secondary" maxWidth={360}>
-                  All active product variants currently have more than 5 units in stock.
-                </Typography>
-              </Box>
-            ) : (
+            {lowStockContent || (
               <TableContainer sx={{ maxHeight: 360 }}>
                 <Table size="small" stickyHeader>
                   <TableHead>
@@ -504,23 +534,7 @@ export const Dashboard = () => {
               </Button>
             </Box>
 
-            {loading ? (
-              <Box sx={{ p: 2 }}>
-                {[1, 2, 3].map((i) => (
-                  <Skeleton key={i} variant="rectangular" height={48} sx={{ my: 1, borderRadius: 1 }} />
-                ))}
-              </Box>
-            ) : !stats?.recentOrders || stats.recentOrders.length === 0 ? (
-              <Box sx={{ py: 6, px: 3, textAlign: 'center' }}>
-                <ShoppingBagOutlined sx={{ fontSize: 44, color: 'text.secondary', mb: 1, opacity: 0.5 }} />
-                <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-                  No Orders Yet
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Customer orders will be displayed here in real time.
-                </Typography>
-              </Box>
-            ) : (
+            {recentOrdersContent || (
               <TableContainer sx={{ maxHeight: 360 }}>
                 <Table size="small" stickyHeader>
                   <TableHead>

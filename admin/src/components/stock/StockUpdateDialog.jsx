@@ -22,7 +22,7 @@ export const StockUpdateDialog = ({
   open,
   onClose,
   onSubmit,
-  record = null, // { product, variant }
+  record = null,
   loading = false,
   error = null,
 }) => {

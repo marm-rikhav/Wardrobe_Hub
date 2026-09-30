@@ -12,7 +12,7 @@ export const customerService = {
     const cleanParams = {};
     if (params.page) cleanParams.page = params.page;
     if (params.limit) cleanParams.limit = params.limit;
-    if (params.search && params.search.trim()) {
+    if (params.search?.trim()) {
       cleanParams.search = params.search.trim();
     }
 

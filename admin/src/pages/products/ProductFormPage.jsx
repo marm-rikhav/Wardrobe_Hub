@@ -109,7 +109,7 @@ export const ProductFormPage = () => {
         setCategories(cats);
         setAllSubcategories(subs);
       } catch (err) {
-        showSnackbar('Failed to load category catalog', 'error');
+        showSnackbar(err.response?.data?.message || 'Failed to load category catalog', 'error');
       }
     };
     loadCatalog();
@@ -131,7 +131,7 @@ export const ProductFormPage = () => {
           brand: prod.brand || '',
           description: prod.description || '',
           subcategoryId: prod.subcategoryId || '',
-          basePrice: prod.basePrice !== undefined ? String(prod.basePrice) : '',
+          basePrice: prod.basePrice === undefined ? '' : String(prod.basePrice),
           discountPrice: prod.discountPrice !== null && prod.discountPrice !== undefined ? String(prod.discountPrice) : '',
           isActive: prod.isActive ?? true,
           variants: (prod.variants || []).map((v) => ({
@@ -217,7 +217,7 @@ export const ProductFormPage = () => {
             if (msg.toLowerCase().includes('expected') && msg.toLowerCase().includes('received')) {
               msg = `${item.field || 'Field'} is required`;
             }
-            return `${item.field ? `${item.field}: ` : ''}${msg}`;
+            return item.field ? `${item.field}: ${msg}` : msg;
           })
           .join(' | ');
         detailedMsg = `${detailedMsg}: ${details}`;
@@ -272,6 +272,20 @@ export const ProductFormPage = () => {
         <CircularProgress color="primary" />
       </Box>
     );
+  }
+
+  let subcategoryHelperText = null;
+  if (errors.subcategoryId) {
+    subcategoryHelperText = errors.subcategoryId.message;
+  } else if (filteredSubcategories.length === 0 && selectedParentCategoryId) {
+    subcategoryHelperText = 'No subcategories found in this category.';
+  }
+
+  let submitButtonLabel = 'Create Product';
+  if (submitting) {
+    submitButtonLabel = 'Saving...';
+  } else if (isEditing) {
+    submitButtonLabel = 'Save Product Changes';
   }
 
   return (
@@ -421,7 +435,7 @@ export const ProductFormPage = () => {
                     </MenuItem>
                     {categories.map((cat) => (
                       <MenuItem key={cat.id} value={cat.id}>
-                        {cat.name} {!cat.isActive ? '(Inactive)' : ''}
+                        {cat.name} {cat.isActive ? '' : '(Inactive)'}
                       </MenuItem>
                     ))}
                   </Select>
@@ -448,17 +462,15 @@ export const ProductFormPage = () => {
                       >
                         {filteredSubcategories.map((sub) => (
                           <MenuItem key={sub.id} value={sub.id}>
-                            {sub.name} {!sub.isActive ? '(Inactive)' : ''}
+                            {sub.name} {sub.isActive ? '' : '(Inactive)'}
                           </MenuItem>
                         ))}
                       </Select>
                     )}
                   />
-                  {errors.subcategoryId ? (
-                    <FormHelperText>{errors.subcategoryId.message}</FormHelperText>
-                  ) : filteredSubcategories.length === 0 && selectedParentCategoryId ? (
-                    <FormHelperText>No subcategories found in this category.</FormHelperText>
-                  ) : null}
+                  {subcategoryHelperText && (
+                    <FormHelperText>{subcategoryHelperText}</FormHelperText>
+                  )}
                 </FormControl>
               </Grid>
             </Grid>
@@ -552,7 +564,7 @@ export const ProductFormPage = () => {
             startIcon={submitting ? <CircularProgress size={18} color="inherit" /> : <SaveOutlined />}
             sx={{ px: 4 }}
           >
-            {submitting ? 'Saving...' : isEditing ? 'Save Product Changes' : 'Create Product'}
+            {submitButtonLabel}
           </Button>
         </Box>
       </form>

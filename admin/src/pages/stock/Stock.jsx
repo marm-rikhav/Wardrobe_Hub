@@ -61,7 +61,7 @@ export const Stock = () => {
         const cats = await categoryService.getAllCategories();
         setCategories(cats);
       } catch (err) {
-        showSnackbar('Failed to load categories', 'error');
+        showSnackbar(err.response?.data?.message || 'Failed to load categories', 'error');
       }
     };
     loadCategories();

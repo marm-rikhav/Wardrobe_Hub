@@ -37,7 +37,7 @@ export const ProtectedRoute = ({ children }) => {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  return children ? children : <Outlet />;
+  return children ?? <Outlet />;
 };
 
 ProtectedRoute.propTypes = {

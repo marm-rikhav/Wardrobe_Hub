@@ -143,5 +143,5 @@ apiClient.interceptors.response.use(
   }
 );
 
-export { getAccessToken, setAccessToken, clearAccessToken };
+export { getAccessToken, setAccessToken, clearAccessToken } from './tokenStorage.js';
 export default apiClient;

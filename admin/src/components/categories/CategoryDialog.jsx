@@ -75,6 +75,13 @@ export const CategoryDialog = ({
     onSubmit(payload);
   };
 
+  let submitButtonLabel = 'Create Category';
+  if (loading) {
+    submitButtonLabel = 'Saving...';
+  } else if (isEditing) {
+    submitButtonLabel = 'Save Changes';
+  }
+
   return (
     <Dialog
       open={open}
@@ -179,7 +186,7 @@ export const CategoryDialog = ({
             disabled={loading}
             startIcon={loading ? <CircularProgress size={16} color="inherit" /> : null}
           >
-            {loading ? 'Saving...' : isEditing ? 'Save Changes' : 'Create Category'}
+            {submitButtonLabel}
           </Button>
         </DialogActions>
       </form>

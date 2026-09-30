@@ -141,8 +141,8 @@ export const Subcategories = () => {
     return subcategories.filter(
       (sub) =>
         sub.name.toLowerCase().includes(q) ||
-        (sub.slug && sub.slug.toLowerCase().includes(q)) ||
-        (sub.category?.name && sub.category.name.toLowerCase().includes(q))
+        sub.slug?.toLowerCase().includes(q) ||
+        sub.category?.name?.toLowerCase().includes(q)
     );
   }, [subcategories, searchQuery]);
 

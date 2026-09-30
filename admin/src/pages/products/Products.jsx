@@ -77,7 +77,7 @@ export const Products = () => {
         setCategories(cats);
         setAllSubcategories(subs);
       } catch (err) {
-        showSnackbar('Failed to load category filters', 'error');
+        showSnackbar(err.response?.data?.message || 'Failed to load category filters', 'error');
       }
     };
     loadFilterData();

@@ -21,6 +21,25 @@ import {
 import OrderStatusChip from './OrderStatusChip.jsx';
 import { formatCurrency, formatOrderDate } from '../../utils/orderConstants.js';
 
+const getPaymentStatusColor = (status) => {
+  if (status === 'PAID') return 'success.main';
+  if (status === 'CANCELLED') return 'error.main';
+  return 'warning.main';
+};
+
+const getPaymentStatusLabel = (status) => {
+  switch (status) {
+    case 'PENDING':
+      return 'Pending';
+    case 'PAID':
+      return 'Paid';
+    case 'CANCELLED':
+      return 'Cancelled';
+    default:
+      return status || 'Pending';
+  }
+};
+
 export const OrderTable = ({
   orders = [],
   loading = false,
@@ -141,7 +160,7 @@ export const OrderTable = ({
                     '&:last-child td, &:last-child th': { border: 0 },
                     cursor: 'pointer',
                   }}
-                  onClick={() => onViewDetail && onViewDetail(order.id)}
+                  onClick={() => onViewDetail?.(order.id)}
                 >
                   {/* Order Number */}
                   <TableCell>
@@ -186,7 +205,7 @@ export const OrderTable = ({
                   {/* Items Count */}
                   <TableCell align="center">
                     <Typography variant="body2" fontWeight={500}>
-                      {order.itemCount || (order.items ? order.items.length : 0)}
+                      {order.itemCount ?? (order.items?.length ?? 0)}
                     </Typography>
                   </TableCell>
 
@@ -202,24 +221,13 @@ export const OrderTable = ({
                     <Typography
                       variant="caption"
                       sx={{
-                        color:
-                          order.paymentStatus === 'PAID'
-                            ? 'success.main'
-                            : order.paymentStatus === 'CANCELLED'
-                            ? 'error.main'
-                            : 'warning.main',
+                        color: getPaymentStatusColor(order.paymentStatus),
                         fontWeight: 600,
                         display: 'block',
                       }}
                     >
                       {order.paymentMethod === 'COD' ? 'COD' : order.paymentMethod || 'COD'}:{' '}
-                      {order.paymentStatus === 'PENDING'
-                        ? 'Pending'
-                        : order.paymentStatus === 'PAID'
-                        ? 'Paid'
-                        : order.paymentStatus === 'CANCELLED'
-                        ? 'Cancelled'
-                        : order.paymentStatus || 'Pending'}
+                      {getPaymentStatusLabel(order.paymentStatus)}
                     </Typography>
                   </TableCell>
 
@@ -235,7 +243,7 @@ export const OrderTable = ({
                       variant="outlined"
                       color="primary"
                       startIcon={<VisibilityOutlined />}
-                      onClick={() => onViewDetail && onViewDetail(order.id)}
+                      onClick={() => onViewDetail?.(order.id)}
                       sx={{ minWidth: 100 }}
                     >
                       View

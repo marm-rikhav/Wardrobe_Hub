@@ -27,6 +27,25 @@ import DeliveryAddressCard from '../../components/orders/DeliveryAddressCard.jsx
 import OrderStatusAction from '../../components/orders/OrderStatusAction.jsx';
 import { formatCurrency, formatOrderDate } from '../../utils/orderConstants.js';
 
+const getPaymentStatusColor = (status) => {
+  if (status === 'PAID') return 'success.main';
+  if (status === 'CANCELLED') return 'error.main';
+  return 'warning.main';
+};
+
+const getPaymentStatusLabel = (status) => {
+  switch (status) {
+    case 'PENDING':
+      return 'Pending';
+    case 'PAID':
+      return 'Paid';
+    case 'CANCELLED':
+      return 'Cancelled';
+    default:
+      return status || 'Pending';
+  }
+};
+
 export const OrderDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -244,23 +263,12 @@ export const OrderDetail = () => {
                     <Box
                       component="span"
                       sx={{
-                        color:
-                          order.paymentStatus === 'PAID'
-                            ? 'success.main'
-                            : order.paymentStatus === 'CANCELLED'
-                            ? 'error.main'
-                            : 'warning.main',
+                        color: getPaymentStatusColor(order.paymentStatus),
                         fontWeight: 700,
                         fontSize: '0.875rem',
                       }}
                     >
-                      {order.paymentStatus === 'PENDING'
-                        ? 'Pending'
-                        : order.paymentStatus === 'PAID'
-                        ? 'Paid'
-                        : order.paymentStatus === 'CANCELLED'
-                        ? 'Cancelled'
-                        : order.paymentStatus || 'Pending'}
+                      {getPaymentStatusLabel(order.paymentStatus)}
                     </Box>
                   </Box>
                 </Box>
