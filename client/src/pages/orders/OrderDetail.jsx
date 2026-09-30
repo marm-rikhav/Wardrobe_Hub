@@ -21,6 +21,7 @@ import orderApi from '../../api/order.api.js';
 import OrderStatusChip from '../../components/orders/OrderStatusChip.jsx';
 import Loading from '../../components/common/Loading.jsx';
 import ErrorMessage from '../../components/common/ErrorMessage.jsx';
+import ConfirmDialog from '../../components/common/ConfirmDialog.jsx';
 import { formatPrice, formatDate } from '../../utils/formatters.js';
 
 export const OrderDetail = () => {
@@ -29,6 +30,9 @@ export const OrderDetail = () => {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [cancelError, setCancelError] = useState(null);
 
   const orderJustPlaced = Boolean(location.state?.orderJustPlaced);
 
@@ -54,6 +58,20 @@ export const OrderDetail = () => {
       fetchOrder();
     }
   }, [id]);
+
+  const handleCancelOrder = async () => {
+    setIsCancelling(true);
+    setCancelError(null);
+    try {
+      const response = await orderApi.cancelOrder(order.id);
+      setOrder(response.data?.order || { ...order, status: 'CANCELLED', paymentStatus: 'CANCELLED' });
+      setCancelDialogOpen(false);
+    } catch (err) {
+      setCancelError(err.response?.data?.message || err.message || 'Failed to cancel order');
+    } finally {
+      setIsCancelling(false);
+    }
+  };
 
   if (loading) {
     return <Loading fullScreen message="Loading order details..." />;
@@ -112,6 +130,17 @@ export const OrderDetail = () => {
             {order.orderNumber}
           </Typography>
         </Breadcrumbs>
+
+        {/* Cancel Error Alert */}
+        {cancelError && (
+          <Alert
+            severity="error"
+            onClose={() => setCancelError(null)}
+            sx={{ mb: 3, borderRadius: 2 }}
+          >
+            {cancelError}
+          </Alert>
+        )}
 
         {/* Success Banner if redirected from checkout */}
         {orderJustPlaced && (
@@ -277,7 +306,7 @@ export const OrderDetail = () => {
               </Box>
             </Paper>
 
-            <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
+            <Box sx={{ mt: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
               <Button
                 component={Link}
                 to="/orders"
@@ -297,6 +326,16 @@ export const OrderDetail = () => {
               >
                 Continue Shopping
               </Button>
+              {['PENDING', 'CONFIRMED'].includes(order.status) && (
+                <Button
+                  variant="outlined"
+                  color="error"
+                  onClick={() => setCancelDialogOpen(true)}
+                  sx={{ textTransform: 'none', fontWeight: 600, ml: { xs: 0, sm: 'auto' } }}
+                >
+                  Cancel Order
+                </Button>
+              )}
             </Box>
           </Grid>
 
@@ -389,10 +428,36 @@ export const OrderDetail = () => {
 
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5 }}>
                   <Typography variant="body2" color="text.secondary">
+                    Payment Method
+                  </Typography>
+                  <Typography variant="body2" fontWeight={600}>
+                    {order.paymentMethod === 'COD' ? 'Cash on Delivery' : order.paymentMethod}
+                  </Typography>
+                </Box>
+
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5 }}>
+                  <Typography variant="body2" color="text.secondary">
                     Payment Status
                   </Typography>
-                  <Typography variant="body2" fontWeight={600} color="secondary.main">
-                    {order.paymentStatus}
+                  <Typography
+                    variant="body2"
+                    fontWeight={700}
+                    sx={{
+                      color:
+                        order.paymentStatus === 'PAID'
+                          ? 'success.main'
+                          : order.paymentStatus === 'CANCELLED'
+                          ? 'error.main'
+                          : 'warning.main',
+                    }}
+                  >
+                    {order.paymentStatus === 'PENDING'
+                      ? 'Pending'
+                      : order.paymentStatus === 'PAID'
+                      ? 'Paid'
+                      : order.paymentStatus === 'CANCELLED'
+                      ? 'Cancelled'
+                      : order.paymentStatus}
                   </Typography>
                 </Box>
               </Box>
@@ -415,6 +480,19 @@ export const OrderDetail = () => {
           </Grid>
         </Grid>
       </Container>
+
+      {/* Cancel Order Confirm Dialog */}
+      <ConfirmDialog
+        open={cancelDialogOpen}
+        title="Cancel Order"
+        message={`Are you sure you want to cancel order #${order?.orderNumber}? Any reserved inventory will be returned to stock.`}
+        confirmText="Yes, Cancel Order"
+        cancelText="Keep Order"
+        confirmColor="error"
+        loading={isCancelling}
+        onConfirm={handleCancelOrder}
+        onClose={() => setCancelDialogOpen(false)}
+      />
     </Box>
   );
 };

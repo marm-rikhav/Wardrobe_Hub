@@ -70,6 +70,8 @@ export const OrderDetail = () => {
     fetchOrderDetail();
   }, [fetchOrderDetail]);
 
+  const [isUpdatingPayment, setIsUpdatingPayment] = useState(false);
+
   const handleUpdateStatus = async (newStatus) => {
     setIsUpdating(true);
     try {
@@ -81,6 +83,20 @@ export const OrderDetail = () => {
       showSnackbar(msg, 'error');
     } finally {
       setIsUpdating(false);
+    }
+  };
+
+  const handleUpdatePaymentStatus = async (newPaymentStatus) => {
+    setIsUpdatingPayment(true);
+    try {
+      const updatedOrder = await orderService.updatePaymentStatus(id, newPaymentStatus);
+      setOrder(updatedOrder);
+      showSnackbar(`Order payment status updated to ${newPaymentStatus}!`);
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Failed to update payment status';
+      showSnackbar(msg, 'error');
+    } finally {
+      setIsUpdatingPayment(false);
     }
   };
 
@@ -222,29 +238,63 @@ export const OrderDetail = () => {
                 <Divider sx={{ my: 1 }} />
 
                 {/* Payment Method & Status */}
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, pt: 0.5 }}>
-                  <CreditCardOutlined fontSize="small" sx={{ color: 'text.secondary' }} />
-                  <Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1.5, pt: 0.5 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                    <CreditCardOutlined fontSize="small" sx={{ color: 'text.secondary' }} />
+                    <Box>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                        Payment Method
+                      </Typography>
+                      <Typography variant="body2" fontWeight={600}>
+                        {order.paymentMethod === 'COD' ? 'Cash on Delivery (COD)' : order.paymentMethod || 'COD'}
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  <Box sx={{ textAlign: 'right' }}>
                     <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                      Payment Method
+                      Payment Status
                     </Typography>
-                    <Typography variant="body2" fontWeight={600}>
-                      {order.paymentMethod || 'ONLINE'} &bull; Status:{' '}
-                      <Box
-                        component="span"
-                        sx={{
-                          color:
-                            order.paymentStatus === 'PAID'
-                              ? 'success.main'
-                              : 'text.secondary',
-                          fontWeight: 700,
-                        }}
-                      >
-                        {order.paymentStatus || 'UNPAID'}
-                      </Box>
-                    </Typography>
+                    <Box
+                      component="span"
+                      sx={{
+                        color:
+                          order.paymentStatus === 'PAID'
+                            ? 'success.main'
+                            : order.paymentStatus === 'CANCELLED'
+                            ? 'error.main'
+                            : 'warning.main',
+                        fontWeight: 700,
+                        fontSize: '0.875rem',
+                      }}
+                    >
+                      {order.paymentStatus === 'PENDING'
+                        ? 'Pending'
+                        : order.paymentStatus === 'PAID'
+                        ? 'Paid'
+                        : order.paymentStatus === 'CANCELLED'
+                        ? 'Cancelled'
+                        : order.paymentStatus || 'Pending'}
+                    </Box>
                   </Box>
                 </Box>
+
+                {/* COD Mark as Paid Button */}
+                {order.paymentStatus === 'PENDING' && order.status !== 'CANCELLED' && (
+                  <Box sx={{ mt: 1, pt: 1.5, borderTop: '1px dashed', borderColor: 'divider' }}>
+                    <Button
+                      fullWidth
+                      variant="contained"
+                      color="success"
+                      size="small"
+                      disabled={isUpdatingPayment}
+                      onClick={() => handleUpdatePaymentStatus('PAID')}
+                      sx={{ fontWeight: 600, textTransform: 'none' }}
+                    >
+                      {isUpdatingPayment ? 'Updating...' : 'Mark COD Payment as Paid'}
+                    </Button>
+                  </Box>
+                )}
               </Stack>
             </CardContent>
           </Card>

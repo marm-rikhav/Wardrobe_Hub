@@ -89,6 +89,7 @@ export const Checkout = () => {
     try {
       const response = await orderApi.createOrder({
         addressId: selectedAddressId,
+        paymentMethod: 'COD',
       });
 
       const createdOrder = response.data?.order;
@@ -324,7 +325,61 @@ export const Checkout = () => {
               )}
             </Paper>
 
-            {/* 2. Order Review Items */}
+            {/* 2. Payment Method Section */}
+            <Paper
+              elevation={0}
+              sx={{
+                p: { xs: 2.5, sm: 3 },
+                mb: 4,
+                borderRadius: 2,
+                border: '1px solid',
+                borderColor: 'divider',
+                backgroundColor: 'background.paper',
+              }}
+            >
+              <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
+                2. Payment Method
+              </Typography>
+
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 2.5,
+                  borderRadius: 2,
+                  border: '2px solid',
+                  borderColor: 'primary.main',
+                  backgroundColor: 'rgba(17, 17, 17, 0.02)',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: 1.5,
+                }}
+              >
+                <Radio
+                  checked={true}
+                  name="payment-method"
+                  size="small"
+                  sx={{ p: 0.5, mt: 0.2 }}
+                />
+                <Box sx={{ flexGrow: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.5 }}>
+                    <Typography variant="subtitle1" fontWeight={700}>
+                      Cash on Delivery (COD)
+                    </Typography>
+                    <Chip
+                      label="Available"
+                      size="small"
+                      color="success"
+                      sx={{ fontWeight: 700, fontSize: '0.65rem', height: 20 }}
+                    />
+                  </Box>
+                  <Typography variant="body2" color="text.secondary">
+                    Pay with cash upon delivery of your order to your doorstep. No online transaction required.
+                  </Typography>
+                </Box>
+              </Paper>
+            </Paper>
+
+            {/* 3. Order Review Items */}
             <Paper
               elevation={0}
               sx={{
@@ -336,7 +391,7 @@ export const Checkout = () => {
               }}
             >
               <Typography variant="h6" fontWeight={700} sx={{ mb: 2.5 }}>
-                2. Review Items ({totalItems})
+                3. Review Items ({totalItems})
               </Typography>
 
               <Box>
@@ -429,7 +484,7 @@ export const Checkout = () => {
               subtotal={subtotal}
               totalItems={totalItems}
               shippingFee={0}
-              actionText="Place Order"
+              actionText="Place Order — Cash on Delivery"
               onAction={handlePlaceOrder}
               actionDisabled={!selectedAddressId || items.length === 0}
               actionLoading={isPlacingOrder}

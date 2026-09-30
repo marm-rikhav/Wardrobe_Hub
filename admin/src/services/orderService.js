@@ -45,6 +45,18 @@ export const orderService = {
     });
     return response.data?.data?.order;
   },
+
+  /**
+   * Update order payment status (e.g. mark COD as PAID)
+   * @param {string} orderId
+   * @param {string} paymentStatus
+   */
+  async updatePaymentStatus(orderId, paymentStatus) {
+    const response = await apiClient.patch(`/admin/orders/${orderId}/payment-status`, {
+      paymentStatus,
+    });
+    return response.data?.data?.order;
+  },
 };
 
 export default orderService;

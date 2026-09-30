@@ -155,6 +155,34 @@ export const OrderHistory = () => {
                         {formatPrice(order.total)}
                       </Typography>
                     </Box>
+
+                    <Box>
+                      <Typography variant="caption" color="text.secondary" display="block">
+                        PAYMENT
+                      </Typography>
+                      <Typography variant="body2" fontWeight={600}>
+                        {order.paymentMethod === 'COD' ? 'COD' : order.paymentMethod} &bull;{' '}
+                        <Box
+                          component="span"
+                          sx={{
+                            color:
+                              order.paymentStatus === 'PAID'
+                                ? 'success.main'
+                                : order.paymentStatus === 'CANCELLED'
+                                ? 'error.main'
+                                : 'warning.main',
+                          }}
+                        >
+                          {order.paymentStatus === 'PENDING'
+                            ? 'Pending'
+                            : order.paymentStatus === 'PAID'
+                            ? 'Paid'
+                            : order.paymentStatus === 'CANCELLED'
+                            ? 'Cancelled'
+                            : order.paymentStatus}
+                        </Box>
+                      </Typography>
+                    </Box>
                   </Box>
 
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, alignSelf: { xs: 'flex-start', sm: 'center' } }}>

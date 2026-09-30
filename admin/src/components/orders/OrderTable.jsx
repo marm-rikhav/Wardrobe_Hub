@@ -190,7 +190,7 @@ export const OrderTable = ({
                     </Typography>
                   </TableCell>
 
-                  {/* Total Amount */}
+                  {/* Total Amount & Payment */}
                   <TableCell align="right">
                     <Typography
                       variant="body2"
@@ -198,6 +198,28 @@ export const OrderTable = ({
                       sx={{ color: 'accent.main' }}
                     >
                       {formatCurrency(order.total)}
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color:
+                          order.paymentStatus === 'PAID'
+                            ? 'success.main'
+                            : order.paymentStatus === 'CANCELLED'
+                            ? 'error.main'
+                            : 'warning.main',
+                        fontWeight: 600,
+                        display: 'block',
+                      }}
+                    >
+                      {order.paymentMethod === 'COD' ? 'COD' : order.paymentMethod || 'COD'}:{' '}
+                      {order.paymentStatus === 'PENDING'
+                        ? 'Pending'
+                        : order.paymentStatus === 'PAID'
+                        ? 'Paid'
+                        : order.paymentStatus === 'CANCELLED'
+                        ? 'Cancelled'
+                        : order.paymentStatus || 'Pending'}
                     </Typography>
                   </TableCell>
 

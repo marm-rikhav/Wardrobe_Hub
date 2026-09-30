@@ -319,7 +319,7 @@ describe("Customer Cart & Orders API Tests", () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${customerBToken}`,
         },
-        body: JSON.stringify({ addressId: testAddressId }),
+        body: JSON.stringify({ addressId: testAddressId, paymentMethod: "COD" }),
       });
       const body = await res.json();
       assert.equal(res.status, 400);
@@ -347,7 +347,7 @@ describe("Customer Cart & Orders API Tests", () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${customerBToken}`,
         },
-        body: JSON.stringify({ addressId: testAddressId }), // User A's address
+        body: JSON.stringify({ addressId: testAddressId, paymentMethod: "COD" }), // User A's address
       });
       assert.equal(res.status, 404);
 
@@ -371,7 +371,7 @@ describe("Customer Cart & Orders API Tests", () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${customerAToken}`,
         },
-        body: JSON.stringify({ addressId: testAddressId }),
+        body: JSON.stringify({ addressId: testAddressId, paymentMethod: "COD" }),
       });
 
       const body = await res.json();
