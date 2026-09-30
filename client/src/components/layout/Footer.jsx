@@ -145,7 +145,7 @@ export const Footer = () => {
             © 2026 Wardrobe Hub. All rights reserved.
           </Typography>
           <Typography variant="caption" sx={{ color: '#BFA88A' }}>
-            Built with Material UI & React
+            Built by Marm Rikhav
           </Typography>
         </Box>
       </Container>
