@@ -12,6 +12,7 @@ import Products from './pages/products/Products.jsx';
 import ProductFormPage from './pages/products/ProductFormPage.jsx';
 import Stock from './pages/stock/Stock.jsx';
 import Orders from './pages/Orders.jsx';
+import OrderDetail from './pages/orders/OrderDetail.jsx';
 import Customers from './pages/Customers.jsx';
 import Settings from './pages/Settings.jsx';
 
@@ -47,8 +48,11 @@ export function App() {
             {/* Stock Management */}
             <Route path="stock" element={<Stock />} />
 
-            {/* Placeholder Sections */}
+            {/* Orders Management */}
             <Route path="orders" element={<Orders />} />
+            <Route path="orders/:id" element={<OrderDetail />} />
+
+            {/* Placeholder Sections */}
             <Route path="customers" element={<Customers />} />
             <Route path="settings" element={<Settings />} />
           </Route>
