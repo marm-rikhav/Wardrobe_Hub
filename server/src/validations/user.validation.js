@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+const MOBILE_REGEX = /^(?:\+91[- ]?|0)?[6-9]\d{9}$/;
+
 export const updateProfileSchema = z.object({
   name: z
     .string()
@@ -10,7 +12,10 @@ export const updateProfileSchema = z.object({
   phone: z
     .string()
     .trim()
-    .max(20, "Phone number cannot exceed 20 characters")
+    .refine(
+      (val) => !val || MOBILE_REGEX.test(val),
+      "Please enter a valid 10-digit mobile number"
+    )
     .optional()
     .nullable(),
 });
