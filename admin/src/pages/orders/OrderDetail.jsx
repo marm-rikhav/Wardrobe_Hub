@@ -70,8 +70,6 @@ export const OrderDetail = () => {
     fetchOrderDetail();
   }, [fetchOrderDetail]);
 
-  const [isUpdatingPayment, setIsUpdatingPayment] = useState(false);
-
   const handleUpdateStatus = async (newStatus) => {
     setIsUpdating(true);
     try {
@@ -86,19 +84,7 @@ export const OrderDetail = () => {
     }
   };
 
-  const handleUpdatePaymentStatus = async (newPaymentStatus) => {
-    setIsUpdatingPayment(true);
-    try {
-      const updatedOrder = await orderService.updatePaymentStatus(id, newPaymentStatus);
-      setOrder(updatedOrder);
-      showSnackbar(`Order payment status updated to ${newPaymentStatus}!`);
-    } catch (err) {
-      const msg = err.response?.data?.message || 'Failed to update payment status';
-      showSnackbar(msg, 'error');
-    } finally {
-      setIsUpdatingPayment(false);
-    }
-  };
+
 
   if (loading) {
     return (
@@ -278,23 +264,6 @@ export const OrderDetail = () => {
                     </Box>
                   </Box>
                 </Box>
-
-                {/* COD Mark as Paid Button */}
-                {order.paymentStatus === 'PENDING' && order.status !== 'CANCELLED' && (
-                  <Box sx={{ mt: 1, pt: 1.5, borderTop: '1px dashed', borderColor: 'divider' }}>
-                    <Button
-                      fullWidth
-                      variant="contained"
-                      color="success"
-                      size="small"
-                      disabled={isUpdatingPayment}
-                      onClick={() => handleUpdatePaymentStatus('PAID')}
-                      sx={{ fontWeight: 600, textTransform: 'none' }}
-                    >
-                      {isUpdatingPayment ? 'Updating...' : 'Mark COD Payment as Paid'}
-                    </Button>
-                  </Box>
-                )}
               </Stack>
             </CardContent>
           </Card>

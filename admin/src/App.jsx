@@ -13,6 +13,7 @@ import ProductFormPage from './pages/products/ProductFormPage.jsx';
 import Stock from './pages/stock/Stock.jsx';
 import Orders from './pages/Orders.jsx';
 import OrderDetail from './pages/orders/OrderDetail.jsx';
+import ReturnRequests from './pages/returns/ReturnRequests.jsx';
 import Customers from './pages/Customers.jsx';
 import Settings from './pages/Settings.jsx';
 
@@ -51,6 +52,9 @@ export function App() {
             {/* Orders Management */}
             <Route path="orders" element={<Orders />} />
             <Route path="orders/:id" element={<OrderDetail />} />
+
+            {/* Returns & Exchanges Management */}
+            <Route path="returns" element={<ReturnRequests />} />
 
             {/* Placeholder Sections */}
             <Route path="customers" element={<Customers />} />

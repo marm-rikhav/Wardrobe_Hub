@@ -22,6 +22,7 @@ import {
   Inventory2Outlined,
   WarehouseOutlined,
   ShoppingBagOutlined,
+  AssignmentReturnOutlined,
   PeopleAltOutlined,
   SettingsOutlined,
   LogoutOutlined,
@@ -330,7 +331,7 @@ export const Sidebar = ({
             </Tooltip>
           </ListItem>
 
-          {/* Orders (Placeholder) */}
+          {/* Orders */}
           <ListItem disablePadding>
             <Tooltip title={collapsed && !isMobile ? 'Orders' : ''} placement="right">
               <ListItemButton
@@ -343,6 +344,26 @@ export const Sidebar = ({
                 {(!collapsed || isMobile) && (
                   <ListItemText
                     primary="Orders"
+                    primaryTypographyProps={{ fontSize: '0.9rem', fontWeight: 500 }}
+                  />
+                )}
+              </ListItemButton>
+            </Tooltip>
+          </ListItem>
+
+          {/* Returns & Exchanges */}
+          <ListItem disablePadding>
+            <Tooltip title={collapsed && !isMobile ? 'Returns' : ''} placement="right">
+              <ListItemButton
+                onClick={() => handleNavigate('/admin/returns')}
+                sx={navItemStyles(isCurrent('/admin/returns'))}
+              >
+                <ListItemIcon sx={iconStyles(isCurrent('/admin/returns'))}>
+                  <AssignmentReturnOutlined fontSize="small" />
+                </ListItemIcon>
+                {(!collapsed || isMobile) && (
+                  <ListItemText
+                    primary="Returns / Exchanges"
                     primaryTypographyProps={{ fontSize: '0.9rem', fontWeight: 500 }}
                   />
                 )}

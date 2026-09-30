@@ -87,20 +87,6 @@ export const CustomerInfoCard = ({ customer = null }) => {
             </Box>
           </Box>
         )}
-
-        {customer.id && (
-          <Box sx={{ pt: 0.5 }}>
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-              Customer ID
-            </Typography>
-            <Typography
-              variant="caption"
-              sx={{ fontFamily: 'monospace', color: 'text.secondary' }}
-            >
-              {customer.id}
-            </Typography>
-          </Box>
-        )}
       </CardContent>
     </Card>
   );
