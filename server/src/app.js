@@ -15,6 +15,8 @@ import {
   adminProductRouter,
 } from "./routes/product.routes.js";
 import addressRoutes from "./routes/address.routes.js";
+import cartRoutes from "./routes/cart.routes.js";
+import orderRoutes from "./routes/order.routes.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { ApiError } from "./utils/apiError.js";
 
@@ -64,6 +66,10 @@ app.use("/api/auth", authRoutes);
 // Address Routes
 app.use("/api/addresses", addressRoutes);
 app.use("/api/user/addresses", addressRoutes);
+
+// Customer Cart & Orders Routes
+app.use("/api/cart", cartRoutes);
+app.use("/api/orders", orderRoutes);
 
 // Catalog Public Routes
 app.use("/api/categories", publicCategoryRouter);
