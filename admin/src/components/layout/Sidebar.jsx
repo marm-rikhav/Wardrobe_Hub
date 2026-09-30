@@ -38,12 +38,343 @@ import useAuth from '../../hooks/useAuth.js';
 export const DRAWER_WIDTH = 260;
 export const COLLAPSED_WIDTH = 72;
 
+const NAV_ITEMS = [
+  { label: 'Products', path: '/admin/products', icon: Inventory2Outlined },
+  { label: 'Stock', path: '/admin/stock', icon: WarehouseOutlined },
+  { label: 'Orders', path: '/admin/orders', icon: ShoppingBagOutlined },
+  {
+    label: 'Returns / Exchanges',
+    path: '/admin/returns',
+    tooltip: 'Returns',
+    icon: AssignmentReturnOutlined,
+  },
+  { label: 'Customers', path: '/admin/customers', icon: PeopleAltOutlined },
+  { label: 'Settings', path: '/admin/settings', icon: SettingsOutlined },
+];
+
+const getNavItemStyles = (active, isCompact) => ({
+  minHeight: 44,
+  borderRadius: 1.5,
+  mx: isCompact ? 1 : 1.5,
+  my: 0.5,
+  px: isCompact ? 1.5 : 2,
+  justifyContent: isCompact ? 'center' : 'initial',
+  bgcolor: active ? 'rgba(191, 168, 138, 0.16)' : 'transparent',
+  color: active ? '#BFA88A' : '#E5DED3',
+  '&:hover': {
+    bgcolor: active ? 'rgba(191, 168, 138, 0.24)' : 'rgba(255, 255, 255, 0.06)',
+    color: '#FFFFFF',
+  },
+  transition: 'all 0.2s ease',
+});
+
+const getIconStyles = (active, isCompact) => ({
+  minWidth: 0,
+  mr: isCompact ? 0 : 2,
+  justifyContent: 'center',
+  color: active ? '#BFA88A' : '#E5DED3',
+});
+
+const BrandHeader = ({ isCompact, isMobile, onToggleCollapse }) => (
+  <Box
+    sx={{
+      height: 64,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: isCompact ? 'center' : 'space-between',
+      px: isCompact ? 1 : 2.5,
+      borderBottom: '1px solid rgba(229, 222, 211, 0.12)',
+    }}
+  >
+    {!isCompact && (
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+        <Box
+          sx={{
+            width: 32,
+            height: 32,
+            borderRadius: 1,
+            bgcolor: '#BFA88A',
+            color: '#111111',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontWeight: 900,
+            fontSize: '1.1rem',
+            fontFamily: 'serif',
+          }}
+        >
+          W
+        </Box>
+        <Typography
+          variant="subtitle1"
+          sx={{
+            fontWeight: 700,
+            letterSpacing: '0.04em',
+            color: '#F5F1EB',
+            lineHeight: 1.2,
+          }}
+        >
+          Wardrobe Hub
+        </Typography>
+      </Box>
+    )}
+
+    {isCompact && (
+      <Box
+        sx={{
+          width: 36,
+          height: 36,
+          borderRadius: 1,
+          bgcolor: '#BFA88A',
+          color: '#111111',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontWeight: 900,
+          fontSize: '1.2rem',
+          fontFamily: 'serif',
+        }}
+      >
+        W
+      </Box>
+    )}
+
+    {!isMobile && (
+      <IconButton
+        onClick={onToggleCollapse}
+        size="small"
+        sx={{
+          color: '#BFA88A',
+          '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.08)' },
+        }}
+        aria-label={isCompact ? 'Expand sidebar' : 'Collapse sidebar'}
+      >
+        {isCompact ? <ChevronRight fontSize="small" /> : <ChevronLeft fontSize="small" />}
+      </IconButton>
+    )}
+  </Box>
+);
+
+BrandHeader.propTypes = {
+  isCompact: PropTypes.bool.isRequired,
+  isMobile: PropTypes.bool.isRequired,
+  onToggleCollapse: PropTypes.func,
+};
+
+const SidebarNavItem = ({ item, isCompact, showLabels, isActive, onClick }) => {
+  const IconComponent = item.icon;
+  const tooltipTitle = isCompact ? (item.tooltip || item.label) : '';
+
+  return (
+    <ListItem disablePadding>
+      <Tooltip title={tooltipTitle} placement="right">
+        <ListItemButton onClick={onClick} sx={getNavItemStyles(isActive, isCompact)}>
+          <ListItemIcon sx={getIconStyles(isActive, isCompact)}>
+            <IconComponent fontSize="small" />
+          </ListItemIcon>
+          {showLabels && (
+            <ListItemText
+              primary={item.label}
+              primaryTypographyProps={{ fontSize: '0.9rem', fontWeight: 500 }}
+            />
+          )}
+        </ListItemButton>
+      </Tooltip>
+    </ListItem>
+  );
+};
+
+SidebarNavItem.propTypes = {
+  item: PropTypes.shape({
+    label: PropTypes.string.isRequired,
+    path: PropTypes.string.isRequired,
+    tooltip: PropTypes.string,
+    icon: PropTypes.elementType.isRequired,
+  }).isRequired,
+  isCompact: PropTypes.bool.isRequired,
+  showLabels: PropTypes.bool.isRequired,
+  isActive: PropTypes.bool.isRequired,
+  onClick: PropTypes.func.isRequired,
+};
+
+const CatalogNavGroup = ({
+  isCompact,
+  showLabels,
+  isCatalogActive,
+  catalogOpen,
+  onToggleCatalog,
+  onNavigate,
+  isCurrent,
+}) => {
+  const isCategoriesCurrent = isCurrent('/admin/categories');
+  const isSubcategoriesCurrent = isCurrent('/admin/subcategories');
+
+  return (
+    <ListItem disablePadding sx={{ display: 'block' }}>
+      <Tooltip title={isCompact ? 'Catalog' : ''} placement="right">
+        <ListItemButton onClick={onToggleCatalog} sx={getNavItemStyles(isCatalogActive, isCompact)}>
+          <ListItemIcon sx={getIconStyles(isCatalogActive, isCompact)}>
+            <CategoryOutlined fontSize="small" />
+          </ListItemIcon>
+          {showLabels && (
+            <>
+              <ListItemText
+                primary="Catalog"
+                primaryTypographyProps={{ fontSize: '0.9rem', fontWeight: 500 }}
+              />
+              {catalogOpen ? (
+                <ExpandLess sx={{ fontSize: 18, color: '#BFA88A' }} />
+              ) : (
+                <ExpandMore sx={{ fontSize: 18, color: '#E5DED3' }} />
+              )}
+            </>
+          )}
+        </ListItemButton>
+      </Tooltip>
+
+      <Collapse in={showLabels && catalogOpen} timeout="auto" unmountOnExit>
+        <List disablePadding sx={{ pl: 2.5 }}>
+          <ListItem disablePadding>
+            <ListItemButton
+              onClick={() => onNavigate('/admin/categories')}
+              sx={getNavItemStyles(isCategoriesCurrent, false)}
+            >
+              <ListItemIcon sx={getIconStyles(isCategoriesCurrent, false)}>
+                <ClassOutlined sx={{ fontSize: 18 }} />
+              </ListItemIcon>
+              <ListItemText
+                primary="Categories"
+                primaryTypographyProps={{
+                  fontSize: '0.85rem',
+                  fontWeight: isCategoriesCurrent ? 600 : 400,
+                }}
+              />
+            </ListItemButton>
+          </ListItem>
+
+          <ListItem disablePadding>
+            <ListItemButton
+              onClick={() => onNavigate('/admin/subcategories')}
+              sx={getNavItemStyles(isSubcategoriesCurrent, false)}
+            >
+              <ListItemIcon sx={getIconStyles(isSubcategoriesCurrent, false)}>
+                <AccountTreeOutlined sx={{ fontSize: 18 }} />
+              </ListItemIcon>
+              <ListItemText
+                primary="Subcategories"
+                primaryTypographyProps={{
+                  fontSize: '0.85rem',
+                  fontWeight: isSubcategoriesCurrent ? 600 : 400,
+                }}
+              />
+            </ListItemButton>
+          </ListItem>
+        </List>
+      </Collapse>
+    </ListItem>
+  );
+};
+
+CatalogNavGroup.propTypes = {
+  isCompact: PropTypes.bool.isRequired,
+  showLabels: PropTypes.bool.isRequired,
+  isCatalogActive: PropTypes.bool.isRequired,
+  catalogOpen: PropTypes.bool.isRequired,
+  onToggleCatalog: PropTypes.func.isRequired,
+  onNavigate: PropTypes.func.isRequired,
+  isCurrent: PropTypes.func.isRequired,
+};
+
+const UserFooter = ({ user, isCompact, showLabels, onLogout }) => {
+  const userInitial = (user?.name || user?.email || 'A').charAt(0).toUpperCase();
+
+  return (
+    <>
+      <Divider sx={{ borderColor: 'rgba(229, 222, 211, 0.12)' }} />
+      <Box sx={{ p: isCompact ? 1 : 2 }}>
+        {showLabels && (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5, px: 0.5 }}>
+            <Avatar
+              sx={{
+                width: 34,
+                height: 34,
+                bgcolor: 'secondary.main',
+                color: 'secondary.contrastText',
+                fontSize: '0.875rem',
+                fontWeight: 700,
+              }}
+            >
+              {userInitial}
+            </Avatar>
+            <Box sx={{ overflow: 'hidden', flex: 1 }}>
+              <Typography
+                variant="body2"
+                noWrap
+                sx={{ fontWeight: 600, color: '#F5F1EB' }}
+              >
+                {user?.name || 'Administrator'}
+              </Typography>
+              <Typography
+                variant="caption"
+                noWrap
+                sx={{ color: '#BFA88A', display: 'block', fontSize: '0.75rem' }}
+              >
+                {user?.email || 'Admin'}
+              </Typography>
+            </Box>
+          </Box>
+        )}
+
+        <Tooltip title={isCompact ? 'Logout' : ''} placement="right">
+          <ListItemButton
+            onClick={onLogout}
+            sx={{
+              ...getNavItemStyles(false, isCompact),
+              mx: 0,
+              color: '#E5DED3',
+              '&:hover': {
+                bgcolor: 'rgba(192, 57, 43, 0.18)',
+                color: '#ff6b6b',
+              },
+            }}
+          >
+            <ListItemIcon
+              sx={{
+                ...getIconStyles(false, isCompact),
+                color: 'inherit',
+              }}
+            >
+              <LogoutOutlined fontSize="small" />
+            </ListItemIcon>
+            {showLabels && (
+              <ListItemText
+                primary="Logout"
+                primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: 500 }}
+              />
+            )}
+          </ListItemButton>
+        </Tooltip>
+      </Box>
+    </>
+  );
+};
+
+UserFooter.propTypes = {
+  user: PropTypes.shape({
+    name: PropTypes.string,
+    email: PropTypes.string,
+  }),
+  isCompact: PropTypes.bool.isRequired,
+  showLabels: PropTypes.bool.isRequired,
+  onLogout: PropTypes.func.isRequired,
+};
+
 export const Sidebar = ({
-  collapsed,
+  collapsed = false,
   onToggleCollapse,
-  mobileOpen,
+  mobileOpen = false,
   onCloseMobile,
-  isMobile,
+  isMobile = false,
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -54,6 +385,9 @@ export const Sidebar = ({
     location.pathname.startsWith('/admin/subcategories');
 
   const [catalogOpen, setCatalogOpen] = useState(isCatalogActive);
+
+  const isCompact = collapsed && !isMobile;
+  const showLabels = !collapsed || isMobile;
 
   // Auto-expand catalog when navigated into catalog routes
   useEffect(() => {
@@ -77,35 +411,21 @@ export const Sidebar = ({
     navigate('/login');
   };
 
+  const handleToggleCatalog = () => {
+    if (isCompact) {
+      onToggleCollapse?.();
+      setCatalogOpen(true);
+    } else {
+      setCatalogOpen((prev) => !prev);
+    }
+  };
+
   const isCurrent = (path) => {
     if (path === '/admin') {
       return location.pathname === '/admin';
     }
     return location.pathname.startsWith(path);
   };
-
-  const navItemStyles = (active) => ({
-    minHeight: 44,
-    borderRadius: 1.5,
-    mx: collapsed && !isMobile ? 1 : 1.5,
-    my: 0.5,
-    px: collapsed && !isMobile ? 1.5 : 2,
-    justifyContent: collapsed && !isMobile ? 'center' : 'initial',
-    bgcolor: active ? 'rgba(191, 168, 138, 0.16)' : 'transparent',
-    color: active ? '#BFA88A' : '#E5DED3',
-    '&:hover': {
-      bgcolor: active ? 'rgba(191, 168, 138, 0.24)' : 'rgba(255, 255, 255, 0.06)',
-      color: '#FFFFFF',
-    },
-    transition: 'all 0.2s ease',
-  });
-
-  const iconStyles = (active) => ({
-    minWidth: 0,
-    mr: collapsed && !isMobile ? 0 : 2,
-    justifyContent: 'center',
-    color: active ? '#BFA88A' : '#E5DED3',
-  });
 
   const sidebarContent = (
     <Box
@@ -118,367 +438,51 @@ export const Sidebar = ({
         userSelect: 'none',
       }}
     >
-      {/* Brand Header */}
-      <Box
-        sx={{
-          height: 64,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: collapsed && !isMobile ? 'center' : 'space-between',
-          px: collapsed && !isMobile ? 1 : 2.5,
-          borderBottom: '1px solid rgba(229, 222, 211, 0.12)',
-        }}
-      >
-        {(!collapsed || isMobile) && (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <Box
-              sx={{
-                width: 32,
-                height: 32,
-                borderRadius: 1,
-                bgcolor: '#BFA88A',
-                color: '#111111',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontWeight: 900,
-                fontSize: '1.1rem',
-                fontFamily: 'serif',
-              }}
-            >
-              W
-            </Box>
-            <Typography
-              variant="subtitle1"
-              sx={{
-                fontWeight: 700,
-                letterSpacing: '0.04em',
-                color: '#F5F1EB',
-                lineHeight: 1.2,
-              }}
-            >
-              Wardrobe Hub
-            </Typography>
-          </Box>
-        )}
+      <BrandHeader
+        isCompact={isCompact}
+        isMobile={isMobile}
+        onToggleCollapse={onToggleCollapse}
+      />
 
-        {collapsed && !isMobile && (
-          <Box
-            sx={{
-              width: 36,
-              height: 36,
-              borderRadius: 1,
-              bgcolor: '#BFA88A',
-              color: '#111111',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: 900,
-              fontSize: '1.2rem',
-              fontFamily: 'serif',
-            }}
-          >
-            W
-          </Box>
-        )}
-
-        {!isMobile && (
-          <IconButton
-            onClick={onToggleCollapse}
-            size="small"
-            sx={{
-              color: '#BFA88A',
-              '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.08)' },
-            }}
-            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          >
-            {collapsed ? <ChevronRight fontSize="small" /> : <ChevronLeft fontSize="small" />}
-          </IconButton>
-        )}
-      </Box>
-
-      {/* Navigation List */}
       <Box sx={{ flexGrow: 1, overflowY: 'auto', py: 1.5 }}>
         <List disablePadding>
-          {/* Dashboard */}
-          <ListItem disablePadding>
-            <Tooltip title={collapsed && !isMobile ? 'Dashboard' : ''} placement="right">
-              <ListItemButton
-                onClick={() => handleNavigate('/admin')}
-                sx={navItemStyles(isCurrent('/admin'))}
-              >
-                <ListItemIcon sx={iconStyles(isCurrent('/admin'))}>
-                  <DashboardOutlined fontSize="small" />
-                </ListItemIcon>
-                {(!collapsed || isMobile) && (
-                  <ListItemText
-                    primary="Dashboard"
-                    primaryTypographyProps={{ fontSize: '0.9rem', fontWeight: 500 }}
-                  />
-                )}
-              </ListItemButton>
-            </Tooltip>
-          </ListItem>
+          <SidebarNavItem
+            item={{ label: 'Dashboard', path: '/admin', icon: DashboardOutlined }}
+            isCompact={isCompact}
+            showLabels={showLabels}
+            isActive={isCurrent('/admin')}
+            onClick={() => handleNavigate('/admin')}
+          />
 
-          {/* Catalog Group (Collapsible) */}
-          <ListItem disablePadding sx={{ display: 'block' }}>
-            <Tooltip title={collapsed && !isMobile ? 'Catalog' : ''} placement="right">
-              <ListItemButton
-                onClick={() => {
-                  if (collapsed && !isMobile) {
-                    onToggleCollapse();
-                    setCatalogOpen(true);
-                  } else {
-                    setCatalogOpen(!catalogOpen);
-                  }
-                }}
-                sx={navItemStyles(isCatalogActive)}
-              >
-                <ListItemIcon sx={iconStyles(isCatalogActive)}>
-                  <CategoryOutlined fontSize="small" />
-                </ListItemIcon>
-                {(!collapsed || isMobile) && (
-                  <>
-                    <ListItemText
-                      primary="Catalog"
-                      primaryTypographyProps={{ fontSize: '0.9rem', fontWeight: 500 }}
-                    />
-                    {catalogOpen ? (
-                      <ExpandLess sx={{ fontSize: 18, color: '#BFA88A' }} />
-                    ) : (
-                      <ExpandMore sx={{ fontSize: 18, color: '#E5DED3' }} />
-                    )}
-                  </>
-                )}
-              </ListItemButton>
-            </Tooltip>
+          <CatalogNavGroup
+            isCompact={isCompact}
+            showLabels={showLabels}
+            isCatalogActive={isCatalogActive}
+            catalogOpen={catalogOpen}
+            onToggleCatalog={handleToggleCatalog}
+            onNavigate={handleNavigate}
+            isCurrent={isCurrent}
+          />
 
-            {/* Catalog Sub-items */}
-            <Collapse in={(!collapsed || isMobile) && catalogOpen} timeout="auto" unmountOnExit>
-              <List disablePadding sx={{ pl: 2.5 }}>
-                {/* Categories */}
-                <ListItem disablePadding>
-                  <ListItemButton
-                    onClick={() => handleNavigate('/admin/categories')}
-                    sx={navItemStyles(isCurrent('/admin/categories'))}
-                  >
-                    <ListItemIcon sx={iconStyles(isCurrent('/admin/categories'))}>
-                      <ClassOutlined sx={{ fontSize: 18 }} />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary="Categories"
-                      primaryTypographyProps={{ fontSize: '0.85rem', fontWeight: isCurrent('/admin/categories') ? 600 : 400 }}
-                    />
-                  </ListItemButton>
-                </ListItem>
-
-                {/* Subcategories */}
-                <ListItem disablePadding>
-                  <ListItemButton
-                    onClick={() => handleNavigate('/admin/subcategories')}
-                    sx={navItemStyles(isCurrent('/admin/subcategories'))}
-                  >
-                    <ListItemIcon sx={iconStyles(isCurrent('/admin/subcategories'))}>
-                      <AccountTreeOutlined sx={{ fontSize: 18 }} />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary="Subcategories"
-                      primaryTypographyProps={{ fontSize: '0.85rem', fontWeight: isCurrent('/admin/subcategories') ? 600 : 400 }}
-                    />
-                  </ListItemButton>
-                </ListItem>
-              </List>
-            </Collapse>
-          </ListItem>
-
-          {/* Products */}
-          <ListItem disablePadding>
-            <Tooltip title={collapsed && !isMobile ? 'Products' : ''} placement="right">
-              <ListItemButton
-                onClick={() => handleNavigate('/admin/products')}
-                sx={navItemStyles(isCurrent('/admin/products'))}
-              >
-                <ListItemIcon sx={iconStyles(isCurrent('/admin/products'))}>
-                  <Inventory2Outlined fontSize="small" />
-                </ListItemIcon>
-                {(!collapsed || isMobile) && (
-                  <ListItemText
-                    primary="Products"
-                    primaryTypographyProps={{ fontSize: '0.9rem', fontWeight: 500 }}
-                  />
-                )}
-              </ListItemButton>
-            </Tooltip>
-          </ListItem>
-
-          {/* Stock */}
-          <ListItem disablePadding>
-            <Tooltip title={collapsed && !isMobile ? 'Stock' : ''} placement="right">
-              <ListItemButton
-                onClick={() => handleNavigate('/admin/stock')}
-                sx={navItemStyles(isCurrent('/admin/stock'))}
-              >
-                <ListItemIcon sx={iconStyles(isCurrent('/admin/stock'))}>
-                  <WarehouseOutlined fontSize="small" />
-                </ListItemIcon>
-                {(!collapsed || isMobile) && (
-                  <ListItemText
-                    primary="Stock"
-                    primaryTypographyProps={{ fontSize: '0.9rem', fontWeight: 500 }}
-                  />
-                )}
-              </ListItemButton>
-            </Tooltip>
-          </ListItem>
-
-          {/* Orders */}
-          <ListItem disablePadding>
-            <Tooltip title={collapsed && !isMobile ? 'Orders' : ''} placement="right">
-              <ListItemButton
-                onClick={() => handleNavigate('/admin/orders')}
-                sx={navItemStyles(isCurrent('/admin/orders'))}
-              >
-                <ListItemIcon sx={iconStyles(isCurrent('/admin/orders'))}>
-                  <ShoppingBagOutlined fontSize="small" />
-                </ListItemIcon>
-                {(!collapsed || isMobile) && (
-                  <ListItemText
-                    primary="Orders"
-                    primaryTypographyProps={{ fontSize: '0.9rem', fontWeight: 500 }}
-                  />
-                )}
-              </ListItemButton>
-            </Tooltip>
-          </ListItem>
-
-          {/* Returns & Exchanges */}
-          <ListItem disablePadding>
-            <Tooltip title={collapsed && !isMobile ? 'Returns' : ''} placement="right">
-              <ListItemButton
-                onClick={() => handleNavigate('/admin/returns')}
-                sx={navItemStyles(isCurrent('/admin/returns'))}
-              >
-                <ListItemIcon sx={iconStyles(isCurrent('/admin/returns'))}>
-                  <AssignmentReturnOutlined fontSize="small" />
-                </ListItemIcon>
-                {(!collapsed || isMobile) && (
-                  <ListItemText
-                    primary="Returns / Exchanges"
-                    primaryTypographyProps={{ fontSize: '0.9rem', fontWeight: 500 }}
-                  />
-                )}
-              </ListItemButton>
-            </Tooltip>
-          </ListItem>
-
-          {/* Customers */}
-          <ListItem disablePadding>
-            <Tooltip title={collapsed && !isMobile ? 'Customers' : ''} placement="right">
-              <ListItemButton
-                onClick={() => handleNavigate('/admin/customers')}
-                sx={navItemStyles(isCurrent('/admin/customers'))}
-              >
-                <ListItemIcon sx={iconStyles(isCurrent('/admin/customers'))}>
-                  <PeopleAltOutlined fontSize="small" />
-                </ListItemIcon>
-                {(!collapsed || isMobile) && (
-                  <ListItemText
-                    primary="Customers"
-                    primaryTypographyProps={{ fontSize: '0.9rem', fontWeight: 500 }}
-                  />
-                )}
-              </ListItemButton>
-            </Tooltip>
-          </ListItem>
-
-          {/* Settings */}
-          <ListItem disablePadding>
-            <Tooltip title={collapsed && !isMobile ? 'Settings' : ''} placement="right">
-              <ListItemButton
-                onClick={() => handleNavigate('/admin/settings')}
-                sx={navItemStyles(isCurrent('/admin/settings'))}
-              >
-                <ListItemIcon sx={iconStyles(isCurrent('/admin/settings'))}>
-                  <SettingsOutlined fontSize="small" />
-                </ListItemIcon>
-                {(!collapsed || isMobile) && (
-                  <ListItemText
-                    primary="Settings"
-                    primaryTypographyProps={{ fontSize: '0.9rem', fontWeight: 500 }}
-                  />
-                )}
-              </ListItemButton>
-            </Tooltip>
-          </ListItem>
+          {NAV_ITEMS.map((item) => (
+            <SidebarNavItem
+              key={item.path}
+              item={item}
+              isCompact={isCompact}
+              showLabels={showLabels}
+              isActive={isCurrent(item.path)}
+              onClick={() => handleNavigate(item.path)}
+            />
+          ))}
         </List>
       </Box>
 
-      {/* User Footer & Logout */}
-      <Divider sx={{ borderColor: 'rgba(229, 222, 211, 0.12)' }} />
-      <Box sx={{ p: collapsed && !isMobile ? 1 : 2 }}>
-        {(!collapsed || isMobile) && (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5, px: 0.5 }}>
-            <Avatar
-              sx={{
-                width: 34,
-                height: 34,
-                bgcolor: 'secondary.main',
-                color: 'secondary.contrastText',
-                fontSize: '0.875rem',
-                fontWeight: 700,
-              }}
-            >
-              {(user?.name || user?.email || 'A').charAt(0).toUpperCase()}
-            </Avatar>
-            <Box sx={{ overflow: 'hidden', flex: 1 }}>
-              <Typography
-                variant="body2"
-                noWrap
-                sx={{ fontWeight: 600, color: '#F5F1EB' }}
-              >
-                {user?.name || 'Administrator'}
-              </Typography>
-              <Typography
-                variant="caption"
-                noWrap
-                sx={{ color: '#BFA88A', display: 'block', fontSize: '0.75rem' }}
-              >
-                {user?.email || 'Admin'}
-              </Typography>
-            </Box>
-          </Box>
-        )}
-
-        <Tooltip title={collapsed && !isMobile ? 'Logout' : ''} placement="right">
-          <ListItemButton
-            onClick={handleLogout}
-            sx={{
-              ...navItemStyles(false),
-              mx: 0,
-              color: '#E5DED3',
-              '&:hover': {
-                bgcolor: 'rgba(192, 57, 43, 0.18)',
-                color: '#ff6b6b',
-              },
-            }}
-          >
-            <ListItemIcon
-              sx={{
-                ...iconStyles(false),
-                color: 'inherit',
-              }}
-            >
-              <LogoutOutlined fontSize="small" />
-            </ListItemIcon>
-            {(!collapsed || isMobile) && (
-              <ListItemText
-                primary="Logout"
-                primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: 500 }}
-              />
-            )}
-          </ListItemButton>
-        </Tooltip>
-      </Box>
+      <UserFooter
+        user={user}
+        isCompact={isCompact}
+        showLabels={showLabels}
+        onLogout={handleLogout}
+      />
     </Box>
   );
 

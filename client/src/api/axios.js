@@ -54,7 +54,7 @@ api.interceptors.response.use(
 
     // If no response (network error) or error isn't 401, reject immediately
     if (!error.response || error.response.status !== 401) {
-      return Promise.reject(error);
+      throw error;
     }
 
     // Don't attempt refresh if the failed request was already login, register, or refresh itself
@@ -64,13 +64,13 @@ api.interceptors.response.use(
       requestUrl.includes('/auth/register') ||
       requestUrl.includes('/auth/refresh')
     ) {
-      return Promise.reject(error);
+      throw error;
     }
 
     // Check if this request has already been retried once
     if (originalRequest._retry) {
       if (onAuthFailed) onAuthFailed();
-      return Promise.reject(error);
+      throw error;
     }
 
     originalRequest._retry = true;
@@ -84,7 +84,9 @@ api.interceptors.response.use(
           originalRequest.headers.Authorization = `Bearer ${newToken}`;
           return api(originalRequest);
         })
-        .catch((err) => Promise.reject(err));
+        .catch((err) => {
+          throw err;
+        });
     }
 
     isRefreshing = true;
@@ -119,7 +121,7 @@ api.interceptors.response.use(
       if (onAuthFailed) {
         onAuthFailed();
       }
-      return Promise.reject(refreshError);
+      throw refreshError;
     } finally {
       isRefreshing = false;
     }
