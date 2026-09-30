@@ -56,7 +56,7 @@ export function App() {
             {/* Returns & Exchanges Management */}
             <Route path="returns" element={<ReturnRequests />} />
 
-            {/* Placeholder Sections */}
+            {/* Customers & Settings */}
             <Route path="customers" element={<Customers />} />
             <Route path="settings" element={<Settings />} />
           </Route>

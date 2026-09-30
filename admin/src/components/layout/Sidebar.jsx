@@ -371,7 +371,7 @@ export const Sidebar = ({
             </Tooltip>
           </ListItem>
 
-          {/* Customers (Placeholder) */}
+          {/* Customers */}
           <ListItem disablePadding>
             <Tooltip title={collapsed && !isMobile ? 'Customers' : ''} placement="right">
               <ListItemButton
@@ -391,7 +391,7 @@ export const Sidebar = ({
             </Tooltip>
           </ListItem>
 
-          {/* Settings (Placeholder) */}
+          {/* Settings */}
           <ListItem disablePadding>
             <Tooltip title={collapsed && !isMobile ? 'Settings' : ''} placement="right">
               <ListItemButton
