@@ -32,7 +32,7 @@ describe("Customer Cart & Orders API Tests", () => {
     phone: "9876543211",
   };
 
-  const cleanTestUsers = async () => {
+  const cleanTestEntities = async () => {
     const users = await prisma.user.findMany({
       where: { email: { in: [userA.email, userB.email] } },
       select: { id: true },
@@ -47,6 +47,8 @@ describe("Customer Cart & Orders API Tests", () => {
       const orderIds = userOrders.map((o) => o.id);
 
       if (orderIds.length > 0) {
+        await prisma.returnRequest.deleteMany({ where: { orderId: { in: orderIds } } });
+        await prisma.payment.deleteMany({ where: { orderId: { in: orderIds } } });
         await prisma.orderItem.deleteMany({ where: { orderId: { in: orderIds } } });
         await prisma.order.deleteMany({ where: { id: { in: orderIds } } });
       }
@@ -56,11 +58,31 @@ describe("Customer Cart & Orders API Tests", () => {
       await prisma.address.deleteMany({ where: { userId: { in: userIds } } });
       await prisma.user.deleteMany({ where: { id: { in: userIds } } });
     }
+
+    if (testProductId) {
+      await prisma.productVariant.deleteMany({ where: { productId: testProductId } });
+      await prisma.product.deleteMany({ where: { id: testProductId } });
+    } else {
+      await prisma.productVariant.deleteMany({ where: { sku: { startsWith: "CT-JKT" } } });
+      await prisma.product.deleteMany({ where: { slug: { startsWith: "cart-test" } } });
+    }
+
+    if (testSubcategoryId) {
+      await prisma.subcategory.deleteMany({ where: { id: testSubcategoryId } });
+    } else {
+      await prisma.subcategory.deleteMany({ where: { slug: { startsWith: "cart-test" } } });
+    }
+
+    if (testCategoryId) {
+      await prisma.category.deleteMany({ where: { id: testCategoryId } });
+    } else {
+      await prisma.category.deleteMany({ where: { slug: { startsWith: "cart-test" } } });
+    }
   };
 
   before(async () => {
     // Clean up any existing test entities
-    await cleanTestUsers();
+    await cleanTestEntities();
 
     server = http.createServer(app);
     await new Promise((resolve) => server.listen(0, resolve));
@@ -441,5 +463,15 @@ describe("Customer Cart & Orders API Tests", () => {
       });
       assert.equal(res.status, 404);
     });
+  });
+
+  after(async () => {
+    try {
+      await cleanTestEntities();
+    } finally {
+      if (server) {
+        await new Promise((resolve) => server.close(resolve));
+      }
+    }
   });
 });

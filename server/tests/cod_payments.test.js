@@ -35,7 +35,13 @@ describe("Phase 7: Cash on Delivery (COD) Payments Tests", () => {
 
   const cleanEntities = async () => {
     const users = await prisma.user.findMany({
-      where: { email: { in: [customerUser.email, adminUser.email] } },
+      where: {
+        OR: [
+          { email: { in: [customerUser.email, adminUser.email] } },
+          { email: { startsWith: "cod_" } },
+          { email: { startsWith: "concurrent_" } },
+        ],
+      },
       select: { id: true },
     });
     const userIds = users.map((u) => u.id);
@@ -48,6 +54,7 @@ describe("Phase 7: Cash on Delivery (COD) Payments Tests", () => {
       const orderIds = orders.map((o) => o.id);
 
       if (orderIds.length > 0) {
+        await prisma.returnRequest.deleteMany({ where: { orderId: { in: orderIds } } });
         await prisma.payment.deleteMany({ where: { orderId: { in: orderIds } } });
         await prisma.orderItem.deleteMany({ where: { orderId: { in: orderIds } } });
         await prisma.order.deleteMany({ where: { id: { in: orderIds } } });
@@ -57,6 +64,26 @@ describe("Phase 7: Cash on Delivery (COD) Payments Tests", () => {
       await prisma.cart.deleteMany({ where: { userId: { in: userIds } } });
       await prisma.address.deleteMany({ where: { userId: { in: userIds } } });
       await prisma.user.deleteMany({ where: { id: { in: userIds } } });
+    }
+
+    if (testProductId) {
+      await prisma.productVariant.deleteMany({ where: { productId: testProductId } });
+      await prisma.product.deleteMany({ where: { id: testProductId } });
+    } else {
+      await prisma.productVariant.deleteMany({ where: { sku: { startsWith: "COD" } } });
+      await prisma.product.deleteMany({ where: { slug: { startsWith: "cod-" } } });
+    }
+
+    if (testSubcategoryId) {
+      await prisma.subcategory.deleteMany({ where: { id: testSubcategoryId } });
+    } else {
+      await prisma.subcategory.deleteMany({ where: { slug: { startsWith: "cod-" } } });
+    }
+
+    if (testCategoryId) {
+      await prisma.category.deleteMany({ where: { id: testCategoryId } });
+    } else {
+      await prisma.category.deleteMany({ where: { slug: { startsWith: "cod-" } } });
     }
   };
 
@@ -697,5 +724,15 @@ describe("Phase 7: Cash on Delivery (COD) Payments Tests", () => {
     await prisma.address.deleteMany({ where: { userId: regBody.data.user.id } });
     await prisma.user.deleteMany({ where: { id: regBody.data.user.id } });
     await prisma.productVariant.delete({ where: { id: limitedVariant.id } });
+  });
+
+  after(async () => {
+    try {
+      await cleanEntities();
+    } finally {
+      if (server) {
+        await new Promise((resolve) => server.close(resolve));
+      }
+    }
   });
 });

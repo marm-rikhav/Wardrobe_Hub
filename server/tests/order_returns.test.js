@@ -28,18 +28,29 @@ describe("Order Improvements & Return/Exchange Flow Tests", () => {
   const createdOrderIds = [];
 
   const cleanup = async () => {
-    if (createdOrderIds.length > 0) {
-      await prisma.returnRequest.deleteMany({ where: { orderId: { in: createdOrderIds } } });
-      await prisma.payment.deleteMany({ where: { orderId: { in: createdOrderIds } } });
-      await prisma.orderItem.deleteMany({ where: { orderId: { in: createdOrderIds } } });
-      await prisma.order.deleteMany({ where: { id: { in: createdOrderIds } } });
-    }
-
     const testUsers = await prisma.user.findMany({
       where: { email: { in: [adminEmail, cust1Email, cust2Email] } },
       select: { id: true },
     });
     const userIds = testUsers.map((u) => u.id);
+
+    const userOrders = await prisma.order.findMany({
+      where: {
+        OR: [
+          ...(userIds.length > 0 ? [{ userId: { in: userIds } }] : []),
+          ...(createdOrderIds.length > 0 ? [{ id: { in: createdOrderIds } }] : []),
+        ],
+      },
+      select: { id: true },
+    });
+    const orderIds = userOrders.map((o) => o.id);
+
+    if (orderIds.length > 0) {
+      await prisma.returnRequest.deleteMany({ where: { orderId: { in: orderIds } } });
+      await prisma.payment.deleteMany({ where: { orderId: { in: orderIds } } });
+      await prisma.orderItem.deleteMany({ where: { orderId: { in: orderIds } } });
+      await prisma.order.deleteMany({ where: { id: { in: orderIds } } });
+    }
 
     if (userIds.length > 0) {
       await prisma.returnRequest.deleteMany({ where: { userId: { in: userIds } } });
@@ -62,6 +73,7 @@ describe("Order Improvements & Return/Exchange Flow Tests", () => {
   };
 
   before(async () => {
+    await cleanup();
     server = http.createServer(app);
     await new Promise((resolve) => server.listen(0, resolve));
     baseUrl = `http://localhost:${server.address().port}`;
@@ -453,5 +465,15 @@ describe("Order Improvements & Return/Exchange Flow Tests", () => {
     assert.equal(res.status, 200);
     const body = await res.json();
     assert.equal(body.data.request.status, "APPROVED");
+  });
+
+  after(async () => {
+    try {
+      await cleanup();
+    } finally {
+      if (server) {
+        await new Promise((resolve) => server.close(resolve));
+      }
+    }
   });
 });

@@ -48,6 +48,7 @@ describe("Admin Orders API Tests", () => {
       const orderIds = orders.map((o) => o.id);
 
       if (orderIds.length > 0) {
+        await prisma.returnRequest.deleteMany({ where: { orderId: { in: orderIds } } });
         await prisma.payment.deleteMany({ where: { orderId: { in: orderIds } } });
         await prisma.orderItem.deleteMany({ where: { orderId: { in: orderIds } } });
         await prisma.order.deleteMany({ where: { id: { in: orderIds } } });
@@ -57,6 +58,26 @@ describe("Admin Orders API Tests", () => {
       await prisma.cart.deleteMany({ where: { userId: { in: userIds } } });
       await prisma.address.deleteMany({ where: { userId: { in: userIds } } });
       await prisma.user.deleteMany({ where: { id: { in: userIds } } });
+    }
+
+    if (testProductId) {
+      await prisma.productVariant.deleteMany({ where: { productId: testProductId } });
+      await prisma.product.deleteMany({ where: { id: testProductId } });
+    } else {
+      await prisma.productVariant.deleteMany({ where: { sku: { startsWith: "ADM-ORD" } } });
+      await prisma.product.deleteMany({ where: { slug: { startsWith: "adm-order" } } });
+    }
+
+    if (testSubcategoryId) {
+      await prisma.subcategory.deleteMany({ where: { id: testSubcategoryId } });
+    } else {
+      await prisma.subcategory.deleteMany({ where: { slug: { startsWith: "adm-order" } } });
+    }
+
+    if (testCategoryId) {
+      await prisma.category.deleteMany({ where: { id: testCategoryId } });
+    } else {
+      await prisma.category.deleteMany({ where: { slug: { startsWith: "adm-order" } } });
     }
   };
 
@@ -476,5 +497,15 @@ describe("Admin Orders API Tests", () => {
       });
       assert.equal(res.status, 400);
     });
+  });
+
+  after(async () => {
+    try {
+      await cleanEntities();
+    } finally {
+      if (server) {
+        await new Promise((resolve) => server.close(resolve));
+      }
+    }
   });
 });

@@ -29,13 +29,15 @@ describe("Authentication & Authorization API Tests", () => {
     baseUrl = `http://localhost:${port}`;
   });
 
-  // Teardown: Close server, delete test user, and disconnect Prisma
+  // Teardown: Close server and delete test user
   after(async () => {
-    await prisma.user.deleteMany({ where: { email: testUser.email } });
-    if (server) {
-      await new Promise((resolve) => server.close(resolve));
+    try {
+      await prisma.user.deleteMany({ where: { email: testUser.email } });
+    } finally {
+      if (server) {
+        await new Promise((resolve) => server.close(resolve));
+      }
     }
-    await prisma.$disconnect();
   });
 
   // ==========================================

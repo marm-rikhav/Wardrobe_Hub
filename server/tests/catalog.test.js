@@ -93,16 +93,57 @@ describe("Catalog Backend Tests (Admin & Public)", () => {
   const adminEmail = "catalog_admin@example.com";
   const customerEmail = "catalog_customer@example.com";
 
-  before(async () => {
-    // 1. Clean up any previous test catalog data
-    await prisma.productVariant.deleteMany({});
-    await prisma.productImage.deleteMany({});
-    await prisma.product.deleteMany({});
-    await prisma.subcategory.deleteMany({});
-    await prisma.category.deleteMany({});
+  const cleanupCatalogTestEntities = async () => {
+    await prisma.productVariant.deleteMany({
+      where: {
+        OR: [
+          ...(createdProductId ? [{ productId: createdProductId }] : []),
+          { sku: { in: ["OXF-BLU-M", "OXF-WHT-L"] } },
+        ],
+      },
+    });
+
+    if (createdProductId) {
+      await prisma.productImage.deleteMany({
+        where: { productId: createdProductId },
+      });
+    }
+
+    await prisma.product.deleteMany({
+      where: {
+        OR: [
+          ...(createdProductId ? [{ id: createdProductId }] : []),
+          { slug: { in: ["classic-oxford-cotton-shirt", "classic-oxford-cotton-shirt-updated"] } },
+        ],
+      },
+    });
+
+    await prisma.subcategory.deleteMany({
+      where: {
+        OR: [
+          ...(createdSubcategoryId ? [{ id: createdSubcategoryId }] : []),
+          { slug: { in: ["mens-shirts", "different-slug"] } },
+        ],
+      },
+    });
+
+    await prisma.category.deleteMany({
+      where: {
+        OR: [
+          ...(createdCategoryId ? [{ id: createdCategoryId }] : []),
+          { slug: { in: ["mens-apparel", "mens-wear"] } },
+        ],
+      },
+    });
+
     await prisma.user.deleteMany({
       where: { email: { in: [adminEmail, customerEmail] } },
     });
+  };
+
+  before(async () => {
+    // 1. Clean up any previous test catalog data
+    await cleanupCatalogTestEntities();
 
     // 2. Create Admin and Customer users
     const passwordHash = await bcrypt.hash("Password123!", 10);
@@ -146,20 +187,13 @@ describe("Catalog Backend Tests (Admin & Public)", () => {
   });
 
   after(async () => {
-    // Cleanup
-    await prisma.productVariant.deleteMany({});
-    await prisma.productImage.deleteMany({});
-    await prisma.product.deleteMany({});
-    await prisma.subcategory.deleteMany({});
-    await prisma.category.deleteMany({});
-    await prisma.user.deleteMany({
-      where: { email: { in: [adminEmail, customerEmail] } },
-    });
-
-    if (server) {
-      await new Promise((resolve) => server.close(resolve));
+    try {
+      await cleanupCatalogTestEntities();
+    } finally {
+      if (server) {
+        await new Promise((resolve) => server.close(resolve));
+      }
     }
-    await prisma.$disconnect();
   });
 
   // ==========================================
