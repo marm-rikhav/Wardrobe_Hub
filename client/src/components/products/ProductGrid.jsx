@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Grid, Box, Skeleton } from '@mui/material';
 import ProductCard from './ProductCard.jsx';
 import EmptyState from '../common/EmptyState.jsx';
@@ -55,6 +56,15 @@ export const ProductGrid = ({
       ))}
     </Grid>
   );
+};
+
+ProductGrid.propTypes = {
+  products: PropTypes.arrayOf(PropTypes.object),
+  loading: PropTypes.bool,
+  skeletonCount: PropTypes.number,
+  emptyTitle: PropTypes.node,
+  emptyDescription: PropTypes.node,
+  onResetFilters: PropTypes.func,
 };
 
 export default ProductGrid;

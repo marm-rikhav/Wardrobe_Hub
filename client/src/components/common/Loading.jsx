@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Box, CircularProgress, Typography } from '@mui/material';
 
 export const Loading = ({ message = 'Loading...', fullScreen = false }) => {
@@ -22,6 +23,11 @@ export const Loading = ({ message = 'Loading...', fullScreen = false }) => {
       )}
     </Box>
   );
+};
+
+Loading.propTypes = {
+  message: PropTypes.node,
+  fullScreen: PropTypes.bool,
 };
 
 export default Loading;

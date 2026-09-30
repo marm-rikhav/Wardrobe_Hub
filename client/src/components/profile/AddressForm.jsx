@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import PropTypes from 'prop-types';
 import {
   Box,
   TextField,
@@ -202,6 +203,25 @@ export const AddressForm = ({
       </Box>
     </Dialog>
   );
+};
+
+AddressForm.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  onSubmitAddress: PropTypes.func.isRequired,
+  initialData: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    name: PropTypes.string,
+    phone: PropTypes.string,
+    address: PropTypes.string,
+    city: PropTypes.string,
+    state: PropTypes.string,
+    postalCode: PropTypes.string,
+    country: PropTypes.string,
+    isDefault: PropTypes.bool,
+  }),
+  isSubmitting: PropTypes.bool,
+  error: PropTypes.node,
 };
 
 export default AddressForm;

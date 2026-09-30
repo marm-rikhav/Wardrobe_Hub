@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Box, Typography, Button } from '@mui/material';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 
@@ -65,6 +66,15 @@ export const EmptyState = ({
       )}
     </Box>
   );
+};
+
+EmptyState.propTypes = {
+  icon: PropTypes.elementType,
+  title: PropTypes.node,
+  description: PropTypes.node,
+  actionLabel: PropTypes.string,
+  onAction: PropTypes.func,
+  sx: PropTypes.object,
 };
 
 export default EmptyState;

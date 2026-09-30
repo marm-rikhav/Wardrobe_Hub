@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Alert, AlertTitle, Box, Button } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 
@@ -40,6 +41,13 @@ export const ErrorMessage = ({
       </Alert>
     </Box>
   );
+};
+
+ErrorMessage.propTypes = {
+  title: PropTypes.node,
+  error: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
+  onRetry: PropTypes.func,
+  sx: PropTypes.object,
 };
 
 export default ErrorMessage;

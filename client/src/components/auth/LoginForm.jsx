@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import {
   Box,
   TextField,
@@ -102,6 +103,10 @@ export const LoginForm = ({ onSuccess }) => {
       </Button>
     </Box>
   );
+};
+
+LoginForm.propTypes = {
+  onSuccess: PropTypes.func,
 };
 
 export default LoginForm;

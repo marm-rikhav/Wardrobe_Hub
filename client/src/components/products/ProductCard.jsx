@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import {
   Card,
   CardActionArea,
@@ -147,6 +148,27 @@ export const ProductCard = ({ product }) => {
       </CardActionArea>
     </Card>
   );
+};
+
+ProductCard.propTypes = {
+  product: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    name: PropTypes.string,
+    slug: PropTypes.string,
+    brand: PropTypes.string,
+    basePrice: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    discountPrice: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    effectivePrice: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    images: PropTypes.arrayOf(
+      PropTypes.shape({
+        imageUrl: PropTypes.string,
+      })
+    ),
+    category: PropTypes.shape({
+      name: PropTypes.string,
+    }),
+    variants: PropTypes.arrayOf(PropTypes.object),
+  }),
 };
 
 export default ProductCard;

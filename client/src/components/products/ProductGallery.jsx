@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { Box, Card, CardMedia } from '@mui/material';
 import { PLACEHOLDER_PRODUCT_IMAGE } from '../../utils/constants.js';
 
@@ -87,6 +88,16 @@ export const ProductGallery = ({ images = [], productName = 'Product' }) => {
       )}
     </Box>
   );
+};
+
+ProductGallery.propTypes = {
+  images: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      imageUrl: PropTypes.string,
+    })
+  ),
+  productName: PropTypes.string,
 };
 
 export default ProductGallery;

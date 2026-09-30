@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import PropTypes from 'prop-types';
 import { Box, Typography, Button, Chip } from '@mui/material';
 
 export const VariantSelector = ({
@@ -130,6 +131,20 @@ export const VariantSelector = ({
       </Box>
     </Box>
   );
+};
+
+VariantSelector.propTypes = {
+  variants: PropTypes.arrayOf(
+    PropTypes.shape({
+      size: PropTypes.string,
+      color: PropTypes.string,
+      stock: PropTypes.number,
+    })
+  ),
+  selectedSize: PropTypes.string,
+  selectedColor: PropTypes.string,
+  onSelectSize: PropTypes.func.isRequired,
+  onSelectColor: PropTypes.func.isRequired,
 };
 
 export default VariantSelector;

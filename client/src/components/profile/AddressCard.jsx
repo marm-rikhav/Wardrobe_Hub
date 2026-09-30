@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Card, CardContent, Typography, Box, Chip, Button, IconButton } from '@mui/material';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
@@ -99,6 +100,23 @@ export const AddressCard = ({
       </Box>
     </Card>
   );
+};
+
+AddressCard.propTypes = {
+  address: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    name: PropTypes.string,
+    address: PropTypes.string,
+    city: PropTypes.string,
+    state: PropTypes.string,
+    postalCode: PropTypes.string,
+    country: PropTypes.string,
+    phone: PropTypes.string,
+    isDefault: PropTypes.bool,
+  }),
+  onEdit: PropTypes.func.isRequired,
+  onDelete: PropTypes.func.isRequired,
+  onSetDefault: PropTypes.func.isRequired,
 };
 
 export default AddressCard;

@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Box, Pagination as MuiPagination, Typography } from '@mui/material';
 
 export const Pagination = ({
@@ -46,6 +47,15 @@ export const Pagination = ({
       />
     </Box>
   );
+};
+
+Pagination.propTypes = {
+  page: PropTypes.number,
+  totalPages: PropTypes.number,
+  total: PropTypes.number,
+  limit: PropTypes.number,
+  onChange: PropTypes.func.isRequired,
+  sx: PropTypes.object,
 };
 
 export default Pagination;

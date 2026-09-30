@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import authApi from '../api/auth.api.js';
 import { setAuthCallbacks } from '../api/axios.js';
 import { setAccessToken, clearAccessToken } from '../utils/storage.js';
@@ -138,6 +139,10 @@ export const AuthProvider = ({ children }) => {
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
+
+AuthProvider.propTypes = {
+  children: PropTypes.node,
 };
 
 export const useAuthContext = () => {

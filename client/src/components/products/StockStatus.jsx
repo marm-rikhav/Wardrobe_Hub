@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Box, Typography, Chip } from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
@@ -66,6 +67,13 @@ export const StockStatus = ({ variant, isSelected }) => {
       sx={{ fontWeight: 600 }}
     />
   );
+};
+
+StockStatus.propTypes = {
+  variant: PropTypes.shape({
+    stock: PropTypes.number,
+  }),
+  isSelected: PropTypes.bool,
 };
 
 export default StockStatus;

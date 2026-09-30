@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import {
   Box,
   Typography,
@@ -273,6 +274,31 @@ export const ProductFilters = ({
       </Accordion>
     </Box>
   );
+};
+
+ProductFilters.propTypes = {
+  categories: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      name: PropTypes.string,
+      slug: PropTypes.string,
+      subcategories: PropTypes.arrayOf(
+        PropTypes.shape({
+          id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+          name: PropTypes.string,
+          slug: PropTypes.string,
+        })
+      ),
+    })
+  ),
+  selectedCategory: PropTypes.string,
+  selectedSubcategory: PropTypes.string,
+  selectedSize: PropTypes.string,
+  selectedColor: PropTypes.string,
+  minPrice: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  maxPrice: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  onFilterChange: PropTypes.func.isRequired,
+  onResetFilters: PropTypes.func.isRequired,
 };
 
 export default ProductFilters;
