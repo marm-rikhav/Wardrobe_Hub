@@ -12,7 +12,6 @@ import {
   Typography,
   Divider,
   Collapse,
-  IconButton,
   Tooltip,
   Avatar,
 } from '@mui/material';
