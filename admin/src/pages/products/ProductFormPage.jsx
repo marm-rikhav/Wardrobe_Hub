@@ -453,7 +453,7 @@ export const ProductFormPage = () => {
                   disabled={submitting || !selectedParentCategoryId || filteredSubcategories.length === 0}
                 >
                   <InputLabel id="product-subcat-label">
-                    {!selectedParentCategoryId ? 'Select Parent Category first' : 'Subcategory'}
+                    {selectedParentCategoryId ? 'Subcategory' : 'Select Parent Category first'}
                   </InputLabel>
                   <Controller
                     name="subcategoryId"
@@ -461,7 +461,7 @@ export const ProductFormPage = () => {
                     render={({ field }) => (
                       <Select
                         labelId="product-subcat-label"
-                        label={!selectedParentCategoryId ? 'Select Parent Category first' : 'Subcategory'}
+                        label={selectedParentCategoryId ? 'Subcategory' : 'Select Parent Category first'}
                         {...field}
                       >
                         {filteredSubcategories.map((sub) => (

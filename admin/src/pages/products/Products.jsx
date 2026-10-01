@@ -301,11 +301,11 @@ export const Products = () => {
                 disabled={!categoryId || filteredSubcategories.length === 0}
               >
                 <InputLabel id="filter-subcat-label">
-                  {!categoryId ? 'Select Category first' : 'Subcategory'}
+                  {categoryId ? 'Subcategory' : 'Select Category first'}
                 </InputLabel>
                 <Select
                   labelId="filter-subcat-label"
-                  label={!categoryId ? 'Select Category first' : 'Subcategory'}
+                  label={categoryId ? 'Subcategory' : 'Select Category first'}
                   value={subcategoryId}
                   onChange={(e) => setSubcategoryId(e.target.value)}
                 >
