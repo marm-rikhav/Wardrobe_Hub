@@ -434,7 +434,26 @@ export const OrderDetail = () => {
     severity: 'success',
   });
 
-  const orderJustPlaced = Boolean(location.state?.orderJustPlaced);
+  const [showOrderPlacedBanner, setShowOrderPlacedBanner] = useState(
+    Boolean(location.state?.orderJustPlaced)
+  );
+
+  useEffect(() => {
+    if (location.state?.orderJustPlaced) {
+      if (window.history.replaceState) {
+        window.history.replaceState(
+          { ...window.history.state, usr: null },
+          document.title
+        );
+      }
+
+      const timer = setTimeout(() => {
+        setShowOrderPlacedBanner(false);
+      }, 6000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [location.state?.orderJustPlaced]);
 
   useEffect(() => {
     if (id) {
@@ -586,10 +605,11 @@ export const OrderDetail = () => {
         )}
 
         {/* Success Banner if redirected from checkout */}
-        {orderJustPlaced && (
+        {showOrderPlacedBanner && (
           <Alert
             icon={<CheckCircleOutlineIcon fontSize="inherit" />}
             severity="success"
+            onClose={() => setShowOrderPlacedBanner(false)}
             sx={{ mb: 4, borderRadius: 2 }}
           >
             <Typography variant="subtitle1" fontWeight={700}>
