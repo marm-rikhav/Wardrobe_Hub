@@ -148,7 +148,7 @@ export const Header = () => {
                 src="/wardrobe_hub_logo.svg"
                 alt="Wardrobe Hub"
                 sx={{
-                  height: { xs: 36, md: 44 },
+                  height: { xs: 38, md: 46 },
                   width: 'auto',
                   display: 'block',
                   objectFit: 'contain',
