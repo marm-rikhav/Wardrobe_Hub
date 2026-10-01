@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+const PHONE_10_DIGIT_REGEX = /^\d{10}$/;
 
 export const loginSchema = z.object({
   email: z
@@ -18,10 +19,10 @@ export const registerSchema = z
   .object({
     name: z
       .string()
-      .min(1, 'Name is required')
       .trim()
-      .min(2, 'Name must be at least 2 characters long')
-      .max(100, 'Name cannot exceed 100 characters'),
+      .min(1, 'Name is required')
+      .min(3, 'Name must be at least 3 characters long')
+      .max(50, 'Name cannot exceed 50 characters'),
     email: z
       .string()
       .min(1, 'Email is required')
@@ -32,7 +33,10 @@ export const registerSchema = z
     phone: z
       .string()
       .trim()
-      .max(20, 'Phone cannot exceed 20 characters')
+      .refine(
+        (val) => !val || PHONE_10_DIGIT_REGEX.test(val),
+        'Phone number must be exactly 10 digits'
+      )
       .optional()
       .or(z.literal('')),
     password: z

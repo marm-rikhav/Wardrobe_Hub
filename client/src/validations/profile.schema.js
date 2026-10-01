@@ -1,14 +1,14 @@
 import { z } from 'zod';
 
-const MOBILE_REGEX = /^(?:\+91[- ]?|0)?[6-9]\d{9}$/;
+const PHONE_10_DIGIT_REGEX = /^\d{10}$/;
 
 export const profileSchema = z.object({
   name: z
     .string()
-    .min(1, 'Name is required')
     .trim()
-    .min(2, 'Name must be at least 2 characters long')
-    .max(100, 'Name cannot exceed 100 characters'),
+    .min(1, 'Name is required')
+    .min(3, 'Name must be at least 3 characters long')
+    .max(50, 'Name cannot exceed 50 characters'),
   email: z
     .string()
     .email('Invalid email address')
@@ -17,8 +17,8 @@ export const profileSchema = z.object({
     .string()
     .trim()
     .refine(
-      (val) => !val || MOBILE_REGEX.test(val),
-      'Please enter a valid 10-digit mobile number'
+      (val) => !val || PHONE_10_DIGIT_REGEX.test(val),
+      'Phone number must be exactly 10 digits'
     )
     .optional()
     .or(z.literal('')),

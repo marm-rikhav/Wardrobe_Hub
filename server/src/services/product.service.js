@@ -7,6 +7,38 @@ import { validateImageBuffer } from "../utils/imageValidator.js";
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const isUuid = (val) => Boolean(val && UUID_REGEX.test(val));
 
+const buildTokenCondition = (token) => {
+  const clean = token.replace(/['’]s$/i, "").trim();
+  const terms = [token];
+  if (clean && clean.toLowerCase() !== token.toLowerCase()) {
+    terms.push(clean);
+  }
+
+  const orList = [];
+  for (const t of terms) {
+    orList.push(
+      { name: { contains: t, mode: "insensitive" } },
+      { brand: { contains: t, mode: "insensitive" } },
+      { description: { contains: t, mode: "insensitive" } },
+      { subcategory: { name: { contains: t, mode: "insensitive" } } },
+      { subcategory: { category: { name: { contains: t, mode: "insensitive" } } } },
+      { variants: { some: { color: { contains: t, mode: "insensitive" }, isActive: true } } }
+    );
+  }
+  return { OR: orList };
+};
+
+const buildSearchFilter = (search) => {
+  if (!search || !search.trim()) {
+    return null;
+  }
+  const tokens = search.trim().split(/\s+/).filter(Boolean);
+  if (tokens.length === 0) {
+    return null;
+  }
+  return tokens.map((token) => buildTokenCondition(token));
+};
+
 /**
  * Helper to compute effective price for a product or variant
  */
@@ -174,12 +206,11 @@ export const getAllProductsAdmin = async ({ page = 1, limit = 20, search, subcat
     where.subcategory = { categoryId };
   }
 
-  if (search) {
-    where.OR = [
-      { name: { contains: search, mode: "insensitive" } },
-      { brand: { contains: search, mode: "insensitive" } },
-      { description: { contains: search, mode: "insensitive" } },
-    ];
+  if (search?.trim()) {
+    const adminSearchConditions = buildSearchFilter(search);
+    if (adminSearchConditions && adminSearchConditions.length > 0) {
+      where.AND = adminSearchConditions;
+    }
   }
 
   const [total, products] = await Promise.all([
@@ -552,16 +583,6 @@ const buildProductOrderBy = (sort) => {
   return SORT_MAPPINGS[sort] || { createdAt: "desc" };
 };
 
-const buildSearchFilter = (search) => {
-  if (!search) {
-    return null;
-  }
-  return [
-    { name: { contains: search, mode: "insensitive" } },
-    { brand: { contains: search, mode: "insensitive" } },
-    { description: { contains: search, mode: "insensitive" } },
-  ];
-};
 
 const applyCategoryFilter = (where, category) => {
   if (!category) {
@@ -633,12 +654,16 @@ const buildPriceConditions = (priceRange) => {
 };
 
 const combineFilters = (where, searchConditions, priceConditions) => {
-  if (searchConditions && priceConditions) {
-    where.AND = [{ OR: searchConditions }, { OR: priceConditions }];
-  } else if (searchConditions) {
-    where.OR = searchConditions;
-  } else if (priceConditions) {
-    where.OR = priceConditions;
+  const andClauses = [];
+  if (searchConditions && searchConditions.length > 0) {
+    andClauses.push(...searchConditions);
+  }
+  if (priceConditions) {
+    andClauses.push({ OR: priceConditions });
+  }
+
+  if (andClauses.length > 0) {
+    where.AND = andClauses;
   }
 };
 
