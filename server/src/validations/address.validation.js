@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+const PHONE_10_DIGIT_REGEX = /^\d{10}$/;
+const POSTAL_CODE_6_DIGIT_REGEX = /^\d{6}$/;
+
 export const createAddressSchema = z.object({
   name: z
     .string()
@@ -9,8 +12,7 @@ export const createAddressSchema = z.object({
   phone: z
     .string()
     .trim()
-    .min(10, "Phone number must be at least 10 digits")
-    .max(20, "Phone number cannot exceed 20 characters"),
+    .regex(PHONE_10_DIGIT_REGEX, "Phone number must be exactly 10 digits"),
   address: z
     .string()
     .trim()
@@ -28,8 +30,7 @@ export const createAddressSchema = z.object({
   postalCode: z
     .string()
     .trim()
-    .min(3, "Postal/ZIP code is required")
-    .max(20, "Postal code cannot exceed 20 characters"),
+    .regex(POSTAL_CODE_6_DIGIT_REGEX, "PIN / Postal code must be exactly 6 digits"),
   country: z
     .string()
     .trim()

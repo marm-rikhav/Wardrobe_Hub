@@ -116,9 +116,19 @@ export const AddressForm = ({
                 fullWidth
                 id="phone"
                 label="Phone Number"
+                autoComplete="tel"
+                inputProps={{
+                  maxLength: 10,
+                  inputMode: 'numeric',
+                  pattern: '[0-9]*',
+                }}
                 error={Boolean(errors.phone)}
                 helperText={errors.phone?.message}
-                {...register('phone')}
+                {...register('phone', {
+                  onChange: (e) => {
+                    e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10);
+                  },
+                })}
               />
             </Grid>
             <Grid item xs={12}>
@@ -162,9 +172,19 @@ export const AddressForm = ({
                 fullWidth
                 id="postalCode"
                 label="PIN / Postal Code"
+                autoComplete="postal-code"
+                inputProps={{
+                  maxLength: 6,
+                  inputMode: 'numeric',
+                  pattern: '[0-9]*',
+                }}
                 error={Boolean(errors.postalCode)}
                 helperText={errors.postalCode?.message}
-                {...register('postalCode')}
+                {...register('postalCode', {
+                  onChange: (e) => {
+                    e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6);
+                  },
+                })}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
