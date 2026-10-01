@@ -1,22 +1,50 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Container, Box, Typography, Paper, Link as MuiLink } from '@mui/material';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import LoginForm from '../../components/auth/LoginForm.jsx';
 import { useAuth } from '../../hooks/useAuth.js';
+import { addToCart } from '../../store/cart/cartThunks.js';
 
 export const Login = () => {
   const { isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch();
+  const actionProcessedRef = useRef(false);
 
   const fromPath = location.state?.from?.pathname;
   const from = fromPath && !fromPath.startsWith('/profile') ? fromPath : '/products';
+  const postLoginAction = location.state?.postLoginAction;
+
+  const handlePostAuthRedirect = async () => {
+    if (actionProcessedRef.current) return;
+    actionProcessedRef.current = true;
+
+    if (postLoginAction?.variantId) {
+      try {
+        await dispatch(
+          addToCart({
+            variantId: postLoginAction.variantId,
+            quantity: postLoginAction.quantity || 1,
+          })
+        ).unwrap();
+      } catch (err) {
+        console.error('Failed to add pending product to cart:', err);
+      }
+
+      navigate(postLoginAction.redirectTo || '/cart', { replace: true });
+      return;
+    }
+
+    navigate(from, { replace: true });
+  };
 
   useEffect(() => {
-    if (!loading && isAuthenticated) {
-      navigate(from, { replace: true });
+    if (!loading && isAuthenticated && !actionProcessedRef.current) {
+      void handlePostAuthRedirect();
     }
-  }, [isAuthenticated, loading, navigate, from]);
+  }, [isAuthenticated, loading]);
 
   return (
     <Container maxWidth="xs" sx={{ py: { xs: 6, md: 10 } }}>
@@ -47,7 +75,7 @@ export const Login = () => {
           </Typography>
         </Box>
 
-        <LoginForm onSuccess={() => navigate(from, { replace: true })} />
+        <LoginForm onSuccess={() => void handlePostAuthRedirect()} />
 
         <Box sx={{ mt: 3, textAlign: 'center' }}>
           <Typography variant="body2" color="text.secondary">
@@ -55,6 +83,7 @@ export const Login = () => {
             <MuiLink
               component={Link}
               to="/register"
+              state={location.state}
               underline="hover"
               color="primary.main"
               fontWeight={600}

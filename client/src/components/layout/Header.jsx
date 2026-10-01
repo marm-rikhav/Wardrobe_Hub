@@ -27,7 +27,6 @@ import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined
 import CloseIcon from '@mui/icons-material/Close';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
-import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import ReceiptLongOutlinedIcon from '@mui/icons-material/ReceiptLongOutlined';
 import { useAuth } from '../../hooks/useAuth.js';
 import { useCategories } from '../../hooks/useCategories.js';
@@ -281,14 +280,6 @@ export const Header = () => {
                   >
                     <ReceiptLongOutlinedIcon sx={{ mr: 1.5, fontSize: 20 }} />
                     My Orders
-                  </MenuItem>
-                  <MenuItem
-                    component={Link}
-                    to="/profile/addresses"
-                    onClick={handleAccountClose}
-                  >
-                    <LocationOnOutlinedIcon sx={{ mr: 1.5, fontSize: 20 }} />
-                    Address Book
                   </MenuItem>
                   <Divider />
                   <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>

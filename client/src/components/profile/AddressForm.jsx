@@ -86,23 +86,24 @@ export const AddressForm = ({
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle fontWeight={600}>
+      <DialogTitle fontWeight={600} sx={{ py: 1.5, px: 3 }}>
         {isEditing ? 'Edit Address' : 'Add New Address'}
       </DialogTitle>
 
       <Box component="form" onSubmit={handleSubmit(onFormSubmit)} noValidate>
-        <DialogContent dividers>
+        <DialogContent dividers sx={{ py: 2, px: 3 }}>
           {error && (
             <Alert severity="error" sx={{ mb: 2 }}>
               {error}
             </Alert>
           )}
 
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
+          <Grid container spacing={1.5}>
+            <Grid size={12}>
               <TextField
                 required
                 fullWidth
+                size="small"
                 id="name"
                 label="Full Name"
                 error={Boolean(errors.name)}
@@ -110,10 +111,11 @@ export const AddressForm = ({
                 {...register('name')}
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid size={12}>
               <TextField
                 required
                 fullWidth
+                size="small"
                 id="phone"
                 label="Phone Number"
                 autoComplete="tel"
@@ -131,23 +133,26 @@ export const AddressForm = ({
                 })}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid size={12}>
               <TextField
                 required
                 fullWidth
+                size="small"
                 id="address"
                 label="Street Address / House No / Apartment"
                 multiline
-                rows={2}
+                minRows={1}
+                maxRows={2}
                 error={Boolean(errors.address)}
                 helperText={errors.address?.message}
                 {...register('address')}
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid size={12}>
               <TextField
                 required
                 fullWidth
+                size="small"
                 id="city"
                 label="City"
                 error={Boolean(errors.city)}
@@ -155,10 +160,11 @@ export const AddressForm = ({
                 {...register('city')}
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid size={12}>
               <TextField
                 required
                 fullWidth
+                size="small"
                 id="state"
                 label="State / Province"
                 error={Boolean(errors.state)}
@@ -166,10 +172,11 @@ export const AddressForm = ({
                 {...register('state')}
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid size={12}>
               <TextField
                 required
                 fullWidth
+                size="small"
                 id="postalCode"
                 label="PIN / Postal Code"
                 autoComplete="postal-code"
@@ -187,9 +194,10 @@ export const AddressForm = ({
                 })}
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid size={12}>
               <TextField
                 fullWidth
+                size="small"
                 id="country"
                 label="Country"
                 defaultValue="India"
@@ -198,13 +206,13 @@ export const AddressForm = ({
                 {...register('country')}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid size={12}>
               <Controller
                 name="isDefault"
                 control={control}
                 render={({ field }) => (
                   <FormControlLabel
-                    control={<Checkbox {...field} checked={Boolean(field.value)} />}
+                    control={<Checkbox size="small" {...field} checked={Boolean(field.value)} />}
                     label="Set as default shipping address"
                   />
                 )}
@@ -213,7 +221,7 @@ export const AddressForm = ({
           </Grid>
         </DialogContent>
 
-        <DialogActions sx={{ px: 3, py: 2 }}>
+        <DialogActions sx={{ px: 3, py: 1.5 }}>
           <Button onClick={onClose} disabled={isSubmitting} color="inherit">
             Cancel
           </Button>

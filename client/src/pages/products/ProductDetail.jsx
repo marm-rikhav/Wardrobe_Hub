@@ -53,7 +53,16 @@ export const ProductDetail = () => {
     if (!selectedVariant) return;
 
     if (!isAuthenticated) {
-      navigate('/login', { state: { from: location } });
+      navigate('/login', {
+        state: {
+          from: location,
+          postLoginAction: {
+            variantId: selectedVariant.id,
+            quantity: 1,
+            redirectTo: '/cart',
+          },
+        },
+      });
       return;
     }
 
@@ -77,7 +86,16 @@ export const ProductDetail = () => {
     if (!selectedVariant) return;
 
     if (!isAuthenticated) {
-      navigate('/login', { state: { from: location } });
+      navigate('/login', {
+        state: {
+          from: location,
+          postLoginAction: {
+            variantId: selectedVariant.id,
+            quantity: 1,
+            redirectTo: '/checkout',
+          },
+        },
+      });
       return;
     }
 
