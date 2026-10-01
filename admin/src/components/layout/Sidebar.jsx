@@ -28,8 +28,6 @@ import {
   LogoutOutlined,
   ExpandLess,
   ExpandMore,
-  ChevronLeft,
-  ChevronRight,
   ClassOutlined,
   AccountTreeOutlined,
 } from '@mui/icons-material';
@@ -75,90 +73,78 @@ const getIconStyles = (active, isCompact) => ({
   color: active ? '#BFA88A' : '#E5DED3',
 });
 
-const BrandHeader = ({ isCompact, isMobile, onToggleCollapse }) => (
+const BrandHeader = ({ isCompact, onNavigate }) => (
   <Box
     sx={{
       height: 64,
       display: 'flex',
       alignItems: 'center',
-      justifyContent: isCompact ? 'center' : 'space-between',
+      justifyContent: isCompact ? 'center' : 'flex-start',
       px: isCompact ? 1 : 2.5,
       borderBottom: '1px solid rgba(229, 222, 211, 0.12)',
     }}
   >
     {!isCompact && (
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+      <Box
+        component="div"
+        onClick={onNavigate}
+        role="button"
+        tabIndex={0}
+        aria-label="Wardrobe Hub Admin Home"
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          cursor: 'pointer',
+        }}
+      >
         <Box
+          component="img"
+          src="/wardrobe_hub_logo_dark.svg"
+          alt="Wardrobe Hub"
           sx={{
-            width: 32,
-            height: 32,
-            borderRadius: 1,
-            bgcolor: '#BFA88A',
-            color: '#111111',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: 900,
-            fontSize: '1.1rem',
-            fontFamily: 'serif',
+            height: 34,
+            maxWidth: 165,
+            width: 'auto',
+            display: 'block',
+            objectFit: 'contain',
           }}
-        >
-          W
-        </Box>
-        <Typography
-          variant="subtitle1"
-          sx={{
-            fontWeight: 700,
-            letterSpacing: '0.04em',
-            color: '#F5F1EB',
-            lineHeight: 1.2,
-          }}
-        >
-          Wardrobe Hub
-        </Typography>
+        />
       </Box>
     )}
 
     {isCompact && (
       <Box
+        component="div"
+        onClick={onNavigate}
+        role="button"
+        tabIndex={0}
+        aria-label="Wardrobe Hub Admin Home"
         sx={{
-          width: 36,
-          height: 36,
-          borderRadius: 1,
-          bgcolor: '#BFA88A',
-          color: '#111111',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontWeight: 900,
-          fontSize: '1.2rem',
-          fontFamily: 'serif',
+          cursor: 'pointer',
         }}
       >
-        W
+        <Box
+          component="img"
+          src="/wardrobe_hub_logo_icon.svg"
+          alt="Wardrobe Hub"
+          sx={{
+            height: 34,
+            width: 34,
+            display: 'block',
+            objectFit: 'contain',
+          }}
+        />
       </Box>
-    )}
-
-    {!isMobile && (
-      <IconButton
-        onClick={onToggleCollapse}
-        size="small"
-        sx={{
-          color: '#BFA88A',
-          '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.08)' },
-        }}
-        aria-label={isCompact ? 'Expand sidebar' : 'Collapse sidebar'}
-      >
-        {isCompact ? <ChevronRight fontSize="small" /> : <ChevronLeft fontSize="small" />}
-      </IconButton>
     )}
   </Box>
 );
 
 BrandHeader.propTypes = {
   isCompact: PropTypes.bool.isRequired,
-  isMobile: PropTypes.bool.isRequired,
-  onToggleCollapse: PropTypes.func,
+  onNavigate: PropTypes.func,
 };
 
 const SidebarNavItem = ({ item, isCompact, showLabels, isActive, onClick }) => {
@@ -440,8 +426,7 @@ export const Sidebar = ({
     >
       <BrandHeader
         isCompact={isCompact}
-        isMobile={isMobile}
-        onToggleCollapse={onToggleCollapse}
+        onNavigate={() => handleNavigate('/admin')}
       />
 
       <Box sx={{ flexGrow: 1, overflowY: 'auto', py: 1.5 }}>

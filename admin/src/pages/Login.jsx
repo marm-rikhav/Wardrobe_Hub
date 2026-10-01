@@ -15,7 +15,7 @@ import {
   CircularProgress,
   Container,
 } from '@mui/material';
-import { Visibility, VisibilityOff, LockOutlined } from '@mui/icons-material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import useAuth from '../hooks/useAuth.js';
 import { loginSchema } from '../common/validation/authSchemas.js';
 
@@ -105,29 +105,17 @@ export const Login = () => {
               }}
             >
               <Box
+                component="img"
+                src="/wardrobe_hub_logo.svg"
+                alt="Wardrobe Hub"
                 sx={{
-                  width: 48,
                   height: 48,
-                  borderRadius: '50%',
-                  bgcolor: 'secondary.main',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  width: 'auto',
+                  display: 'block',
+                  objectFit: 'contain',
                   mb: 1.5,
-                  color: 'primary.main',
                 }}
-              >
-                <LockOutlined />
-              </Box>
-              <Typography
-                variant="h5"
-                component="h1"
-                fontWeight={700}
-                color="primary"
-                letterSpacing="-0.5px"
-              >
-                Wardrobe Hub
-              </Typography>
+              />
               <Typography
                 variant="body2"
                 color="text.secondary"

@@ -1,19 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import {
   AppBar,
   Toolbar,
   Typography,
   IconButton,
   Box,
-  Button,
   Chip,
-  Tooltip,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
-  LogoutOutlined,
   MenuOpenOutlined,
 } from '@mui/icons-material';
 import useAuth from '../../hooks/useAuth.js';
@@ -32,19 +29,13 @@ const PAGE_TITLES = {
 
 export const Topbar = ({ onToggleMobile, onToggleCollapse, collapsed, isMobile }) => {
   const location = useLocation();
-  const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   const getPageTitle = () => {
     if (location.pathname.startsWith('/admin/products/') && location.pathname.endsWith('/edit')) {
       return 'Edit Product';
     }
     return PAGE_TITLES[location.pathname] || 'Admin Panel';
-  };
-
-  const handleLogout = async () => {
-    await logout();
-    navigate('/login');
   };
 
   return (
@@ -122,27 +113,6 @@ export const Topbar = ({ onToggleMobile, onToggleCollapse, collapsed, isMobile }
           >
             {user?.name || user?.email}
           </Typography>
-
-          <Tooltip title="Logout">
-            <Button
-              variant="outlined"
-              color="primary"
-              size="small"
-              onClick={handleLogout}
-              startIcon={<LogoutOutlined />}
-              sx={{
-                minWidth: { xs: 'auto', sm: 80 },
-                px: { xs: 1, sm: 1.5 },
-                '& .MuiButton-startIcon': {
-                  mr: { xs: 0, sm: 1 },
-                },
-              }}
-            >
-              <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
-                Logout
-              </Box>
-            </Button>
-          </Tooltip>
         </Box>
       </Toolbar>
     </AppBar>

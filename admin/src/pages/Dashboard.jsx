@@ -23,7 +23,7 @@ import {
 } from '@mui/material';
 import {
   ShoppingBagOutlined,
-  MonetizationOnOutlined,
+  CurrencyRupeeOutlined,
   WarningAmberOutlined,
   PeopleAltOutlined,
   Refresh as RefreshIcon,
@@ -263,7 +263,7 @@ export const Dashboard = () => {
                     height: 40,
                   }}
                 >
-                  <MonetizationOnOutlined fontSize="small" />
+                  <CurrencyRupeeOutlined fontSize="small" />
                 </Avatar>
               </Box>
               {loading ? (
