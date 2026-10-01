@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import {
   Container,
-  Grid,
+  Grid2 as Grid,
   Box,
   Typography,
   Paper,
@@ -667,7 +667,7 @@ export const OrderDetail = () => {
 
         <Grid container spacing={{ xs: 3, md: 4 }}>
           {/* Left Column: Products snapshot & Actions */}
-          <Grid item xs={12} md={8}>
+          <Grid size={{ xs: 12, md: 8 }}>
             <OrderItemsCard items={items} />
             <OrderActionButtons
               isCancellable={isCancellable}
@@ -680,7 +680,7 @@ export const OrderDetail = () => {
           </Grid>
 
           {/* Right Column: Address snapshot & Financial summary */}
-          <Grid item xs={12} md={4}>
+          <Grid size={{ xs: 12, md: 4 }}>
             <DeliveryAddressCard shippingAddress={shippingAddress} />
             <PaymentSummaryCard order={order} />
           </Grid>
