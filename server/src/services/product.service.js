@@ -29,10 +29,11 @@ const buildTokenCondition = (token) => {
 };
 
 const buildSearchFilter = (search) => {
-  if (!search || !search.trim()) {
+  const trimmed = search?.trim();
+  if (!trimmed) {
     return null;
   }
-  const tokens = search.trim().split(/\s+/).filter(Boolean);
+  const tokens = trimmed.split(/\s+/).filter(Boolean);
   if (tokens.length === 0) {
     return null;
   }
@@ -208,7 +209,7 @@ export const getAllProductsAdmin = async ({ page = 1, limit = 20, search, subcat
 
   if (search?.trim()) {
     const adminSearchConditions = buildSearchFilter(search);
-    if (adminSearchConditions && adminSearchConditions.length > 0) {
+    if (adminSearchConditions?.length > 0) {
       where.AND = adminSearchConditions;
     }
   }
@@ -655,7 +656,7 @@ const buildPriceConditions = (priceRange) => {
 
 const combineFilters = (where, searchConditions, priceConditions) => {
   const andClauses = [];
-  if (searchConditions && searchConditions.length > 0) {
+  if (searchConditions?.length > 0) {
     andClauses.push(...searchConditions);
   }
   if (priceConditions) {
