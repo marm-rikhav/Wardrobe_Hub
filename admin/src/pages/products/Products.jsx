@@ -30,6 +30,7 @@ import categoryService from '../../services/categoryService.js';
 import subcategoryService from '../../services/subcategoryService.js';
 import ProductTable from '../../components/products/ProductTable.jsx';
 import ProductImageUpload from '../../components/products/ProductImageUpload.jsx';
+import DeleteConfirmDialog from '../../components/common/DeleteConfirmDialog.jsx';
 
 export const Products = () => {
   const navigate = useNavigate();
@@ -43,6 +44,11 @@ export const Products = () => {
   const [categoryId, setCategoryId] = useState('');
   const [subcategoryId, setSubcategoryId] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+
+  // Delete Confirmation State
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deletingProduct, setDeletingProduct] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   // Categories & Subcategories for filters
   const [categories, setCategories] = useState([]);
@@ -146,6 +152,34 @@ export const Products = () => {
         err.response?.data?.message || 'Failed to update product status',
         'error'
       );
+    }
+  };
+
+  const handleOpenDeleteDialog = (product) => {
+    setDeletingProduct(product);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+    setDeletingProduct(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingProduct) return;
+    setDeleteLoading(true);
+    try {
+      await productService.deleteProduct(deletingProduct.id);
+      showSnackbar(`Product "${deletingProduct.name}" deleted successfully!`);
+      handleCloseDeleteDialog();
+      fetchProducts(pagination.page);
+    } catch (err) {
+      showSnackbar(
+        err.response?.data?.message || 'Failed to delete product',
+        'error'
+      );
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -311,6 +345,18 @@ export const Products = () => {
         onEdit={handleEditProduct}
         onManageImages={handleOpenManageImages}
         onToggleStatus={handleToggleStatus}
+        onDelete={handleOpenDeleteDialog}
+      />
+
+      {/* Delete Product Confirmation Dialog */}
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        title="Delete Product"
+        itemName={deletingProduct ? `${deletingProduct.name} (SKU: ${deletingProduct.variants?.[0]?.sku || 'N/A'})` : ''}
+        message="Are you sure you want to delete this product? This action will deactivate the product and its variants."
+        onClose={handleCloseDeleteDialog}
+        onConfirm={handleConfirmDelete}
+        loading={deleteLoading}
       />
 
       {/* Quick Image Management Modal */}

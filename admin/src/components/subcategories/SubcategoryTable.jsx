@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import {
   Table,
@@ -7,6 +7,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TablePagination,
   Paper,
   Chip,
   IconButton,
@@ -19,6 +20,7 @@ import {
   EditOutlined,
   CheckCircleOutline,
   HighlightOffOutlined,
+  DeleteOutline,
   AccountTreeOutlined,
 } from '@mui/icons-material';
 
@@ -27,7 +29,29 @@ export const SubcategoryTable = ({
   loading = false,
   onEdit,
   onToggleStatus,
+  onDelete,
 }) => {
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  // Reset to first page when subcategories change (e.g. category filter or search)
+  useEffect(() => {
+    setPage(0);
+  }, [subcategories.length]);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const displayedSubcategories = subcategories.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
   if (loading) {
     return (
       <Paper sx={{ width: '100%', overflow: 'hidden', border: '1px solid', borderColor: 'divider' }}>
@@ -104,7 +128,7 @@ export const SubcategoryTable = ({
             </TableRow>
           </TableHead>
           <TableBody>
-            {subcategories.map((sub) => (
+            {displayedSubcategories.map((sub) => (
               <TableRow
                 key={sub.id}
                 hover
@@ -190,6 +214,17 @@ export const SubcategoryTable = ({
                         )}
                       </IconButton>
                     </Tooltip>
+
+                    <Tooltip title="Delete subcategory">
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={() => onDelete?.(sub)}
+                        aria-label={`Delete ${sub.name}`}
+                      >
+                        <DeleteOutline fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
                   </Box>
                 </TableCell>
               </TableRow>
@@ -197,6 +232,17 @@ export const SubcategoryTable = ({
           </TableBody>
         </Table>
       </TableContainer>
+
+      {/* Pagination Controls */}
+      <TablePagination
+        rowsPerPageOptions={[5, 10, 25]}
+        component="div"
+        count={subcategories.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+      />
     </Paper>
   );
 };
@@ -220,6 +266,7 @@ SubcategoryTable.propTypes = {
   loading: PropTypes.bool,
   onEdit: PropTypes.func.isRequired,
   onToggleStatus: PropTypes.func.isRequired,
+  onDelete: PropTypes.func,
 };
 
 export default SubcategoryTable;

@@ -24,6 +24,7 @@ import subcategoryService from '../../services/subcategoryService.js';
 import categoryService from '../../services/categoryService.js';
 import SubcategoryTable from '../../components/subcategories/SubcategoryTable.jsx';
 import SubcategoryDialog from '../../components/subcategories/SubcategoryDialog.jsx';
+import DeleteConfirmDialog from '../../components/common/DeleteConfirmDialog.jsx';
 
 export const Subcategories = () => {
   const [subcategories, setSubcategories] = useState([]);
@@ -37,6 +38,11 @@ export const Subcategories = () => {
   const [editingSubcategory, setEditingSubcategory] = useState(null);
   const [dialogLoading, setDialogLoading] = useState(false);
   const [dialogError, setDialogError] = useState(null);
+
+  // Delete Confirmation State
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deletingSubcategory, setDeletingSubcategory] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   // Snackbar Notification
   const [snackbar, setSnackbar] = useState({
@@ -132,6 +138,34 @@ export const Subcategories = () => {
         err.response?.data?.message || 'Failed to update subcategory status',
         'error'
       );
+    }
+  };
+
+  const handleOpenDeleteDialog = (subcategory) => {
+    setDeletingSubcategory(subcategory);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+    setDeletingSubcategory(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingSubcategory) return;
+    setDeleteLoading(true);
+    try {
+      await subcategoryService.deleteSubcategory(deletingSubcategory.id);
+      showSnackbar(`Subcategory "${deletingSubcategory.name}" deleted successfully!`);
+      handleCloseDeleteDialog();
+      fetchData();
+    } catch (err) {
+      showSnackbar(
+        err.response?.data?.message || 'Failed to delete subcategory',
+        'error'
+      );
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -246,9 +280,10 @@ export const Subcategories = () => {
         loading={loading}
         onEdit={handleOpenEditDialog}
         onToggleStatus={handleToggleStatus}
+        onDelete={handleOpenDeleteDialog}
       />
 
-      {/* Dialog */}
+      {/* Add / Edit Subcategory Dialog */}
       <SubcategoryDialog
         open={dialogOpen}
         onClose={handleCloseDialog}
@@ -257,6 +292,17 @@ export const Subcategories = () => {
         categories={categories}
         loading={dialogLoading}
         error={dialogError}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        title="Delete Subcategory"
+        itemName={deletingSubcategory ? `${deletingSubcategory.name} (${deletingSubcategory.category?.name || 'Category'})` : ''}
+        message="Are you sure you want to delete this subcategory? This action will deactivate the subcategory and its associated products."
+        onClose={handleCloseDeleteDialog}
+        onConfirm={handleConfirmDelete}
+        loading={deleteLoading}
       />
 
       {/* Feedback Snackbar */}

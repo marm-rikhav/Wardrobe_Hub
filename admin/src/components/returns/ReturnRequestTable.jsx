@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import {
   Table,
@@ -7,6 +7,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TablePagination,
   Paper,
   Button,
   Box,
@@ -35,6 +36,27 @@ export const ReturnRequestTable = ({
   onApprove,
   onReject,
 }) => {
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  // Reset to first page when filtered requests change
+  useEffect(() => {
+    setPage(0);
+  }, [requests.length]);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const displayedRequests = requests.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
   if (loading) {
     return (
       <Paper sx={{ width: '100%', overflow: 'hidden', border: '1px solid', borderColor: 'divider' }}>
@@ -159,7 +181,7 @@ export const ReturnRequestTable = ({
             </TableRow>
           </TableHead>
           <TableBody>
-            {requests.map((req) => (
+            {displayedRequests.map((req) => (
               <TableRow
                 key={req.id}
                 hover
@@ -282,6 +304,17 @@ export const ReturnRequestTable = ({
           </TableBody>
         </Table>
       </TableContainer>
+
+      {/* Pagination Controls */}
+      <TablePagination
+        rowsPerPageOptions={[5, 10, 25, 50]}
+        component="div"
+        count={requests.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+      />
     </Paper>
   );
 };

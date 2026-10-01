@@ -51,10 +51,12 @@ export const Customers = () => {
         limit: pagination.limit,
         search: activeSearch,
       });
-      setCustomers(data.customers || []);
+      const fetchedCustomers = data.customers || [];
+      const totalCount = typeof data.pagination?.total === 'number' ? data.pagination.total : fetchedCustomers.length;
+      setCustomers(fetchedCustomers);
       setPagination((prev) => ({
         ...prev,
-        total: data.pagination?.total || 0,
+        total: totalCount,
       }));
     } catch (err) {
       setError(
@@ -216,7 +218,13 @@ export const Customers = () => {
               fullWidth
               placeholder="Search customers by name, email, or phone number..."
               value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
+              onChange={(e) => {
+                setSearchInput(e.target.value);
+                if (!e.target.value.trim() && activeSearch) {
+                  setActiveSearch('');
+                  setPagination((prev) => ({ ...prev, page: 1 }));
+                }
+              }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -349,8 +357,8 @@ export const Customers = () => {
             {/* Pagination */}
             <TablePagination
               component="div"
-              count={pagination.total}
-              page={pagination.page - 1}
+              count={pagination.total ?? customers.length}
+              page={Math.max(0, pagination.page - 1)}
               onPageChange={handleChangePage}
               rowsPerPage={pagination.limit}
               onRowsPerPageChange={handleChangeRowsPerPage}

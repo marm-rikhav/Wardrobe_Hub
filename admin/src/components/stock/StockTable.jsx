@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import {
   Table,
@@ -7,6 +7,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TablePagination,
   Paper,
   Chip,
   Button,
@@ -25,6 +26,27 @@ export const StockTable = ({
   loading = false,
   onUpdateStock,
 }) => {
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  // Reset to first page when filtered items change
+  useEffect(() => {
+    setPage(0);
+  }, [items.length]);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const displayedItems = items.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
   if (loading) {
     return (
       <Paper sx={{ width: '100%', overflow: 'hidden', border: '1px solid', borderColor: 'divider' }}>
@@ -103,7 +125,7 @@ export const StockTable = ({
             </TableRow>
           </TableHead>
           <TableBody>
-            {items.map(({ product, variant }) => {
+            {displayedItems.map(({ product, variant }) => {
               const mainImage = product.images && product.images.length > 0 ? product.images[0].imageUrl : null;
               const isOutOfStock = variant.stock === 0;
               const isLowStock = variant.stock > 0 && variant.stock <= 5;
@@ -244,6 +266,17 @@ export const StockTable = ({
           </TableBody>
         </Table>
       </TableContainer>
+
+      {/* Pagination Controls */}
+      <TablePagination
+        rowsPerPageOptions={[10, 25, 50, 100]}
+        component="div"
+        count={items.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+      />
     </Paper>
   );
 };

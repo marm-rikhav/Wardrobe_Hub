@@ -22,6 +22,7 @@ import {
   CheckCircleOutline,
   HighlightOffOutlined,
   PhotoCameraOutlined,
+  DeleteOutline,
   Inventory2Outlined,
 } from '@mui/icons-material';
 
@@ -34,6 +35,7 @@ export const ProductTable = ({
   onEdit,
   onManageImages,
   onToggleStatus,
+  onDelete,
 }) => {
   const { page = 1, limit = 20, total = 0 } = pagination;
 
@@ -272,6 +274,17 @@ export const ProductTable = ({
                           )}
                         </IconButton>
                       </Tooltip>
+
+                      <Tooltip title="Delete Product">
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={() => onDelete?.(prod)}
+                          aria-label={`Delete ${prod.name}`}
+                        >
+                          <DeleteOutline fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
                     </Box>
                   </TableCell>
                 </TableRow>
@@ -332,6 +345,7 @@ ProductTable.propTypes = {
   onEdit: PropTypes.func,
   onManageImages: PropTypes.func,
   onToggleStatus: PropTypes.func,
+  onDelete: PropTypes.func,
 };
 
 export default ProductTable;

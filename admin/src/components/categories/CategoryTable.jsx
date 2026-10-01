@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import {
   Table,
@@ -7,6 +7,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TablePagination,
   Paper,
   Chip,
   IconButton,
@@ -29,6 +30,27 @@ export const CategoryTable = ({
   onEdit,
   onToggleStatus,
 }) => {
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  // Reset to first page when categories change (e.g. search filter)
+  useEffect(() => {
+    setPage(0);
+  }, [categories.length]);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const displayedCategories = categories.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
   if (loading) {
     return (
       <Paper sx={{ width: '100%', overflow: 'hidden', border: '1px solid', borderColor: 'divider' }}>
@@ -107,7 +129,7 @@ export const CategoryTable = ({
             </TableRow>
           </TableHead>
           <TableBody>
-            {categories.map((cat) => (
+            {displayedCategories.map((cat) => (
               <TableRow
                 key={cat.id}
                 hover
@@ -207,6 +229,17 @@ export const CategoryTable = ({
           </TableBody>
         </Table>
       </TableContainer>
+
+      {/* Pagination Controls */}
+      <TablePagination
+        rowsPerPageOptions={[5, 10, 25]}
+        component="div"
+        count={categories.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+      />
     </Paper>
   );
 };
