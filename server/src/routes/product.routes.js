@@ -9,6 +9,7 @@ import {
   updateProductSchema,
   productQuerySchema,
   uploadImageBodySchema,
+  updateStockSchema,
 } from "../validations/product.validation.js";
 
 // Public product routes mounted at /api/products
@@ -33,6 +34,13 @@ adminProductRouter.put(
   productController.updateProduct
 );
 adminProductRouter.delete("/:id", productController.deleteProduct);
+
+// Variant stock management route
+adminProductRouter.patch(
+  "/:productId/variants/:variantId/stock",
+  validate(updateStockSchema),
+  productController.updateVariantStock
+);
 
 // Image management routes
 adminProductRouter.post(

@@ -16,29 +16,18 @@ export const stockService = {
 
   /**
    * Update stock for a specific variant.
-   * Calls the existing backend product update endpoint atomically.
+   * Calls the dedicated backend variant stock update endpoint atomically.
    *
    * @param {string} productId
-   * @param {Object} variant - The existing variant object (needs id, sku, size, color)
+   * @param {Object} variant - The existing variant object (needs id)
    * @param {number} newStock - New integer stock value (>= 0)
    */
   async updateVariantStock(productId, variant, newStock) {
-    const payload = {
-      variants: [
-        {
-          id: variant.id,
-          sku: variant.sku,
-          size: variant.size,
-          color: variant.color,
-          price: variant.price !== undefined && variant.price !== null ? Number(variant.price) : undefined,
-          stock: Number(newStock),
-          isActive: variant.isActive ?? true,
-        },
-      ],
-    };
-
-    const response = await apiClient.put(`/admin/products/${productId}`, payload);
-    return response.data?.data?.product;
+    const response = await apiClient.patch(
+      `/admin/products/${productId}/variants/${variant.id}/stock`,
+      { stock: Number(newStock) }
+    );
+    return response.data?.data?.variant;
   },
 };
 

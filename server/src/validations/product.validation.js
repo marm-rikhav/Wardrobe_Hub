@@ -152,9 +152,14 @@ export const uploadImageBodySchema = z.object({
   sortOrder: z.coerce.number().int().min(0).default(0).optional(),
 });
 
+export const updateStockSchema = z.object({
+  stock: z.number().int("Stock must be an integer").min(0, "Stock cannot be negative"),
+});
+
 export default {
   createProductSchema,
   updateProductSchema,
   productQuerySchema,
   uploadImageBodySchema,
+  updateStockSchema,
 };

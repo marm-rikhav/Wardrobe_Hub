@@ -157,12 +157,31 @@ export const getPublicProductBySlug = async (req, res, next) => {
   }
 };
 
+/**
+ * Admin: Update variant stock
+ */
+export const updateVariantStock = async (req, res, next) => {
+  try {
+    const { productId, variantId } = req.params;
+    const { stock } = req.body;
+    const variant = await productService.updateVariantStock(productId, variantId, stock);
+    return res.status(200).json({
+      success: true,
+      message: "Variant stock updated successfully",
+      data: { variant },
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
 export default {
   createProduct,
   getAllProductsAdmin,
   getProductByIdAdmin,
   updateProduct,
   deleteProduct,
+  updateVariantStock,
   uploadProductImage,
   deleteProductImage,
   getPublicProducts,

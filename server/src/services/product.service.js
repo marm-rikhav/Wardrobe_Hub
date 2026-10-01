@@ -874,12 +874,31 @@ export const getPublicProductBySlug = async (slug) => {
   return formatProductPrices(product);
 };
 
+/**
+ * Admin: Update stock for a specific variant atomically without affecting other variants
+ */
+export const updateVariantStock = async (productId, variantId, stock) => {
+  const existingVariant = await prisma.productVariant.findFirst({
+    where: { id: variantId, productId },
+  });
+
+  if (!existingVariant) {
+    throw new ApiError(404, "Variant not found for this product");
+  }
+
+  return await prisma.productVariant.update({
+    where: { id: variantId },
+    data: { stock },
+  });
+};
+
 export default {
   createProduct,
   getAllProductsAdmin,
   getProductByIdAdmin,
   updateProduct,
   deleteProduct,
+  updateVariantStock,
   uploadProductImage,
   deleteProductImage,
   getPublicProducts,
