@@ -65,14 +65,14 @@ export const updateSubcategory = async (req, res, next) => {
 };
 
 /**
- * Admin: Soft delete subcategory
+ * Admin: Permanently delete subcategory
  */
 export const deleteSubcategory = async (req, res, next) => {
   try {
     const subcategory = await subcategoryService.deleteSubcategory(req.params.id);
     return res.status(200).json({
       success: true,
-      message: "Subcategory deactivated successfully",
+      message: "Subcategory permanently deleted successfully",
       data: { subcategory },
     });
   } catch (error) {

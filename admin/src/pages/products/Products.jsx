@@ -192,10 +192,10 @@ export const Products = () => {
     fetchProducts(pagination.page);
   };
 
-  // Filter subcategories in dropdown based on selected category
+  // Filter subcategories in dropdown based on selected category (cascading dependency)
   const filteredSubcategories = categoryId
     ? allSubcategories.filter((s) => s.categoryId === categoryId)
-    : allSubcategories;
+    : [];
 
   return (
     <Box sx={{ width: '100%', maxWidth: 1200, mx: 'auto' }}>
@@ -295,11 +295,17 @@ export const Products = () => {
 
             {/* Subcategory Filter */}
             <Grid item xs={12} sm={4} md={3}>
-              <FormControl size="small" fullWidth disabled={filteredSubcategories.length === 0}>
-                <InputLabel id="filter-subcat-label">Subcategory</InputLabel>
+              <FormControl
+                size="small"
+                fullWidth
+                disabled={!categoryId || filteredSubcategories.length === 0}
+              >
+                <InputLabel id="filter-subcat-label">
+                  {!categoryId ? 'Select Category first' : 'Subcategory'}
+                </InputLabel>
                 <Select
                   labelId="filter-subcat-label"
-                  label="Subcategory"
+                  label={!categoryId ? 'Select Category first' : 'Subcategory'}
                   value={subcategoryId}
                   onChange={(e) => setSubcategoryId(e.target.value)}
                 >
@@ -353,7 +359,7 @@ export const Products = () => {
         open={deleteDialogOpen}
         title="Delete Product"
         itemName={deletingProduct ? `${deletingProduct.name} (SKU: ${deletingProduct.variants?.[0]?.sku || 'N/A'})` : ''}
-        message="Are you sure you want to delete this product? This action will deactivate the product and its variants."
+        message="Are you sure you want to permanently delete this product? This action cannot be undone and will permanently remove the product and its variants."
         onClose={handleCloseDeleteDialog}
         onConfirm={handleConfirmDelete}
         loading={deleteLoading}

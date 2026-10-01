@@ -44,7 +44,7 @@ export const subcategoryService = {
   },
 
   /**
-   * Soft delete subcategory (sets isActive to false on subcategory and its products).
+   * Permanently delete subcategory and its associated products.
    * @param {string} id
    */
   async deleteSubcategory(id) {

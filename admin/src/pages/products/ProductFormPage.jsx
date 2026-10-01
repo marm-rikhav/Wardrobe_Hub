@@ -158,10 +158,10 @@ export const ProductFormPage = () => {
     }
   }, [id, isEditing]);
 
-  // Filter subcategories by selected parent category
+  // Filter subcategories by selected parent category (cascading dependency)
   const filteredSubcategories = selectedParentCategoryId
     ? allSubcategories.filter((s) => s.categoryId === selectedParentCategoryId)
-    : allSubcategories;
+    : [];
 
   const handleParentCategoryChange = (catId) => {
     setSelectedParentCategoryId(catId);
@@ -277,7 +277,9 @@ export const ProductFormPage = () => {
   let subcategoryHelperText = null;
   if (errors.subcategoryId) {
     subcategoryHelperText = errors.subcategoryId.message;
-  } else if (filteredSubcategories.length === 0 && selectedParentCategoryId) {
+  } else if (!selectedParentCategoryId) {
+    subcategoryHelperText = 'Please select a parent category first.';
+  } else if (filteredSubcategories.length === 0) {
     subcategoryHelperText = 'No subcategories found in this category.';
   }
 
@@ -448,16 +450,18 @@ export const ProductFormPage = () => {
                   fullWidth
                   required
                   error={Boolean(errors.subcategoryId)}
-                  disabled={submitting || filteredSubcategories.length === 0}
+                  disabled={submitting || !selectedParentCategoryId || filteredSubcategories.length === 0}
                 >
-                  <InputLabel id="product-subcat-label">Subcategory</InputLabel>
+                  <InputLabel id="product-subcat-label">
+                    {!selectedParentCategoryId ? 'Select Parent Category first' : 'Subcategory'}
+                  </InputLabel>
                   <Controller
                     name="subcategoryId"
                     control={control}
                     render={({ field }) => (
                       <Select
                         labelId="product-subcat-label"
-                        label="Subcategory"
+                        label={!selectedParentCategoryId ? 'Select Parent Category first' : 'Subcategory'}
                         {...field}
                       >
                         {filteredSubcategories.map((sub) => (

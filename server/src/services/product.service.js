@@ -525,26 +525,54 @@ export const updateProduct = async (id, updateData) => {
 };
 
 /**
- * Admin: Soft delete product (sets isActive to false on product and variants)
+ * Admin: Permanently delete product (removes product, variants, images, and active cart items)
  */
 export const deleteProduct = async (id) => {
   const existingProduct = await prisma.product.findUnique({
     where: { id },
+    include: {
+      variants: {
+        select: { id: true },
+      },
+    },
   });
 
   if (!existingProduct) {
     throw new ApiError(404, "Product not found");
   }
 
-  return await prisma.$transaction(async (tx) => {
-    await tx.productVariant.updateMany({
-      where: { productId: id },
-      data: { isActive: false },
+  const variantIds = existingProduct.variants.map((v) => v.id);
+
+  if (variantIds.length > 0) {
+    const orderCount = await prisma.orderItem.count({
+      where: { variantId: { in: variantIds } },
     });
 
-    return await tx.product.update({
+    if (orderCount > 0) {
+      throw new ApiError(
+        400,
+        "Cannot delete product because it is associated with existing customer orders. Please deactivate it instead."
+      );
+    }
+  }
+
+  return await prisma.$transaction(async (tx) => {
+    if (variantIds.length > 0) {
+      await tx.cartItem.deleteMany({
+        where: { variantId: { in: variantIds } },
+      });
+    }
+
+    await tx.productImage.deleteMany({
+      where: { productId: id },
+    });
+
+    await tx.productVariant.deleteMany({
+      where: { productId: id },
+    });
+
+    return await tx.product.delete({
       where: { id },
-      data: { isActive: false },
     });
   });
 };

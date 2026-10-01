@@ -66,14 +66,14 @@ export const updateProduct = async (req, res, next) => {
 };
 
 /**
- * Admin: Soft delete product
+ * Admin: Permanently delete product
  */
 export const deleteProduct = async (req, res, next) => {
   try {
     const product = await productService.deleteProduct(req.params.id);
     return res.status(200).json({
       success: true,
-      message: "Product and its variants deactivated successfully",
+      message: "Product permanently deleted successfully",
       data: { product },
     });
   } catch (error) {

@@ -195,7 +195,7 @@ export const updateSubcategory = async (id, updateData) => {
 };
 
 /**
- * Admin: Soft delete subcategory (sets isActive to false)
+ * Admin: Permanently delete subcategory and its associated products
  */
 export const deleteSubcategory = async (id) => {
   const existingSubcategory = await prisma.subcategory.findUnique({
@@ -206,16 +206,55 @@ export const deleteSubcategory = async (id) => {
     throw new ApiError(404, "Subcategory not found");
   }
 
-  return await prisma.$transaction(async (tx) => {
-    // Soft delete associated products
-    await tx.product.updateMany({
-      where: { subcategoryId: id },
-      data: { isActive: false },
+  // Find all products under this subcategory
+  const products = await prisma.product.findMany({
+    where: { subcategoryId: id },
+    include: {
+      variants: {
+        select: { id: true },
+      },
+    },
+  });
+
+  const productIds = products.map((p) => p.id);
+  const variantIds = products.flatMap((p) => p.variants.map((v) => v.id));
+
+  if (variantIds.length > 0) {
+    const orderCount = await prisma.orderItem.count({
+      where: { variantId: { in: variantIds } },
     });
 
-    return await tx.subcategory.update({
+    if (orderCount > 0) {
+      throw new ApiError(
+        400,
+        "Cannot delete subcategory because products under it are linked to existing customer orders. Please deactivate the subcategory instead."
+      );
+    }
+  }
+
+  return await prisma.$transaction(async (tx) => {
+    if (variantIds.length > 0) {
+      await tx.cartItem.deleteMany({
+        where: { variantId: { in: variantIds } },
+      });
+    }
+
+    if (productIds.length > 0) {
+      await tx.productImage.deleteMany({
+        where: { productId: { in: productIds } },
+      });
+
+      await tx.productVariant.deleteMany({
+        where: { productId: { in: productIds } },
+      });
+
+      await tx.product.deleteMany({
+        where: { id: { in: productIds } },
+      });
+    }
+
+    return await tx.subcategory.delete({
       where: { id },
-      data: { isActive: false },
     });
   });
 };

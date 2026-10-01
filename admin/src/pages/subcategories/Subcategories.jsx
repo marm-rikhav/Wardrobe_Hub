@@ -299,7 +299,7 @@ export const Subcategories = () => {
         open={deleteDialogOpen}
         title="Delete Subcategory"
         itemName={deletingSubcategory ? `${deletingSubcategory.name} (${deletingSubcategory.category?.name || 'Category'})` : ''}
-        message="Are you sure you want to delete this subcategory? This action will deactivate the subcategory and its associated products."
+        message="Are you sure you want to permanently delete this subcategory? This action cannot be undone and will delete the subcategory along with any associated products."
         onClose={handleCloseDeleteDialog}
         onConfirm={handleConfirmDelete}
         loading={deleteLoading}

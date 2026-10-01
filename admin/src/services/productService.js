@@ -43,7 +43,7 @@ export const productService = {
   },
 
   /**
-   * Soft delete product (sets isActive to false on product and its variants).
+   * Permanently delete product and its variants.
    * @param {string} id
    */
   async deleteProduct(id) {
