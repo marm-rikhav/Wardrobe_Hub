@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import {
   Container,
-  Grid,
+  Grid2 as Grid,
   Box,
   Typography,
   Button,
@@ -79,7 +79,7 @@ export const ProductListing = () => {
 
   const handlePageChange = (newPage) => {
     updateQuery({ page: newPage }, false);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    globalThis.scrollTo?.({ top: 0, behavior: 'smooth' });
   };
 
   // Find active category title for breadcrumbs / heading
@@ -161,7 +161,7 @@ export const ProductListing = () => {
         {/* Layout: Sidebar Filters | Product Grid */}
         <Grid container spacing={4}>
           {/* Desktop Filters Sidebar */}
-          <Grid item md={3.2} lg={2.8} sx={{ display: { xs: 'none', md: 'block' } }}>
+          <Grid size={{ md: 3.2, lg: 2.8 }} sx={{ display: { xs: 'none', md: 'block' } }}>
             <Box sx={{ position: 'sticky', top: 90 }}>
               <ProductFilters
                 categories={categories}
@@ -180,7 +180,7 @@ export const ProductListing = () => {
           </Grid>
 
           {/* Product Grid Area */}
-          <Grid item xs={12} md={8.8} lg={9.2}>
+          <Grid size={{ xs: 12, md: 8.8, lg: 9.2 }}>
             <ProductGrid
               products={products}
               loading={loading}

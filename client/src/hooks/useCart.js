@@ -29,7 +29,7 @@ export const useCart = () => {
   const error = useSelector(selectCartError);
 
   const getCart = () => dispatch(fetchCart());
-  const addItem = (variantId, quantity = 1) =>
+  const addItem = async (variantId, quantity = 1) =>
     dispatch(addToCart({ variantId, quantity }));
   const updateQuantity = (itemId, quantity) =>
     dispatch(updateCartItem({ itemId, quantity }));

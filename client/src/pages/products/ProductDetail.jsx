@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Container,
-  Grid,
+  Grid2 as Grid,
   Box,
   Typography,
   Breadcrumbs,
@@ -26,7 +26,9 @@ import Loading from '../../components/common/Loading.jsx';
 import ErrorMessage from '../../components/common/ErrorMessage.jsx';
 import { formatPrice } from '../../utils/formatters.js';
 import { useAuth } from '../../hooks/useAuth.js';
-import { useCart } from '../../hooks/useCart.js';
+import { useDispatch, useSelector } from 'react-redux';
+import { addToCart } from '../../store/cart/cartThunks.js';
+import { selectCartActionLoading } from '../../store/cart/cartSlice.js';
 
 export const ProductDetail = () => {
   const { id } = useParams(); // Can be slug or id
@@ -37,7 +39,8 @@ export const ProductDetail = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated } = useAuth();
-  const { addItem, actionLoading } = useCart();
+  const dispatch = useDispatch();
+  const actionLoading = useSelector(selectCartActionLoading);
 
   // Variant selection state
   const [selectedSize, setSelectedSize] = useState('');
@@ -54,18 +57,18 @@ export const ProductDetail = () => {
       return;
     }
 
-    const resultAction = await addItem(selectedVariant.id, 1);
-    if (resultAction.error) {
-      setSnackbar({
-        open: true,
-        message: resultAction.payload || 'Failed to add item to cart',
-        severity: 'error',
-      });
-    } else {
+    try {
+      await dispatch(addToCart({ variantId: selectedVariant.id, quantity: 1 })).unwrap();
       setSnackbar({
         open: true,
         message: `Added "${product.name}" (${selectedVariant.size}/${selectedVariant.color}) to cart!`,
         severity: 'success',
+      });
+    } catch (err) {
+      setSnackbar({
+        open: true,
+        message: err || 'Failed to add item to cart',
+        severity: 'error',
       });
     }
   };
@@ -74,22 +77,20 @@ export const ProductDetail = () => {
     if (!selectedVariant) return;
 
     if (!isAuthenticated) {
-      navigate('/login', { state: { from: { pathname: '/checkout' } } });
+      navigate('/login', { state: { from: location } });
       return;
     }
 
     setBuyNowLoading(true);
     try {
-      const resultAction = await addItem(selectedVariant.id, 1);
-      if (resultAction.error) {
-        setSnackbar({
-          open: true,
-          message: resultAction.payload || 'Failed to prepare order',
-          severity: 'error',
-        });
-      } else {
-        navigate('/checkout');
-      }
+      await dispatch(addToCart({ variantId: selectedVariant.id, quantity: 1 })).unwrap();
+      navigate('/checkout');
+    } catch (err) {
+      setSnackbar({
+        open: true,
+        message: err || 'Failed to prepare order',
+        severity: 'error',
+      });
     } finally {
       setBuyNowLoading(false);
     }
@@ -120,7 +121,7 @@ export const ProductDetail = () => {
     };
 
     if (id) {
-      fetchProduct();
+      void fetchProduct();
     }
   }, [id]);
 
@@ -237,12 +238,12 @@ export const ProductDetail = () => {
         {/* Product Layout: Left Gallery | Right Details */}
         <Grid container spacing={{ xs: 3, md: 6 }}>
           {/* Gallery */}
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <ProductGallery images={product.images} productName={product.name} />
           </Grid>
 
           {/* Details */}
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
               {/* Brand & Title */}
               <Box>

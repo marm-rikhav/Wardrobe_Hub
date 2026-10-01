@@ -29,9 +29,29 @@ export const ProductFilters = ({
   onFilterChange,
   onResetFilters,
 }) => {
+  const [localCategory, setLocalCategory] = useState(selectedCategory || '');
+  const [localSubcategory, setLocalSubcategory] = useState(selectedSubcategory || '');
+  const [localSize, setLocalSize] = useState(selectedSize || '');
+  const [localColor, setLocalColor] = useState(selectedColor || '');
   const [localMinPrice, setLocalMinPrice] = useState(minPrice);
   const [localMaxPrice, setLocalMaxPrice] = useState(maxPrice);
   const [priceError, setPriceError] = useState('');
+
+  useEffect(() => {
+    setLocalCategory(selectedCategory || '');
+  }, [selectedCategory]);
+
+  useEffect(() => {
+    setLocalSubcategory(selectedSubcategory || '');
+  }, [selectedSubcategory]);
+
+  useEffect(() => {
+    setLocalSize(selectedSize || '');
+  }, [selectedSize]);
+
+  useEffect(() => {
+    setLocalColor(selectedColor || '');
+  }, [selectedColor]);
 
   useEffect(() => {
     setLocalMinPrice(minPrice);
@@ -41,8 +61,28 @@ export const ProductFilters = ({
     setLocalMaxPrice(maxPrice);
   }, [maxPrice]);
 
-  const activeCategoryObj = categories.find((c) => c.slug === selectedCategory);
+  const activeCategoryObj = categories.find((c) => c.slug === localCategory);
   const subcategories = activeCategoryObj?.subcategories || [];
+
+  const handleApplyFilters = () => {
+    onFilterChange({
+      category: localCategory || undefined,
+      subcategory: localSubcategory || undefined,
+      size: localSize || undefined,
+      color: localColor || undefined,
+    });
+  };
+
+  const handleReset = () => {
+    setLocalCategory('');
+    setLocalSubcategory('');
+    setLocalSize('');
+    setLocalColor('');
+    setLocalMinPrice('');
+    setLocalMaxPrice('');
+    setPriceError('');
+    onResetFilters();
+  };
 
   const handleApplyPrice = (e) => {
     e.preventDefault();
@@ -78,7 +118,11 @@ export const ProductFilters = ({
       selectedSize ||
       selectedColor ||
       minPrice ||
-      maxPrice
+      maxPrice ||
+      localCategory ||
+      localSubcategory ||
+      localSize ||
+      localColor
   );
 
   return (
@@ -107,7 +151,7 @@ export const ProductFilters = ({
             size="small"
             color="secondary"
             startIcon={<FilterAltOffIcon fontSize="small" />}
-            onClick={onResetFilters}
+            onClick={handleReset}
             sx={{ fontSize: '0.8rem', textTransform: 'none' }}
           >
             Reset
@@ -145,7 +189,7 @@ export const ProductFilters = ({
         <AccordionDetails sx={{ px: 0, pt: 0, pb: 1.5 }}>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
             {categories.map((cat) => {
-              const isSelected = selectedCategory === cat.slug;
+              const isSelected = localCategory === cat.slug;
               return (
                 <Chip
                   key={cat.id}
@@ -154,12 +198,15 @@ export const ProductFilters = ({
                   color={isSelected ? 'primary' : 'default'}
                   variant={isSelected ? 'filled' : 'outlined'}
                   size="small"
-                  onClick={() =>
-                    onFilterChange({
-                      category: isSelected ? undefined : cat.slug,
-                      subcategory: undefined,
-                    })
-                  }
+                  onClick={() => {
+                    if (isSelected) {
+                      setLocalCategory('');
+                      setLocalSubcategory('');
+                    } else {
+                      setLocalCategory(cat.slug);
+                      setLocalSubcategory('');
+                    }
+                  }}
                 />
               );
             })}
@@ -180,7 +227,7 @@ export const ProductFilters = ({
             <AccordionDetails sx={{ px: 0, pt: 0, pb: 1.5 }}>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                 {subcategories.map((sub) => {
-                  const isSelected = selectedSubcategory === sub.slug;
+                  const isSelected = localSubcategory === sub.slug;
                   return (
                     <Chip
                       key={sub.id}
@@ -189,11 +236,9 @@ export const ProductFilters = ({
                       color={isSelected ? 'primary' : 'default'}
                       variant={isSelected ? 'filled' : 'outlined'}
                       size="small"
-                      onClick={() =>
-                        onFilterChange({
-                          subcategory: isSelected ? undefined : sub.slug,
-                        })
-                      }
+                      onClick={() => {
+                        setLocalSubcategory(isSelected ? '' : sub.slug);
+                      }}
                     />
                   );
                 })}
@@ -215,7 +260,7 @@ export const ProductFilters = ({
         <AccordionDetails sx={{ px: 0, pt: 0, pb: 1.5 }}>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
             {COMMON_SIZES.map((size) => {
-              const isSelected = selectedSize.toUpperCase() === size.toUpperCase();
+              const isSelected = localSize.toUpperCase() === size.toUpperCase();
               return (
                 <Chip
                   key={size}
@@ -224,11 +269,9 @@ export const ProductFilters = ({
                   color={isSelected ? 'primary' : 'default'}
                   variant={isSelected ? 'filled' : 'outlined'}
                   size="small"
-                  onClick={() =>
-                    onFilterChange({
-                      size: isSelected ? undefined : size,
-                    })
-                  }
+                  onClick={() => {
+                    setLocalSize(isSelected ? '' : size);
+                  }}
                   sx={{ minWidth: 38 }}
                 />
               );
@@ -249,7 +292,7 @@ export const ProductFilters = ({
         <AccordionDetails sx={{ px: 0, pt: 0, pb: 1.5 }}>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
             {COMMON_COLORS.map((color) => {
-              const isSelected = selectedColor.toLowerCase() === color.toLowerCase();
+              const isSelected = localColor.toLowerCase() === color.toLowerCase();
               return (
                 <Chip
                   key={color}
@@ -258,11 +301,9 @@ export const ProductFilters = ({
                   color={isSelected ? 'primary' : 'default'}
                   variant={isSelected ? 'filled' : 'outlined'}
                   size="small"
-                  onClick={() =>
-                    onFilterChange({
-                      color: isSelected ? undefined : color,
-                    })
-                  }
+                  onClick={() => {
+                    setLocalColor(isSelected ? '' : color);
+                  }}
                 />
               );
             })}
@@ -270,7 +311,21 @@ export const ProductFilters = ({
         </AccordionDetails>
       </Accordion>
 
-      <Divider sx={{ my: 1 }} />
+      {/* Apply Filters Button (Above Price Range) */}
+      <Box sx={{ my: 2 }}>
+        <Button
+          variant="contained"
+          color="primary"
+          fullWidth
+          size="medium"
+          onClick={handleApplyFilters}
+          sx={{ fontWeight: 600, py: 1 }}
+        >
+          Apply Filters
+        </Button>
+      </Box>
+
+      <Divider sx={{ my: 1.5 }} />
 
       {/* Price Range Filter */}
       <Accordion defaultExpanded disableGutters elevation={0} sx={{ '&:before': { display: 'none' } }}>
