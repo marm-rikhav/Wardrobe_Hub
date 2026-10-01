@@ -440,9 +440,9 @@ export const OrderDetail = () => {
 
   useEffect(() => {
     if (location.state?.orderJustPlaced) {
-      if (window.history.replaceState) {
-        window.history.replaceState(
-          { ...window.history.state, usr: null },
+      if (globalThis.history?.replaceState) {
+        globalThis.history.replaceState(
+          { ...globalThis.history.state, usr: null },
           document.title
         );
       }

@@ -361,9 +361,11 @@ const createNewVariant = async (tx, productId, v) => {
  * Remove or deactivate variants omitted from update payload
  */
 const removeOmittedVariants = async (tx, productId, incomingVariants) => {
-  const incomingIds = incomingVariants
-    .map((v) => v.id)
-    .filter(Boolean);
+  const incomingIds = new Set(
+    incomingVariants
+      .map((v) => v.id)
+      .filter(Boolean)
+  );
 
   const existingVariants = await tx.productVariant.findMany({
     where: { productId },
@@ -371,7 +373,7 @@ const removeOmittedVariants = async (tx, productId, incomingVariants) => {
   });
 
   const omittedVariants = existingVariants.filter(
-    (ev) => !incomingIds.includes(ev.id)
+    (ev) => !incomingIds.has(ev.id)
   );
 
   for (const v of omittedVariants) {

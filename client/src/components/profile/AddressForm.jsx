@@ -126,7 +126,7 @@ export const AddressForm = ({
                 helperText={errors.phone?.message}
                 {...register('phone', {
                   onChange: (e) => {
-                    e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10);
+                    e.target.value = e.target.value.replaceAll(/\D/g, '').slice(0, 10);
                   },
                 })}
               />
@@ -182,7 +182,7 @@ export const AddressForm = ({
                 helperText={errors.postalCode?.message}
                 {...register('postalCode', {
                   onChange: (e) => {
-                    e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6);
+                    e.target.value = e.target.value.replaceAll(/\D/g, '').slice(0, 6);
                   },
                 })}
               />
