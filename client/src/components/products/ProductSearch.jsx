@@ -7,7 +7,7 @@ import ClearIcon from '@mui/icons-material/Clear';
 export const ProductSearch = ({
   value = '',
   onChange,
-  placeholder = 'Search by product name or brand...',
+  placeholder = 'Search products, categories (e.g. mens jeans)...',
   sx = {},
 }) => {
   const [internalValue, setInternalValue] = useState(value);

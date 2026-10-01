@@ -101,6 +101,7 @@ export const ProfileForm = () => {
         fullWidth
         id="phone"
         label="Phone Number"
+        inputProps={{ maxLength: 10, inputMode: 'numeric' }}
         error={Boolean(errors.phone)}
         helperText={errors.phone?.message}
         {...register('phone')}

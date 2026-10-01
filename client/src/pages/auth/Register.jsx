@@ -10,7 +10,7 @@ export const Register = () => {
 
   useEffect(() => {
     if (!loading && isAuthenticated) {
-      navigate('/profile', { replace: true });
+      navigate('/products', { replace: true });
     }
   }, [isAuthenticated, loading, navigate]);
 
@@ -43,7 +43,7 @@ export const Register = () => {
           </Typography>
         </Box>
 
-        <RegisterForm onSuccess={() => navigate('/profile', { replace: true })} />
+        <RegisterForm onSuccess={() => navigate('/products', { replace: true })} />
 
         <Box sx={{ mt: 3, textAlign: 'center' }}>
           <Typography variant="body2" color="text.secondary">

@@ -9,7 +9,8 @@ export const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const from = location.state?.from?.pathname || '/profile';
+  const fromPath = location.state?.from?.pathname;
+  const from = fromPath && !fromPath.startsWith('/profile') ? fromPath : '/products';
 
   useEffect(() => {
     if (!loading && isAuthenticated) {

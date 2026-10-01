@@ -85,6 +85,7 @@ export const RegisterForm = ({ onSuccess }) => {
         id="phone"
         label="Phone Number (Optional)"
         autoComplete="tel"
+        inputProps={{ maxLength: 10, inputMode: 'numeric' }}
         error={Boolean(errors.phone)}
         helperText={errors.phone?.message}
         {...register('phone')}

@@ -135,36 +135,25 @@ export const Header = () => {
             <Box
               component={Link}
               to="/"
+              aria-label="Wardrobe Hub Home"
               sx={{
                 display: 'flex',
                 alignItems: 'center',
                 textDecoration: 'none',
-                color: 'text.primary',
                 mr: { xs: 'auto', md: 4 },
               }}
             >
               <Box
                 component="img"
                 src="/wardrobe_hub_logo.svg"
-                alt="Wardrobe Hub Logo"
-                sx={{ height: { xs: 32, md: 38 }, width: 'auto', mr: 1.5 }}
-                onError={(e) => {
-                  e.target.style.display = 'none';
+                alt="Wardrobe Hub"
+                sx={{
+                  height: { xs: 36, md: 44 },
+                  width: 'auto',
+                  display: 'block',
+                  objectFit: 'contain',
                 }}
               />
-              <Typography
-                variant="h6"
-                component="span"
-                sx={{
-                  fontFamily: '"Inter", sans-serif',
-                  fontWeight: 700,
-                  letterSpacing: '0.08em',
-                  fontSize: { xs: '1.05rem', md: '1.25rem' },
-                  color: 'primary.main',
-                }}
-              >
-                WARDROBE <Box component="span" sx={{ color: 'secondary.main' }}>HUB</Box>
-              </Typography>
             </Box>
 
             {/* Desktop Navigation Links */}
@@ -203,7 +192,7 @@ export const Header = () => {
                 <SearchIcon fontSize="small" />
               </SearchIconWrapper>
               <StyledInputBase
-                placeholder="Search clothing, brands..."
+                placeholder="Search products, categories (e.g. mens jeans)..."
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 inputProps={{ 'aria-label': 'search' }}
@@ -357,7 +346,7 @@ export const Header = () => {
               <InputBase
                 fullWidth
                 autoFocus
-                placeholder="Search clothing, brands..."
+                placeholder="Search products, categories (e.g. mens jeans)..."
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 sx={{
