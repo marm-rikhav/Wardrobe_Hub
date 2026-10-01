@@ -551,6 +551,7 @@ export const ProductFormPage = () => {
         {/* Form Actions Footer */}
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, pb: 4 }}>
           <Button
+            type="button"
             variant="outlined"
             color="inherit"
             onClick={() => navigate('/admin/products')}

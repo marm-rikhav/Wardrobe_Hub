@@ -183,6 +183,7 @@ export const VariantManager = ({
         </Box>
 
         <Button
+          type="button"
           variant="outlined"
           color="primary"
           size="small"
@@ -271,6 +272,7 @@ export const VariantManager = ({
                   <TableCell align="right">
                     <Tooltip title="Edit Variant">
                       <IconButton
+                        type="button"
                         size="small"
                         color="primary"
                         onClick={() => handleOpenEdit(index)}
@@ -283,6 +285,7 @@ export const VariantManager = ({
                     {/* Only allow removing unsaved variants or variants if more than 1 exists */}
                     <Tooltip title="Remove Variant">
                       <IconButton
+                        type="button"
                         size="small"
                         color="error"
                         onClick={() => handleRemoveVariant(index)}
@@ -311,7 +314,14 @@ export const VariantManager = ({
           {editingIndex === null ? 'Add Product Variant' : 'Edit Variant'}
         </DialogTitle>
 
-        <form onSubmit={handleSubmit(onSaveVariant)} noValidate>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleSubmit(onSaveVariant)(e);
+          }}
+          noValidate
+        >
           <DialogContent dividers sx={{ py: 2.5 }}>
             {variantFormError && (
               <Alert severity="error" sx={{ mb: 2 }}>
@@ -412,10 +422,19 @@ export const VariantManager = ({
           </DialogContent>
 
           <DialogActions sx={{ px: 3, py: 2 }}>
-            <Button onClick={handleCloseModal} color="inherit">
+            <Button type="button" onClick={handleCloseModal} color="inherit">
               Cancel
             </Button>
-            <Button type="submit" variant="contained" color="primary">
+            <Button
+              type="button"
+              variant="contained"
+              color="primary"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleSubmit(onSaveVariant)(e);
+              }}
+            >
               {editingIndex === null ? 'Add Variant' : 'Save Variant'}
             </Button>
           </DialogActions>
