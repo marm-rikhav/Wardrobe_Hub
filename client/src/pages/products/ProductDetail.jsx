@@ -17,6 +17,7 @@ import {
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import ShoppingBagOutlinedIcon from '@mui/icons-material/ShoppingBagOutlined';
+import FlashOnIcon from '@mui/icons-material/FlashOn';
 import productApi from '../../api/product.api.js';
 import ProductGallery from '../../components/products/ProductGallery.jsx';
 import VariantSelector from '../../components/products/VariantSelector.jsx';
@@ -43,6 +44,7 @@ export const ProductDetail = () => {
   const [selectedColor, setSelectedColor] = useState('');
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [buyNowLoading, setBuyNowLoading] = useState(false);
 
   const handleAddToCart = async () => {
     if (!selectedVariant) return;
@@ -65,6 +67,31 @@ export const ProductDetail = () => {
         message: `Added "${product.name}" (${selectedVariant.size}/${selectedVariant.color}) to cart!`,
         severity: 'success',
       });
+    }
+  };
+
+  const handleBuyNow = async () => {
+    if (!selectedVariant) return;
+
+    if (!isAuthenticated) {
+      navigate('/login', { state: { from: { pathname: '/checkout' } } });
+      return;
+    }
+
+    setBuyNowLoading(true);
+    try {
+      const resultAction = await addItem(selectedVariant.id, 1);
+      if (resultAction.error) {
+        setSnackbar({
+          open: true,
+          message: resultAction.payload || 'Failed to prepare order',
+          severity: 'error',
+        });
+      } else {
+        navigate('/checkout');
+      }
+    } finally {
+      setBuyNowLoading(false);
     }
   };
 
@@ -324,40 +351,87 @@ export const ProductDetail = () => {
                 </Box>
               </Paper>
 
-              {/* Add to Cart */}
+              {/* Action Buttons: Add to Cart & Buy Now */}
               <Box sx={{ mt: 1 }}>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  color="primary"
-                  size="large"
-                  onClick={handleAddToCart}
-                  disabled={
-                    !selectedVariant ||
-                    isOutOfStock ||
-                    isCombinationUnavailable ||
-                    actionLoading
-                  }
-                  startIcon={
-                    actionLoading ? (
-                      <CircularProgress size={20} color="inherit" />
-                    ) : (
-                      <ShoppingBagOutlinedIcon />
-                    )
-                  }
+                <Box
                   sx={{
-                    py: 1.8,
-                    fontWeight: 600,
-                    fontSize: '1rem',
-                    backgroundColor: 'primary.main',
+                    display: 'flex',
+                    flexDirection: { xs: 'column', sm: 'row' },
+                    gap: 1.5,
                   }}
                 >
-                  {addToCartButtonText}
-                </Button>
+                  <Button
+                    fullWidth
+                    variant="outlined"
+                    color="primary"
+                    size="large"
+                    onClick={handleAddToCart}
+                    disabled={
+                      !selectedVariant ||
+                      isOutOfStock ||
+                      isCombinationUnavailable ||
+                      actionLoading ||
+                      buyNowLoading
+                    }
+                    startIcon={
+                      actionLoading ? (
+                        <CircularProgress size={20} color="inherit" />
+                      ) : (
+                        <ShoppingBagOutlinedIcon />
+                      )
+                    }
+                    sx={{
+                      py: 1.6,
+                      fontWeight: 600,
+                      fontSize: '1rem',
+                      borderColor: 'primary.main',
+                      color: 'primary.main',
+                      '&:hover': {
+                        borderColor: 'primary.main',
+                        backgroundColor: 'rgba(17, 17, 17, 0.04)',
+                      },
+                    }}
+                  >
+                    {addToCartButtonText}
+                  </Button>
+
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    size="large"
+                    onClick={handleBuyNow}
+                    disabled={
+                      !selectedVariant ||
+                      isOutOfStock ||
+                      isCombinationUnavailable ||
+                      actionLoading ||
+                      buyNowLoading
+                    }
+                    startIcon={
+                      buyNowLoading ? (
+                        <CircularProgress size={20} color="inherit" />
+                      ) : (
+                        <FlashOnIcon />
+                      )
+                    }
+                    sx={{
+                      py: 1.6,
+                      fontWeight: 600,
+                      fontSize: '1rem',
+                      backgroundColor: 'primary.main',
+                      color: 'primary.contrastText',
+                      '&:hover': {
+                        backgroundColor: '#2a2a2a',
+                      },
+                    }}
+                  >
+                    {buyNowLoading ? 'Proceeding...' : 'Buy Now'}
+                  </Button>
+                </Box>
                 <Typography
                   variant="caption"
                   color="text.secondary"
-                  sx={{ display: 'block', textAlign: 'center', mt: 1 }}
+                  sx={{ display: 'block', textAlign: 'center', mt: 1.5 }}
                 >
                   Free shipping on orders over ₹1,999 · 14-day hassle-free returns
                 </Typography>

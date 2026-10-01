@@ -214,22 +214,20 @@ export const getAllProductsAdmin = async ({ page = 1, limit = 20, search, subcat
     }
   }
 
-  const [total, products] = await Promise.all([
-    prisma.product.count({ where }),
-    prisma.product.findMany({
-      where,
-      skip,
-      take: numericLimit,
-      orderBy: { createdAt: "desc" },
-      include: {
-        subcategory: {
-          include: { category: true },
-        },
-        variants: true,
-        images: { orderBy: { sortOrder: "asc" } },
+  const total = await prisma.product.count({ where });
+  const products = await prisma.product.findMany({
+    where,
+    skip,
+    take: numericLimit,
+    orderBy: { createdAt: "desc" },
+    include: {
+      subcategory: {
+        include: { category: true },
       },
-    }),
-  ]);
+      variants: true,
+      images: { orderBy: { sortOrder: "asc" } },
+    },
+  });
 
   return {
     products: products.map(formatProductPrices),
@@ -360,12 +358,56 @@ const createNewVariant = async (tx, productId, v) => {
 };
 
 /**
+ * Remove or deactivate variants omitted from update payload
+ */
+const removeOmittedVariants = async (tx, productId, incomingVariants) => {
+  const incomingIds = incomingVariants
+    .map((v) => v.id)
+    .filter(Boolean);
+
+  const existingVariants = await tx.productVariant.findMany({
+    where: { productId },
+    select: { id: true },
+  });
+
+  const omittedVariants = existingVariants.filter(
+    (ev) => !incomingIds.includes(ev.id)
+  );
+
+  for (const v of omittedVariants) {
+    const orderCount = await tx.orderItem.count({
+      where: { variantId: v.id },
+    });
+
+    // Remove from active cart items
+    await tx.cartItem.deleteMany({
+      where: { variantId: v.id },
+    });
+
+    if (orderCount > 0) {
+      // Historical orders exist: preserve row for audit/invoices, deactivate and zero stock
+      await tx.productVariant.update({
+        where: { id: v.id },
+        data: { isActive: false, stock: 0 },
+      });
+    } else {
+      // No orders placed: safely delete completely
+      await tx.productVariant.delete({
+        where: { id: v.id },
+      });
+    }
+  }
+};
+
+/**
  * Process all variants for a product update
  */
 const processVariantsUpdate = async (tx, productId, variants) => {
   if (!Array.isArray(variants)) {
     return;
   }
+
+  await removeOmittedVariants(tx, productId, variants);
 
   for (const v of variants) {
     validateVariantStock(v);
@@ -740,27 +782,25 @@ export const getPublicProducts = async ({
   });
   const orderBy = buildProductOrderBy(sort);
 
-  const [total, products] = await Promise.all([
-    prisma.product.count({ where }),
-    prisma.product.findMany({
-      where,
-      skip,
-      take,
-      orderBy,
-      include: {
-        subcategory: {
-          include: { category: true },
-        },
-        variants: {
-          where: { isActive: true },
-          orderBy: [{ color: "asc" }, { size: "asc" }],
-        },
-        images: {
-          orderBy: { sortOrder: "asc" },
-        },
+  const total = await prisma.product.count({ where });
+  const products = await prisma.product.findMany({
+    where,
+    skip,
+    take,
+    orderBy,
+    include: {
+      subcategory: {
+        include: { category: true },
       },
-    }),
-  ]);
+      variants: {
+        where: { isActive: true },
+        orderBy: [{ color: "asc" }, { size: "asc" }],
+      },
+      images: {
+        orderBy: { sortOrder: "asc" },
+      },
+    },
+  });
 
   return {
     products: products.map(formatProductPrices),

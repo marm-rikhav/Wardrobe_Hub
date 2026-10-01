@@ -168,14 +168,13 @@ export const getAllReturnRequestsAdmin = async ({ status, type, page, limit }) =
   const skip = numericPage && numericLimit ? (numericPage - 1) * numericLimit : undefined;
   const take = numericLimit;
 
-  const [total, requests] = await Promise.all([
-    prisma.returnRequest.count({ where }),
-    prisma.returnRequest.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-      skip,
-      take,
-      include: {
+  const total = await prisma.returnRequest.count({ where });
+  const requests = await prisma.returnRequest.findMany({
+    where,
+    orderBy: { createdAt: "desc" },
+    skip,
+    take,
+    include: {
         order: {
           select: {
             id: true,
@@ -195,8 +194,7 @@ export const getAllReturnRequestsAdmin = async ({ status, type, page, limit }) =
           },
         },
       },
-    }),
-  ]);
+    });
 
   return {
     requests: requests.map(formatReturnRequest),

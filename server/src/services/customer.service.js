@@ -22,27 +22,25 @@ export const getAllCustomersAdmin = async ({ page = 1, limit = 20, search }) => 
     ];
   }
 
-  const [total, customers] = await Promise.all([
-    prisma.user.count({ where }),
-    prisma.user.findMany({
-      where,
-      skip,
-      take: numericLimit,
-      orderBy: { createdAt: "desc" },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        phone: true,
-        role: true,
-        isActive: true,
-        createdAt: true,
-        _count: {
-          select: { orders: true },
-        },
+  const total = await prisma.user.count({ where });
+  const customers = await prisma.user.findMany({
+    where,
+    skip,
+    take: numericLimit,
+    orderBy: { createdAt: "desc" },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      phone: true,
+      role: true,
+      isActive: true,
+      createdAt: true,
+      _count: {
+        select: { orders: true },
       },
-    }),
-  ]);
+    },
+  });
 
   return {
     customers: customers.map((c) => ({

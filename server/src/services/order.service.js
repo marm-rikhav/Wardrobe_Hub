@@ -402,16 +402,14 @@ export const getAllOrdersAdmin = async ({ status, page, limit }) => {
   const skip = numericPage && numericLimit ? (numericPage - 1) * numericLimit : undefined;
   const take = numericLimit;
 
-  const [total, orders] = await Promise.all([
-    prisma.order.count({ where }),
-    prisma.order.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-      skip,
-      take,
-      include: adminOrderIncludeOptions,
-    }),
-  ]);
+  const total = await prisma.order.count({ where });
+  const orders = await prisma.order.findMany({
+    where,
+    orderBy: { createdAt: "desc" },
+    skip,
+    take,
+    include: adminOrderIncludeOptions,
+  });
 
   return {
     orders: orders.map(formatOrder),
