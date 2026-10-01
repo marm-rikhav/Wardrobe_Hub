@@ -14,6 +14,7 @@ import {
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import FilterAltOffIcon from '@mui/icons-material/FilterAltOff';
 import { COMMON_SIZES, COMMON_COLORS } from '../../utils/constants.js';
+import ProductSort from './ProductSort.jsx';
 
 export const ProductFilters = ({
   categories = [],
@@ -23,11 +24,14 @@ export const ProductFilters = ({
   selectedColor = '',
   minPrice = '',
   maxPrice = '',
+  selectedSort = 'newest',
+  onSortChange,
   onFilterChange,
   onResetFilters,
 }) => {
   const [localMinPrice, setLocalMinPrice] = useState(minPrice);
   const [localMaxPrice, setLocalMaxPrice] = useState(maxPrice);
+  const [priceError, setPriceError] = useState('');
 
   useEffect(() => {
     setLocalMinPrice(minPrice);
@@ -42,6 +46,26 @@ export const ProductFilters = ({
 
   const handleApplyPrice = (e) => {
     e.preventDefault();
+    setPriceError('');
+
+    const min = localMinPrice !== '' && localMinPrice !== undefined && localMinPrice !== null ? Number(localMinPrice) : null;
+    const max = localMaxPrice !== '' && localMaxPrice !== undefined && localMaxPrice !== null ? Number(localMaxPrice) : null;
+
+    if (min !== null && min < 0) {
+      setPriceError('Min price cannot be negative');
+      return;
+    }
+
+    if (max !== null && max < 0) {
+      setPriceError('Max price cannot be negative');
+      return;
+    }
+
+    if (min !== null && max !== null && max < min) {
+      setPriceError('Max price cannot be less than Min price');
+      return;
+    }
+
     onFilterChange({
       minPrice: localMinPrice || undefined,
       maxPrice: localMaxPrice || undefined,
@@ -90,6 +114,26 @@ export const ProductFilters = ({
           </Button>
         )}
       </Box>
+
+      {/* Sort By Dropdown */}
+      {onSortChange && (
+        <Box sx={{ mb: 2 }}>
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{ display: 'block', mb: 0.8, fontWeight: 700, letterSpacing: '0.05em' }}
+          >
+            SORT BY
+          </Typography>
+          <ProductSort
+            value={selectedSort}
+            onChange={onSortChange}
+            sx={{ width: '100%' }}
+          />
+        </Box>
+      )}
+
+      <Divider sx={{ mb: 1.5 }} />
 
       {/* Category Accordion */}
       <Accordion defaultExpanded disableGutters elevation={0} sx={{ '&:before': { display: 'none' } }}>
@@ -237,14 +281,18 @@ export const ProductFilters = ({
         </AccordionSummary>
         <AccordionDetails sx={{ px: 0, pt: 0, pb: 1.5 }}>
           <Box component="form" onSubmit={handleApplyPrice}>
-            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1.5 }}>
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1 }}>
               <TextField
                 size="small"
                 type="number"
                 placeholder="Min"
                 value={localMinPrice}
-                onChange={(e) => setLocalMinPrice(e.target.value)}
-                inputProps={{ min: 0 }}
+                onChange={(e) => {
+                  setLocalMinPrice(e.target.value);
+                  if (priceError) setPriceError('');
+                }}
+                error={Boolean(priceError)}
+                inputProps={{ min: 0, 'aria-label': 'Minimum Price' }}
                 sx={{ backgroundColor: 'background.default' }}
               />
               <Typography variant="body2" color="text.secondary">
@@ -255,11 +303,24 @@ export const ProductFilters = ({
                 type="number"
                 placeholder="Max"
                 value={localMaxPrice}
-                onChange={(e) => setLocalMaxPrice(e.target.value)}
-                inputProps={{ min: 0 }}
+                onChange={(e) => {
+                  setLocalMaxPrice(e.target.value);
+                  if (priceError) setPriceError('');
+                }}
+                error={Boolean(priceError)}
+                inputProps={{ min: 0, 'aria-label': 'Maximum Price' }}
                 sx={{ backgroundColor: 'background.default' }}
               />
             </Box>
+            {priceError && (
+              <Typography
+                variant="caption"
+                color="error"
+                sx={{ display: 'block', mb: 1.5, fontWeight: 500 }}
+              >
+                {priceError}
+              </Typography>
+            )}
             <Button
               type="submit"
               variant="outlined"
@@ -297,6 +358,8 @@ ProductFilters.propTypes = {
   selectedColor: PropTypes.string,
   minPrice: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   maxPrice: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  selectedSort: PropTypes.string,
+  onSortChange: PropTypes.func,
   onFilterChange: PropTypes.func.isRequired,
   onResetFilters: PropTypes.func.isRequired,
 };

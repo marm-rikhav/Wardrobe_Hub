@@ -16,8 +16,6 @@ import CloseIcon from '@mui/icons-material/Close';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import ProductGrid from '../../components/products/ProductGrid.jsx';
 import ProductFilters from '../../components/products/ProductFilters.jsx';
-import ProductSearch from '../../components/products/ProductSearch.jsx';
-import ProductSort from '../../components/products/ProductSort.jsx';
 import Pagination from '../../components/common/Pagination.jsx';
 import { useProducts } from '../../hooks/useProducts.js';
 import { useCategories } from '../../hooks/useCategories.js';
@@ -75,10 +73,6 @@ export const ProductListing = () => {
     setMobileFilterOpen(false);
   };
 
-  const handleSearchChange = (keyword) => {
-    updateQuery({ search: keyword }, true);
-  };
-
   const handleSortChange = (newSort) => {
     updateQuery({ sort: newSort }, false);
   };
@@ -132,14 +126,12 @@ export const ProductListing = () => {
           )}
         </Breadcrumbs>
 
-        {/* Page Title & Search / Sort Header */}
+        {/* Page Title & Mobile Filter Trigger */}
         <Box
           sx={{
             display: 'flex',
-            flexDirection: { xs: 'column', md: 'row' },
             justifyContent: 'space-between',
-            alignItems: { xs: 'stretch', md: 'center' },
-            gap: 2,
+            alignItems: 'center',
             mb: 4,
           }}
         >
@@ -152,50 +144,18 @@ export const ProductListing = () => {
             </Typography>
           </Box>
 
-          <Box
+          <Button
+            variant="outlined"
+            color="inherit"
+            startIcon={<TuneIcon />}
+            onClick={() => setMobileFilterOpen(true)}
             sx={{
-              display: 'flex',
-              flexDirection: { xs: 'column', sm: 'row' },
-              alignItems: 'center',
-              gap: 1.5,
+              display: { xs: 'inline-flex', md: 'none' },
+              backgroundColor: 'background.paper',
             }}
           >
-            <Box sx={{ width: { xs: '100%', sm: 260 } }}>
-              <ProductSearch
-                value={queryParams.search}
-                onChange={handleSearchChange}
-              />
-            </Box>
-
-            <Box
-              sx={{
-                display: 'flex',
-                gap: 1.5,
-                width: { xs: '100%', sm: 'auto' },
-                justifyContent: 'space-between',
-              }}
-            >
-              <Button
-                variant="outlined"
-                color="inherit"
-                startIcon={<TuneIcon />}
-                onClick={() => setMobileFilterOpen(true)}
-                sx={{
-                  display: { xs: 'inline-flex', md: 'none' },
-                  flexGrow: { xs: 1, sm: 0 },
-                  backgroundColor: 'background.paper',
-                }}
-              >
-                Filters
-              </Button>
-
-              <ProductSort
-                value={queryParams.sort}
-                onChange={handleSortChange}
-                sx={{ flexGrow: { xs: 1, sm: 0 } }}
-              />
-            </Box>
-          </Box>
+            Filters & Sort
+          </Button>
         </Box>
 
         {/* Layout: Sidebar Filters | Product Grid */}
@@ -211,6 +171,8 @@ export const ProductListing = () => {
                 selectedColor={queryParams.color}
                 minPrice={queryParams.minPrice}
                 maxPrice={queryParams.maxPrice}
+                selectedSort={queryParams.sort}
+                onSortChange={handleSortChange}
                 onFilterChange={handleFilterChange}
                 onResetFilters={handleResetFilters}
               />
@@ -274,6 +236,8 @@ export const ProductListing = () => {
           selectedColor={queryParams.color}
           minPrice={queryParams.minPrice}
           maxPrice={queryParams.maxPrice}
+          selectedSort={queryParams.sort}
+          onSortChange={handleSortChange}
           onFilterChange={handleFilterChange}
           onResetFilters={handleResetFilters}
         />
