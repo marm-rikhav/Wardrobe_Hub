@@ -1,9 +1,7 @@
-// Wardrobe Hub: Material UI theme (black and beige)
-// Shared theme definition for client and admin applications
+// Wardrobe Hub: Material UI theme configuration (black and beige)
+// Shared theme options for client and admin applications
 
-import { createTheme } from '@mui/material/styles';
-
-const theme = createTheme({
+export const themeOptions = {
   palette: {
     mode: 'light',
     primary: { main: '#111111', contrastText: '#F5F1EB' },   // main: black
@@ -29,6 +27,6 @@ const theme = createTheme({
       },
     },
   },
-});
+};
 
-export default theme;
+export default themeOptions;

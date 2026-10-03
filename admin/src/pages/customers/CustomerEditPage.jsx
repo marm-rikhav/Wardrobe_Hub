@@ -203,9 +203,6 @@ export const CustomerEditPage = () => {
               <Typography variant="h5" component="h1" fontWeight={700}>
                 Edit Customer
               </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Customer ID: {id} • Update user profile and address together
-              </Typography>
             </Box>
           </Box>
 
