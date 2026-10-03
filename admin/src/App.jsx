@@ -15,6 +15,9 @@ import Orders from './pages/Orders.jsx';
 import OrderDetail from './pages/orders/OrderDetail.jsx';
 import ReturnRequests from './pages/returns/ReturnRequests.jsx';
 import Customers from './pages/Customers.jsx';
+import CreateCustomerPage from './pages/customers/CreateCustomerPage.jsx';
+import CustomerDetailPage from './pages/customers/CustomerDetailPage.jsx';
+import CustomerEditPage from './pages/customers/CustomerEditPage.jsx';
 import Settings from './pages/Settings.jsx';
 
 export function App() {
@@ -58,6 +61,9 @@ export function App() {
 
             {/* Customers & Settings */}
             <Route path="customers" element={<Customers />} />
+            <Route path="customers/create" element={<CreateCustomerPage />} />
+            <Route path="customers/:id" element={<CustomerDetailPage />} />
+            <Route path="customers/:id/edit" element={<CustomerEditPage />} />
             <Route path="settings" element={<Settings />} />
           </Route>
 

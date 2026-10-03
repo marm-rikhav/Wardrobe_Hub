@@ -24,6 +24,7 @@ const PAGE_TITLES = {
   '/admin/stock': 'Variant Stock Management',
   '/admin/orders': 'Orders',
   '/admin/customers': 'Customers',
+  '/admin/customers/create': 'Create Customer',
   '/admin/settings': 'Settings',
 };
 
@@ -34,6 +35,12 @@ export const Topbar = ({ onToggleMobile, onToggleCollapse, collapsed, isMobile }
   const getPageTitle = () => {
     if (location.pathname.startsWith('/admin/products/') && location.pathname.endsWith('/edit')) {
       return 'Edit Product';
+    }
+    if (location.pathname.startsWith('/admin/customers/') && location.pathname.endsWith('/edit')) {
+      return 'Edit Customer';
+    }
+    if (location.pathname.startsWith('/admin/customers/') && location.pathname !== '/admin/customers/create') {
+      return 'Customer Details';
     }
     return PAGE_TITLES[location.pathname] || 'Admin Panel';
   };

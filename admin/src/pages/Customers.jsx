@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Box,
   Typography,
@@ -21,6 +22,7 @@ import {
   TablePagination,
   IconButton,
   Tooltip,
+  Snackbar,
 } from '@mui/material';
 import {
   PersonAddOutlined,
@@ -30,17 +32,36 @@ import {
   PeopleOutline as PeopleOutlineIcon,
   EmailOutlined,
   PhoneOutlined,
-  OpenInNew as OpenInNewIcon,
+  VisibilityOutlined,
+  EditOutlined,
+  DeleteOutline,
+  CheckCircleOutline,
+  BlockOutlined,
 } from '@mui/icons-material';
 import customerService from '../services/customerService.js';
+import DeleteConfirmDialog from '../components/common/DeleteConfirmDialog.jsx';
 
 export const Customers = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [customers, setCustomers] = useState([]);
   const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchInput, setSearchInput] = useState('');
   const [activeSearch, setActiveSearch] = useState('');
+
+  // Delete action states
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [customerToDelete, setCustomerToDelete] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  const [snackbar, setSnackbar] = useState({
+    open: Boolean(location.state?.message),
+    message: location.state?.message || '',
+    severity: 'success',
+  });
 
   const fetchCustomers = useCallback(async () => {
     setLoading(true);
@@ -93,15 +114,59 @@ export const Customers = () => {
     setPagination((prev) => ({ ...prev, limit: newLimit, page: 1 }));
   };
 
-  /**
-   * Requirement 2: The Create Customer action redirects the admin to the
-   * storefront customer registration/create-account page.
-   */
-  const handleCreateCustomer = () => {
-    const storefrontBaseUrl =
-      import.meta.env.VITE_STOREFRONT_URL || 'http://localhost:3000';
-    const registerUrl = `${storefrontBaseUrl.replace(/\/$/, '')}/register`;
-    window.open(registerUrl, '_blank', 'noopener,noreferrer');
+  const handleToggleStatus = async (customer) => {
+    const nextStatus = !customer.isActive;
+    try {
+      await customerService.toggleCustomerStatus(customer.id, nextStatus);
+      setSnackbar({
+        open: true,
+        message: nextStatus
+          ? `Customer "${customer.name || customer.email}" activated successfully.`
+          : `Customer "${customer.name || customer.email}" deactivated. Login access is now restricted.`,
+        severity: 'success',
+      });
+      fetchCustomers();
+    } catch (err) {
+      setSnackbar({
+        open: true,
+        message: err.response?.data?.message || 'Failed to update customer status.',
+        severity: 'error',
+      });
+    }
+  };
+
+  const handleOpenDelete = (customer) => {
+    setCustomerToDelete(customer);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!customerToDelete) return;
+    setDeleteLoading(true);
+    try {
+      await customerService.deleteCustomer(customerToDelete.id);
+      setSnackbar({
+        open: true,
+        message: `Customer "${customerToDelete.name || customerToDelete.email}" deleted successfully.`,
+        severity: 'success',
+      });
+      setDeleteDialogOpen(false);
+      setCustomerToDelete(null);
+      fetchCustomers();
+    } catch (err) {
+      setSnackbar({
+        open: true,
+        message: err.response?.data?.message || 'Failed to delete customer.',
+        severity: 'error',
+      });
+      setDeleteDialogOpen(false);
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
   const formatDate = (dateString) => {
@@ -176,17 +241,14 @@ export const Customers = () => {
             Refresh
           </Button>
 
-          <Tooltip title="Opens customer registration page in storefront">
-            <Button
-              variant="contained"
-              color="primary"
-              startIcon={<PersonAddOutlined />}
-              endIcon={<OpenInNewIcon sx={{ fontSize: 16 }} />}
-              onClick={handleCreateCustomer}
-            >
-              Create Customer
-            </Button>
-          </Tooltip>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<PersonAddOutlined />}
+            onClick={() => navigate('/admin/customers/create')}
+          >
+            Create Customer
+          </Button>
         </Box>
       </Box>
 
@@ -257,14 +319,15 @@ export const Customers = () => {
         {customersContent || (
           <>
             <TableContainer component={Paper} elevation={0}>
-              <Table sx={{ minWidth: 650 }}>
+              <Table sx={{ minWidth: 800 }}>
                 <TableHead>
                   <TableRow sx={{ bgcolor: 'rgba(191, 168, 138, 0.08)' }}>
                     <TableCell sx={{ fontWeight: 600 }}>Customer</TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>Contact Details</TableCell>
                     <TableCell align="center" sx={{ fontWeight: 600 }}>Orders Placed</TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>Joined Date</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 600 }}>Status</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 600 }}>Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -336,7 +399,7 @@ export const Customers = () => {
                       </TableCell>
 
                       {/* Status */}
-                      <TableCell align="right">
+                      <TableCell>
                         <Chip
                           size="small"
                           label={customer.isActive ? 'ACTIVE' : 'INACTIVE'}
@@ -347,6 +410,64 @@ export const Customers = () => {
                             color: customer.isActive ? '#2F7D4F' : '#C0392B',
                           }}
                         />
+                      </TableCell>
+
+                      {/* Actions */}
+                      <TableCell align="right">
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 0.5 }}>
+                          <Tooltip title="View Customer Details">
+                            <IconButton
+                              size="small"
+                              color="primary"
+                              onClick={() => navigate(`/admin/customers/${customer.id}`)}
+                            >
+                              <VisibilityOutlined fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+
+                          <Tooltip title="Edit Customer">
+                            <IconButton
+                              size="small"
+                              color="info"
+                              onClick={() => navigate(`/admin/customers/${customer.id}/edit`)}
+                            >
+                              <EditOutlined fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+
+                          <Tooltip title={customer.isActive ? 'Deactivate Customer' : 'Activate Customer'}>
+                            <IconButton
+                              size="small"
+                              color={customer.isActive ? 'warning' : 'success'}
+                              onClick={() => handleToggleStatus(customer)}
+                            >
+                              {customer.isActive ? (
+                                <BlockOutlined fontSize="small" />
+                              ) : (
+                                <CheckCircleOutline fontSize="small" />
+                              )}
+                            </IconButton>
+                          </Tooltip>
+
+                          <Tooltip
+                            title={
+                              customer.totalOrders > 0
+                                ? 'Cannot delete customer with order history (deactivate instead)'
+                                : 'Delete Customer'
+                            }
+                          >
+                            <span>
+                              <IconButton
+                                size="small"
+                                color="error"
+                                disabled={customer.totalOrders > 0}
+                                onClick={() => handleOpenDelete(customer)}
+                              >
+                                <DeleteOutline fontSize="small" />
+                              </IconButton>
+                            </span>
+                          </Tooltip>
+                        </Box>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -367,6 +488,34 @@ export const Customers = () => {
           </>
         )}
       </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        title="Delete Customer Account"
+        itemName={customerToDelete ? `${customerToDelete.name} (${customerToDelete.email})` : ''}
+        message="Are you sure you want to permanently delete this customer account? This action cannot be undone."
+        loading={deleteLoading}
+        onClose={() => setDeleteDialogOpen(false)}
+        onConfirm={handleConfirmDelete}
+      />
+
+      {/* Feedback Snackbar */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4500}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          variant="filled"
+          sx={{ width: '100%', fontWeight: 600 }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
