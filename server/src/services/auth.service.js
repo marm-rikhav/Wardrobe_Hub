@@ -72,8 +72,7 @@ export const login = async ({ email, password }) => {
     where: { email },
   });
 
-  // Use generic message to prevent email enumeration
-  if (!user?.isActive) {
+  if (!user) {
     throw new ApiError(401, "Invalid email or password");
   }
 
@@ -82,6 +81,14 @@ export const login = async ({ email, password }) => {
 
   if (!isPasswordValid) {
     throw new ApiError(401, "Invalid email or password");
+  }
+
+  // Check if account has been deactivated by admin
+  if (!user.isActive) {
+    throw new ApiError(
+      403,
+      "Your account has been deactivated. Please email the admin at admin@wardrobehub.com to activate your account."
+    );
   }
 
   // Generate tokens
