@@ -19,7 +19,7 @@ import {
   ReceiptLongOutlined,
   CreditCardOutlined,
 } from '@mui/icons-material';
-import orderService from '../../services/orderService.js';
+import { useOrderDetail } from '../../hooks/index.js';
 import OrderStatusChip from '../../components/orders/OrderStatusChip.jsx';
 import OrderItems from '../../components/orders/OrderItems.jsx';
 import CustomerInfoCard from '../../components/orders/CustomerInfoCard.jsx';
@@ -50,10 +50,13 @@ export const OrderDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [order, setOrder] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [error, setError] = useState(null);
+  const {
+    order,
+    loading,
+    updating: isUpdating,
+    error,
+    updateOrderStatus,
+  } = useOrderDetail(id);
 
   // Feedback Snackbar
   const [snackbar, setSnackbar] = useState({
@@ -70,36 +73,13 @@ export const OrderDetail = () => {
     setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
-  const fetchOrderDetail = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await orderService.getOrderById(id);
-      setOrder(data);
-    } catch (err) {
-      const msg = err.response?.data?.message || 'Failed to load order details';
-      setError(msg);
-      showSnackbar(msg, 'error');
-    } finally {
-      setLoading(false);
-    }
-  }, [id]);
-
-  useEffect(() => {
-    fetchOrderDetail();
-  }, [fetchOrderDetail]);
-
   const handleUpdateStatus = async (newStatus) => {
-    setIsUpdating(true);
     try {
-      const updatedOrder = await orderService.updateOrderStatus(id, newStatus);
-      setOrder(updatedOrder);
+      await updateOrderStatus(newStatus);
       showSnackbar(`Order status updated to ${newStatus}!`);
     } catch (err) {
       const msg = err.response?.data?.message || 'Failed to update order status';
       showSnackbar(msg, 'error');
-    } finally {
-      setIsUpdating(false);
     }
   };
 

@@ -14,10 +14,10 @@ import {
   EmailOutlined,
   BadgeOutlined,
 } from '@mui/icons-material';
-import useAuth from '../hooks/useAuth.js';
+import { useSettings } from '../hooks/index.js';
 
 export const Settings = () => {
-  const { user, loading } = useAuth();
+  const { user, loading } = useSettings();
 
   return (
     <Box sx={{ width: '100%', maxWidth: 800, mx: 'auto' }}>

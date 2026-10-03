@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Box,
   Typography,
@@ -15,13 +15,19 @@ import {
   Search as SearchIcon,
   Refresh as RefreshIcon,
 } from '@mui/icons-material';
-import categoryService from '../../services/categoryService.js';
+import { useCategories } from '../../hooks/index.js';
 import CategoryTable from '../../components/categories/CategoryTable.jsx';
 import CategoryDialog from '../../components/categories/CategoryDialog.jsx';
 
 export const Categories = () => {
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const {
+    categories,
+    loading,
+    refetch: fetchCategories,
+    createCategory,
+    updateCategory,
+    toggleCategoryStatus,
+  } = useCategories();
   const [searchQuery, setSearchQuery] = useState('');
 
   // Dialog State
@@ -36,25 +42,6 @@ export const Categories = () => {
     message: '',
     severity: 'success',
   });
-
-  const fetchCategories = async () => {
-    setLoading(true);
-    try {
-      const data = await categoryService.getAllCategories();
-      setCategories(data);
-    } catch (err) {
-      showSnackbar(
-        err.response?.data?.message || 'Failed to load categories',
-        'error'
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchCategories();
-  }, []);
 
   const showSnackbar = (message, severity = 'success') => {
     setSnackbar({ open: true, message, severity });
@@ -87,14 +74,13 @@ export const Categories = () => {
     setDialogError(null);
     try {
       if (editingCategory) {
-        await categoryService.updateCategory(editingCategory.id, formData);
+        await updateCategory(editingCategory.id, formData);
         showSnackbar(`Category "${formData.name}" updated successfully!`);
       } else {
-        await categoryService.createCategory(formData);
+        await createCategory(formData);
         showSnackbar(`Category "${formData.name}" created successfully!`);
       }
       handleCloseDialog();
-      fetchCategories();
     } catch (err) {
       const msg =
         err.response?.data?.message ||
@@ -108,11 +94,10 @@ export const Categories = () => {
   const handleToggleStatus = async (category) => {
     const nextStatus = !category.isActive;
     try {
-      await categoryService.toggleCategoryStatus(category.id, nextStatus);
+      await toggleCategoryStatus(category.id, nextStatus);
       showSnackbar(
         `Category "${category.name}" ${nextStatus ? 'activated' : 'deactivated'} successfully!`
       );
-      fetchCategories();
     } catch (err) {
       showSnackbar(
         err.response?.data?.message || 'Failed to update category status',

@@ -36,7 +36,7 @@ import {
   DeleteOutline,
   OpenInNew as OpenInNewIcon,
 } from '@mui/icons-material';
-import customerService from '../../services/customerService.js';
+import { useCustomer } from '../../hooks/index.js';
 import { formatCurrency, formatOrderDate, ORDER_STATUS_COLORS } from '../../utils/orderConstants.js';
 import AddressEditDialog from '../../components/customers/AddressEditDialog.jsx';
 import DeleteConfirmDialog from '../../components/common/DeleteConfirmDialog.jsx';
@@ -46,9 +46,14 @@ export const CustomerDetailPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [customer, setCustomer] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const {
+    customer,
+    loading,
+    error,
+    toggleStatus,
+    updateAddress,
+    deleteCustomer,
+  } = useCustomer(id);
 
   // Address edit state
   const [selectedAddress, setSelectedAddress] = useState(null);
@@ -66,32 +71,11 @@ export const CustomerDetailPage = () => {
     severity: 'success',
   });
 
-  const fetchCustomer = useCallback(async () => {
-    if (!id) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const rawData = await customerService.getCustomerById(id);
-      const data = rawData?.customer || rawData;
-      setCustomer(data);
-    } catch (err) {
-      setError(
-        err.response?.data?.message || 'Failed to load customer profile details.'
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [id]);
-
-  useEffect(() => {
-    fetchCustomer();
-  }, [fetchCustomer]);
-
   const handleToggleStatus = async () => {
     if (!customer) return;
     const nextStatus = !customer.isActive;
     try {
-      await customerService.toggleCustomerStatus(customer.id, nextStatus);
+      await toggleStatus(nextStatus);
       setSnackbar({
         open: true,
         message: nextStatus
@@ -99,7 +83,6 @@ export const CustomerDetailPage = () => {
           : `Customer "${customer.name || customer.email}" deactivated. Login access is now restricted.`,
         severity: 'success',
       });
-      setCustomer((prev) => (prev ? { ...prev, isActive: nextStatus } : prev));
     } catch (err) {
       setSnackbar({
         open: true,
@@ -118,28 +101,7 @@ export const CustomerDetailPage = () => {
     if (!customer || !selectedAddress) return;
     setAddressSaving(true);
     try {
-      const rawUpdated = await customerService.updateCustomerAddress(
-        customer.id,
-        selectedAddress.id,
-        addressData
-      );
-      const updatedAddr = rawUpdated?.address || rawUpdated || addressData;
-
-      setCustomer((prev) => {
-        if (!prev) return prev;
-        const currentAddresses = prev.addresses || [];
-        const updatedList = currentAddresses.map((a) => {
-          if (a.id === selectedAddress.id) {
-            return { ...a, ...updatedAddr };
-          }
-          if (addressData.isDefault) {
-            return { ...a, isDefault: false };
-          }
-          return a;
-        });
-        return { ...prev, addresses: updatedList };
-      });
-
+      await updateAddress(selectedAddress.id, addressData);
       setAddressDialogOpen(false);
       setSelectedAddress(null);
       setSnackbar({
@@ -162,7 +124,7 @@ export const CustomerDetailPage = () => {
     if (!customer) return;
     setDeleteLoading(true);
     try {
-      await customerService.deleteCustomer(customer.id);
+      await deleteCustomer();
       navigate('/admin/customers', {
         state: {
           message: `Customer "${customer.name || customer.email}" deleted successfully.`,

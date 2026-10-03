@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Box,
   Typography,
@@ -20,17 +20,24 @@ import {
   Search as SearchIcon,
   Refresh as RefreshIcon,
 } from '@mui/icons-material';
-import subcategoryService from '../../services/subcategoryService.js';
-import categoryService from '../../services/categoryService.js';
+import { useSubcategories } from '../../hooks/index.js';
 import SubcategoryTable from '../../components/subcategories/SubcategoryTable.jsx';
 import SubcategoryDialog from '../../components/subcategories/SubcategoryDialog.jsx';
 import DeleteConfirmDialog from '../../components/common/DeleteConfirmDialog.jsx';
 
 export const Subcategories = () => {
-  const [subcategories, setSubcategories] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedCategoryId, setSelectedCategoryId] = useState('');
+  const {
+    subcategories,
+    categories,
+    selectedCategoryId,
+    setSelectedCategoryId,
+    loading,
+    refetch: fetchData,
+    createSubcategory,
+    updateSubcategory,
+    deleteSubcategory,
+    toggleSubcategoryStatus,
+  } = useSubcategories();
   const [searchQuery, setSearchQuery] = useState('');
 
   // Dialog State
@@ -50,29 +57,6 @@ export const Subcategories = () => {
     message: '',
     severity: 'success',
   });
-
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const [subsData, catsData] = await Promise.all([
-        subcategoryService.getAllSubcategories(selectedCategoryId || undefined),
-        categoryService.getAllCategories(),
-      ]);
-      setSubcategories(subsData);
-      setCategories(catsData);
-    } catch (err) {
-      showSnackbar(
-        err.response?.data?.message || 'Failed to load subcategories',
-        'error'
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, [selectedCategoryId]);
 
   const showSnackbar = (message, severity = 'success') => {
     setSnackbar({ open: true, message, severity });
@@ -105,14 +89,13 @@ export const Subcategories = () => {
     setDialogError(null);
     try {
       if (editingSubcategory) {
-        await subcategoryService.updateSubcategory(editingSubcategory.id, formData);
+        await updateSubcategory(editingSubcategory.id, formData);
         showSnackbar(`Subcategory "${formData.name}" updated successfully!`);
       } else {
-        await subcategoryService.createSubcategory(formData);
+        await createSubcategory(formData);
         showSnackbar(`Subcategory "${formData.name}" created successfully!`);
       }
       handleCloseDialog();
-      fetchData();
     } catch (err) {
       const msg =
         err.response?.data?.message ||
@@ -128,11 +111,10 @@ export const Subcategories = () => {
   const handleToggleStatus = async (subcategory) => {
     const nextStatus = !subcategory.isActive;
     try {
-      await subcategoryService.toggleSubcategoryStatus(subcategory.id, nextStatus);
+      await toggleSubcategoryStatus(subcategory.id, nextStatus);
       showSnackbar(
         `Subcategory "${subcategory.name}" ${nextStatus ? 'activated' : 'deactivated'} successfully!`
       );
-      fetchData();
     } catch (err) {
       showSnackbar(
         err.response?.data?.message || 'Failed to update subcategory status',
@@ -155,10 +137,9 @@ export const Subcategories = () => {
     if (!deletingSubcategory) return;
     setDeleteLoading(true);
     try {
-      await subcategoryService.deleteSubcategory(deletingSubcategory.id);
+      await deleteSubcategory(deletingSubcategory.id);
       showSnackbar(`Subcategory "${deletingSubcategory.name}" deleted successfully!`);
       handleCloseDeleteDialog();
-      fetchData();
     } catch (err) {
       showSnackbar(
         err.response?.data?.message || 'Failed to delete subcategory',

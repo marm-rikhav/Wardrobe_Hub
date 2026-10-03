@@ -25,7 +25,7 @@ import {
   HomeOutlined,
   InfoOutlined,
 } from '@mui/icons-material';
-import customerService from '../../services/customerService.js';
+import { useCustomer } from '../../hooks/index.js';
 
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const PHONE_10_DIGIT_REGEX = /^\d{10}$/;
@@ -130,8 +130,8 @@ const validateAddressFields = (data) => {
 
 export const CreateCustomerPage = () => {
   const navigate = useNavigate();
+  const { createCustomer, saving: loading } = useCustomer();
 
-  const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [includeAddress, setIncludeAddress] = useState(true);
@@ -177,7 +177,6 @@ export const CreateCustomerPage = () => {
     e.preventDefault();
     if (!validate()) return;
 
-    setLoading(true);
     setServerError(null);
     try {
       const payload = {
@@ -199,7 +198,7 @@ export const CreateCustomerPage = () => {
         };
       }
 
-      const created = await customerService.createCustomer(payload);
+      const created = await createCustomer(payload);
       const newId = created?.id;
       if (newId) {
         navigate(`/admin/customers/${newId}`, {
@@ -218,8 +217,6 @@ export const CreateCustomerPage = () => {
       setServerError(
         err.response?.data?.message || 'Failed to create customer account.'
       );
-    } finally {
-      setLoading(false);
     }
   };
 

@@ -19,15 +19,18 @@ import {
   Search as SearchIcon,
   Refresh as RefreshIcon,
 } from '@mui/icons-material';
-import stockService from '../../services/stockService.js';
-import categoryService from '../../services/categoryService.js';
+import { useStock } from '../../hooks/index.js';
 import StockTable from '../../components/stock/StockTable.jsx';
 import StockUpdateDialog from '../../components/stock/StockUpdateDialog.jsx';
 
 export const Stock = () => {
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const {
+    products,
+    categories,
+    loading,
+    refetch: fetchStock,
+    updateVariantStock,
+  } = useStock();
 
   // Filters State
   const [search, setSearch] = useState('');
@@ -55,34 +58,11 @@ export const Stock = () => {
     setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
-  useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        const cats = await categoryService.getAllCategories();
-        setCategories(cats);
-      } catch (err) {
-        showSnackbar(err.response?.data?.message || 'Failed to load categories', 'error');
-      }
-    };
-    loadCategories();
-  }, []);
-
-  const fetchStockData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const params = { limit: 100 };
-      if (categoryId) params.categoryId = categoryId;
-      const data = await stockService.getStockList(params);
-      setProducts(data.products || []);
-    } catch (err) {
-      showSnackbar(
-        err.response?.data?.message || 'Failed to load stock inventory',
-        'error'
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [categoryId]);
+  const fetchStockData = useCallback(() => {
+    const params = { limit: 100 };
+    if (categoryId) params.categoryId = categoryId;
+    fetchStock(params);
+  }, [categoryId, fetchStock]);
 
   useEffect(() => {
     fetchStockData();
@@ -150,12 +130,13 @@ export const Stock = () => {
     const { product, variant } = selectedRecord;
 
     try {
-      await stockService.updateVariantStock(product.id, variant, newStock);
+      const params = { limit: 100 };
+      if (categoryId) params.categoryId = categoryId;
+      await updateVariantStock(product.id, variant, newStock, params);
       showSnackbar(
         `Stock for SKU "${variant.sku}" updated to ${newStock} units!`
       );
       handleCloseDialog();
-      fetchStockData();
     } catch (err) {
       setDialogError(
         err.response?.data?.message || 'Failed to update stock in backend.'

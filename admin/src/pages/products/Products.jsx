@@ -25,7 +25,7 @@ import {
   Search as SearchIcon,
   Refresh as RefreshIcon,
 } from '@mui/icons-material';
-import productService from '../../services/productService.js';
+import { useProducts } from '../../hooks/index.js';
 import categoryService from '../../services/categoryService.js';
 import subcategoryService from '../../services/subcategoryService.js';
 import ProductTable from '../../components/products/ProductTable.jsx';
@@ -35,9 +35,14 @@ import DeleteConfirmDialog from '../../components/common/DeleteConfirmDialog.jsx
 export const Products = () => {
   const navigate = useNavigate();
 
-  const [products, setProducts] = useState([]);
-  const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 1 });
-  const [loading, setLoading] = useState(true);
+  const {
+    products,
+    pagination,
+    loading,
+    refetch: fetchProducts,
+    deleteProduct,
+    toggleProductStatus,
+  } = useProducts();
 
   // Filters State
   const [search, setSearch] = useState('');
@@ -89,50 +94,32 @@ export const Products = () => {
     loadFilterData();
   }, []);
 
-  // Fetch products with backend pagination and filters
-  const fetchProducts = useCallback(
-    async (pageToFetch = pagination.page, limitToFetch = pagination.limit) => {
-      setLoading(true);
-      try {
-        const params = {
-          page: pageToFetch,
-          limit: limitToFetch,
-        };
-
-        if (search.trim()) params.search = search.trim();
-        if (categoryId) params.categoryId = categoryId;
-        if (subcategoryId) params.subcategoryId = subcategoryId;
-        if (statusFilter !== 'all') {
-          params.isActive = statusFilter === 'active';
-        }
-
-        const data = await productService.getAllProducts(params);
-        setProducts(data.products || []);
-        if (data.pagination) {
-          setPagination(data.pagination);
-        }
-      } catch (err) {
-        showSnackbar(
-          err.response?.data?.message || 'Failed to fetch products',
-          'error'
-        );
-      } finally {
-        setLoading(false);
-      }
+  const queryProducts = useCallback(
+    (overrides = {}) => {
+      const params = {
+        page: overrides.page !== undefined ? overrides.page : pagination.page,
+        limit: overrides.limit !== undefined ? overrides.limit : pagination.limit,
+        search: search.trim() ? search.trim() : undefined,
+        categoryId: categoryId || undefined,
+        subcategoryId: subcategoryId || undefined,
+        isActive: statusFilter !== 'all' ? statusFilter === 'active' : undefined,
+        ...overrides,
+      };
+      fetchProducts(params);
     },
-    [pagination.page, pagination.limit, search, categoryId, subcategoryId, statusFilter]
+    [fetchProducts, pagination.page, pagination.limit, search, categoryId, subcategoryId, statusFilter]
   );
 
   useEffect(() => {
-    fetchProducts(1);
+    queryProducts({ page: 1 });
   }, [search, categoryId, subcategoryId, statusFilter]);
 
   const handlePageChange = (newPage) => {
-    fetchProducts(newPage, pagination.limit);
+    queryProducts({ page: newPage });
   };
 
   const handleRowsPerPageChange = (newLimit) => {
-    fetchProducts(1, newLimit);
+    queryProducts({ page: 1, limit: newLimit });
   };
 
   const handleEditProduct = (product) => {
@@ -142,11 +129,10 @@ export const Products = () => {
   const handleToggleStatus = async (product) => {
     const nextStatus = !product.isActive;
     try {
-      await productService.toggleProductStatus(product.id, nextStatus);
+      await toggleProductStatus(product.id, nextStatus);
       showSnackbar(
         `Product "${product.name}" ${nextStatus ? 'activated' : 'deactivated'} successfully!`
       );
-      fetchProducts(pagination.page);
     } catch (err) {
       showSnackbar(
         err.response?.data?.message || 'Failed to update product status',
@@ -169,10 +155,9 @@ export const Products = () => {
     if (!deletingProduct) return;
     setDeleteLoading(true);
     try {
-      await productService.deleteProduct(deletingProduct.id);
+      await deleteProduct(deletingProduct.id);
       showSnackbar(`Product "${deletingProduct.name}" deleted successfully!`);
       handleCloseDeleteDialog();
-      fetchProducts(pagination.page);
     } catch (err) {
       showSnackbar(
         err.response?.data?.message || 'Failed to delete product',
@@ -189,7 +174,7 @@ export const Products = () => {
 
   const handleCloseManageImages = () => {
     setImageModalProduct(null);
-    fetchProducts(pagination.page);
+    fetchProducts();
   };
 
   // Filter subcategories in dropdown based on selected category (cascading dependency)

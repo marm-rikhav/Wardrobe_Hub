@@ -28,7 +28,7 @@ import {
   ArrowBack as ArrowBackIcon,
   SaveOutlined,
 } from '@mui/icons-material';
-import productService from '../../services/productService.js';
+import { useProduct } from '../../hooks/index.js';
 import categoryService from '../../services/categoryService.js';
 import subcategoryService from '../../services/subcategoryService.js';
 import { productSchema } from '../../common/validation/productSchemas.js';
@@ -40,7 +40,13 @@ export const ProductFormPage = () => {
   const isEditing = Boolean(id);
   const navigate = useNavigate();
 
-  const [initialLoading, setInitialLoading] = useState(isEditing);
+  const {
+    product,
+    loading: initialLoading,
+    saveProduct,
+    refetch: fetchProduct,
+  } = useProduct(id);
+
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState(null);
 
@@ -115,48 +121,33 @@ export const ProductFormPage = () => {
     loadCatalog();
   }, []);
 
-  // Load product if editing
-  const loadProduct = async () => {
-    if (!id) return;
-    setInitialLoading(true);
-    try {
-      const prod = await productService.getProductById(id);
-      if (prod) {
-        setProductImages(prod.images || []);
-        const parentCatId = prod.subcategory?.category?.id || prod.subcategory?.categoryId || '';
-        setSelectedParentCategoryId(parentCatId);
-
-        reset({
-          name: prod.name || '',
-          brand: prod.brand || '',
-          description: prod.description || '',
-          subcategoryId: prod.subcategoryId || '',
-          basePrice: prod.basePrice === undefined ? '' : String(prod.basePrice),
-          discountPrice: prod.discountPrice !== null && prod.discountPrice !== undefined ? String(prod.discountPrice) : '',
-          isActive: prod.isActive ?? true,
-          variants: (prod.variants || []).map((v) => ({
-            id: v.id,
-            sku: v.sku,
-            size: v.size,
-            color: v.color,
-            price: v.price !== null && v.price !== undefined ? String(v.price) : '',
-            stock: v.stock,
-            isActive: v.isActive ?? true,
-          })),
-        });
-      }
-    } catch (err) {
-      setFormError(err.response?.data?.message || 'Failed to load product details');
-    } finally {
-      setInitialLoading(false);
-    }
-  };
-
+  // Update form values when product data is loaded
   useEffect(() => {
-    if (isEditing) {
-      loadProduct();
+    if (product) {
+      setProductImages(product.images || []);
+      const parentCatId = product.subcategory?.category?.id || product.subcategory?.categoryId || '';
+      setSelectedParentCategoryId(parentCatId);
+
+      reset({
+        name: product.name || '',
+        brand: product.brand || '',
+        description: product.description || '',
+        subcategoryId: product.subcategoryId || '',
+        basePrice: product.basePrice === undefined ? '' : String(product.basePrice),
+        discountPrice: product.discountPrice !== null && product.discountPrice !== undefined ? String(product.discountPrice) : '',
+        isActive: product.isActive ?? true,
+        variants: (product.variants || []).map((v) => ({
+          id: v.id,
+          sku: v.sku,
+          size: v.size,
+          color: v.color,
+          price: v.price !== null && v.price !== undefined ? String(v.price) : '',
+          stock: v.stock,
+          isActive: v.isActive ?? true,
+        })),
+      });
     }
-  }, [id, isEditing]);
+  }, [product, reset]);
 
   // Filter subcategories by selected parent category (cascading dependency)
   const filteredSubcategories = selectedParentCategoryId
@@ -197,11 +188,11 @@ export const ProductFormPage = () => {
 
     try {
       if (isEditing) {
-        await productService.updateProduct(id, payload);
+        await saveProduct(payload, id);
         showSnackbar(`Product "${payload.name}" updated successfully!`);
-        await loadProduct();
+        await fetchProduct(id);
       } else {
-        const created = await productService.createProduct(payload);
+        const created = await saveProduct(payload);
         showSnackbar(`Product "${payload.name}" created successfully!`);
         // Redirect to edit mode so admin can upload images immediately
         navigate(`/admin/products/${created.id}/edit`, { replace: true });
@@ -541,7 +532,7 @@ export const ProductFormPage = () => {
               <ProductImageUpload
                 productId={id}
                 images={productImages}
-                onImagesUpdated={loadProduct}
+                onImagesUpdated={() => fetchProduct(id)}
                 disabled={submitting}
               />
             </CardContent>

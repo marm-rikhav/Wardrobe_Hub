@@ -19,28 +19,31 @@ import {
   Search as SearchIcon,
   Refresh as RefreshIcon,
 } from '@mui/icons-material';
-import returnRequestService from '../../services/returnRequestService.js';
+import { useReturnRequests } from '../../hooks/index.js';
 import ReturnRequestTable from '../../components/returns/ReturnRequestTable.jsx';
 import ReturnDetailDialog from '../../components/returns/ReturnDetailDialog.jsx';
 import RejectConfirmDialog from '../../components/returns/RejectConfirmDialog.jsx';
 import ApproveConfirmDialog from '../../components/returns/ApproveConfirmDialog.jsx';
 
 export const ReturnRequests = () => {
-  const [requests, setRequests] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
   // Filters State
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [typeFilter, setTypeFilter] = useState('ALL');
   const [search, setSearch] = useState('');
+
+  const {
+    requests,
+    loading,
+    actionLoading,
+    refetch: fetchRequests,
+    updateRequestStatus,
+  } = useReturnRequests();
 
   // Dialogs State
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [detailOpen, setDetailOpen] = useState(false);
   const [approveOpen, setApproveOpen] = useState(false);
   const [rejectOpen, setRejectOpen] = useState(false);
-  const [actionLoading, setActionLoading] = useState(false);
 
   // Feedback Snackbar
   const [snackbar, setSnackbar] = useState({
@@ -57,32 +60,20 @@ export const ReturnRequests = () => {
     setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
-  const fetchRequests = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const params = {};
-      if (statusFilter && statusFilter !== 'ALL') {
-        params.status = statusFilter;
-      }
-      if (typeFilter && typeFilter !== 'ALL') {
-        params.type = typeFilter;
-      }
-      const data = await returnRequestService.getReturnRequests(params);
-      setRequests(data.requests || []);
-    } catch (err) {
-      const message =
-        err.response?.data?.message || 'Failed to fetch return requests';
-      setError(message);
-      showSnackbar(message, 'error');
-    } finally {
-      setLoading(false);
+  const handleRefresh = useCallback(() => {
+    const params = {};
+    if (statusFilter && statusFilter !== 'ALL') {
+      params.status = statusFilter;
     }
-  }, [statusFilter, typeFilter]);
+    if (typeFilter && typeFilter !== 'ALL') {
+      params.type = typeFilter;
+    }
+    fetchRequests(params);
+  }, [fetchRequests, statusFilter, typeFilter]);
 
   useEffect(() => {
-    fetchRequests();
-  }, [fetchRequests]);
+    handleRefresh();
+  }, [handleRefresh]);
 
   // Client-side search across orderNumber, customer name, and reason
   const filteredRequests = useMemo(() => {
@@ -115,46 +106,34 @@ export const ReturnRequests = () => {
 
   const handleConfirmApprove = async () => {
     if (!selectedRequest) return;
-    setActionLoading(true);
     try {
-      const updated = await returnRequestService.updateReturnRequestStatus(
+      const updated = await updateRequestStatus(
         selectedRequest.id,
         { status: 'APPROVED' }
       );
-      setRequests((prev) =>
-        prev.map((r) => (r.id === updated.id ? updated : r))
-      );
       setApproveOpen(false);
-      showSnackbar(`Request for order #${updated.orderNumber} approved successfully`);
+      showSnackbar(`Request for order #${updated?.orderNumber || selectedRequest.orderNumber} approved successfully`);
     } catch (err) {
       const msg = err.response?.data?.message || 'Failed to approve request';
       showSnackbar(msg, 'error');
-    } finally {
-      setActionLoading(false);
     }
   };
 
   const handleConfirmReject = async (rejectionReason) => {
     if (!selectedRequest) return;
-    setActionLoading(true);
     try {
-      const updated = await returnRequestService.updateReturnRequestStatus(
+      const updated = await updateRequestStatus(
         selectedRequest.id,
         {
           status: 'REJECTED',
           adminResponse: rejectionReason,
         }
       );
-      setRequests((prev) =>
-        prev.map((r) => (r.id === updated.id ? updated : r))
-      );
       setRejectOpen(false);
-      showSnackbar(`Request for order #${updated.orderNumber} rejected`);
+      showSnackbar(`Request for order #${updated?.orderNumber || selectedRequest.orderNumber} rejected`);
     } catch (err) {
       const msg = err.response?.data?.message || 'Failed to reject request';
       showSnackbar(msg, 'error');
-    } finally {
-      setActionLoading(false);
     }
   };
 
@@ -184,7 +163,7 @@ export const ReturnRequests = () => {
           variant="outlined"
           color="primary"
           startIcon={<RefreshIcon />}
-          onClick={fetchRequests}
+          onClick={handleRefresh}
           disabled={loading}
           sx={{ flexShrink: 0 }}
         >

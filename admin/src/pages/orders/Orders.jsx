@@ -20,20 +20,22 @@ import {
   Search as SearchIcon,
   Refresh as RefreshIcon,
 } from '@mui/icons-material';
-import orderService from '../../services/orderService.js';
+import { useOrders } from '../../hooks/index.js';
 import OrderTable from '../../components/orders/OrderTable.jsx';
 import { ORDER_STATUSES, ORDER_STATUS_LABELS } from '../../utils/orderConstants.js';
 
 export const Orders = () => {
   const navigate = useNavigate();
 
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
   // Filters State
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [search, setSearch] = useState('');
+
+  const {
+    orders,
+    loading,
+    refetch: fetchOrders,
+  } = useOrders(statusFilter !== 'ALL' ? { status: statusFilter } : {});
 
   // Feedback Snackbar
   const [snackbar, setSnackbar] = useState({
@@ -50,29 +52,17 @@ export const Orders = () => {
     setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
-  const fetchOrders = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const params = {};
-      if (statusFilter && statusFilter !== 'ALL') {
-        params.status = statusFilter;
-      }
-      const data = await orderService.getOrders(params);
-      setOrders(data.orders || []);
-    } catch (err) {
-      const message =
-        err.response?.data?.message || 'Failed to fetch customer orders';
-      setError(message);
-      showSnackbar(message, 'error');
-    } finally {
-      setLoading(false);
+  const handleRefresh = useCallback(() => {
+    const params = {};
+    if (statusFilter && statusFilter !== 'ALL') {
+      params.status = statusFilter;
     }
-  }, [statusFilter]);
+    fetchOrders(params);
+  }, [fetchOrders, statusFilter]);
 
   useEffect(() => {
-    fetchOrders();
-  }, [fetchOrders]);
+    handleRefresh();
+  }, [handleRefresh]);
 
   // Client-side search across orderNumber, customer name, and customer email
   const filteredOrders = useMemo(() => {
@@ -118,7 +108,7 @@ export const Orders = () => {
           variant="outlined"
           color="primary"
           startIcon={<RefreshIcon />}
-          onClick={fetchOrders}
+          onClick={handleRefresh}
           disabled={loading}
           sx={{ flexShrink: 0 }}
         >

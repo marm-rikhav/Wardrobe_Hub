@@ -38,17 +38,23 @@ import {
   CheckCircleOutline,
   BlockOutlined,
 } from '@mui/icons-material';
-import customerService from '../services/customerService.js';
+import { useCustomers } from '../hooks/index.js';
 import DeleteConfirmDialog from '../components/common/DeleteConfirmDialog.jsx';
 
 export const Customers = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [customers, setCustomers] = useState([]);
-  const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0 });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const {
+    customers,
+    pagination,
+    loading,
+    error,
+    refetch: fetchCustomers,
+    toggleCustomerStatus,
+    deleteCustomer,
+  } = useCustomers({ page: 1, limit: 10 });
+
   const [searchInput, setSearchInput] = useState('');
   const [activeSearch, setActiveSearch] = useState('');
 
@@ -63,61 +69,31 @@ export const Customers = () => {
     severity: 'success',
   });
 
-  const fetchCustomers = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await customerService.getCustomers({
-        page: pagination.page,
-        limit: pagination.limit,
-        search: activeSearch,
-      });
-      const fetchedCustomers = data.customers || [];
-      const totalCount = typeof data.pagination?.total === 'number' ? data.pagination.total : fetchedCustomers.length;
-      setCustomers(fetchedCustomers);
-      setPagination((prev) => ({
-        ...prev,
-        total: totalCount,
-      }));
-    } catch (err) {
-      setError(
-        err.response?.data?.message ||
-          'Failed to load customer list. Please check your connection and try again.'
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [pagination.page, pagination.limit, activeSearch]);
-
-  useEffect(() => {
-    fetchCustomers();
-  }, [fetchCustomers]);
-
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    setPagination((prev) => ({ ...prev, page: 1 }));
     setActiveSearch(searchInput.trim());
+    fetchCustomers({ page: 1, search: searchInput.trim() });
   };
 
   const handleClearSearch = () => {
     setSearchInput('');
     setActiveSearch('');
-    setPagination((prev) => ({ ...prev, page: 1 }));
+    fetchCustomers({ page: 1, search: '' });
   };
 
   const handleChangePage = (_event, newPage) => {
-    setPagination((prev) => ({ ...prev, page: newPage + 1 }));
+    fetchCustomers({ page: newPage + 1 });
   };
 
   const handleChangeRowsPerPage = (event) => {
     const newLimit = Number.parseInt(event.target.value, 10);
-    setPagination((prev) => ({ ...prev, limit: newLimit, page: 1 }));
+    fetchCustomers({ page: 1, limit: newLimit });
   };
 
   const handleToggleStatus = async (customer) => {
     const nextStatus = !customer.isActive;
     try {
-      await customerService.toggleCustomerStatus(customer.id, nextStatus);
+      await toggleCustomerStatus(customer.id, nextStatus);
       setSnackbar({
         open: true,
         message: nextStatus
@@ -125,7 +101,6 @@ export const Customers = () => {
           : `Customer "${customer.name || customer.email}" deactivated. Login access is now restricted.`,
         severity: 'success',
       });
-      fetchCustomers();
     } catch (err) {
       setSnackbar({
         open: true,
@@ -144,7 +119,7 @@ export const Customers = () => {
     if (!customerToDelete) return;
     setDeleteLoading(true);
     try {
-      await customerService.deleteCustomer(customerToDelete.id);
+      await deleteCustomer(customerToDelete.id);
       setSnackbar({
         open: true,
         message: `Customer "${customerToDelete.name || customerToDelete.email}" deleted successfully.`,
@@ -152,7 +127,6 @@ export const Customers = () => {
       });
       setDeleteDialogOpen(false);
       setCustomerToDelete(null);
-      fetchCustomers();
     } catch (err) {
       setSnackbar({
         open: true,

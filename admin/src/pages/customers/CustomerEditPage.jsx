@@ -20,7 +20,7 @@ import {
   ArrowBack as ArrowBackIcon,
   Save as SaveIcon,
 } from '@mui/icons-material';
-import customerService from '../../services/customerService.js';
+import { useCustomer } from '../../hooks/index.js';
 
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const PHONE_10_DIGIT_REGEX = /^\d{10}$/;
@@ -29,9 +29,14 @@ export const CustomerEditPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [loadError, setLoadError] = useState(null);
+  const {
+    customer,
+    loading,
+    saving,
+    error: loadError,
+    updateCustomer,
+  } = useCustomer(id);
+
   const [saveError, setSaveError] = useState(null);
 
   const [formData, setFormData] = useState({
@@ -42,31 +47,16 @@ export const CustomerEditPage = () => {
   });
   const [errors, setErrors] = useState({});
 
-  const fetchCustomer = useCallback(async () => {
-    if (!id) return;
-    setLoading(true);
-    setLoadError(null);
-    try {
-      const rawData = await customerService.getCustomerById(id);
-      const data = rawData?.customer || rawData;
-      setFormData({
-        name: data?.name || '',
-        email: data?.email || '',
-        phone: data?.phone || '',
-        isActive: typeof data?.isActive === 'boolean' ? data.isActive : true,
-      });
-    } catch (err) {
-      setLoadError(
-        err.response?.data?.message || 'Failed to load customer profile.'
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [id]);
-
   useEffect(() => {
-    fetchCustomer();
-  }, [fetchCustomer]);
+    if (customer) {
+      setFormData({
+        name: customer.name || '',
+        email: customer.email || '',
+        phone: customer.phone || '',
+        isActive: typeof customer.isActive === 'boolean' ? customer.isActive : true,
+      });
+    }
+  }, [customer]);
 
   const handleInputChange = (field) => (e) => {
     const value = field === 'isActive' ? e.target.checked : e.target.value;
@@ -116,10 +106,9 @@ export const CustomerEditPage = () => {
     e.preventDefault();
     if (!validate()) return;
 
-    setSaving(true);
     setSaveError(null);
     try {
-      await customerService.updateCustomer(id, {
+      await updateCustomer({
         name: formData.name.trim(),
         email: formData.email.trim(),
         phone: formData.phone.trim() || undefined,
@@ -135,8 +124,6 @@ export const CustomerEditPage = () => {
       setSaveError(
         err.response?.data?.message || 'Failed to update customer details.'
       );
-    } finally {
-      setSaving(false);
     }
   };
 

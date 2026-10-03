@@ -31,34 +31,12 @@ import {
   CheckCircleOutline as CheckCircleOutlineIcon,
   Inventory2Outlined,
 } from '@mui/icons-material';
-import dashboardService from '../services/dashboardService.js';
+import { useDashboard } from '../hooks/index.js';
 import OrderStatusChip from '../components/orders/OrderStatusChip.jsx';
 
 export const Dashboard = () => {
   const navigate = useNavigate();
-  const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  const fetchDashboardData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await dashboardService.getDashboardStats();
-      setStats(data);
-    } catch (err) {
-      setError(
-        err.response?.data?.message ||
-          'Failed to load dashboard metrics. Please check your network and try again.'
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchDashboardData();
-  }, [fetchDashboardData]);
+  const { stats, loading, error, refetch: fetchDashboardData } = useDashboard();
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-IN', {
