@@ -31,37 +31,42 @@ const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const PHONE_10_DIGIT_REGEX = /^\d{10}$/;
 const POSTAL_CODE_6_DIGIT_REGEX = /^\d{6}$/;
 
+const setFieldError = (errMap, field, msg) => {
+  errMap[field] = msg;
+};
+
 const validateUserFields = (data) => {
   const errors = {};
   const nameVal = data.name.trim();
   if (!nameVal) {
-    errors.name = 'Name is required';
+    setFieldError(errors, 'name', 'Name is required');
   } else if (nameVal.length < 3) {
-    errors.name = 'Name must be at least 3 characters long';
+    setFieldError(errors, 'name', 'Name must be at least 3 characters long');
   } else if (nameVal.length > 50) {
-    errors.name = 'Name cannot exceed 50 characters';
+    setFieldError(errors, 'name', 'Name cannot exceed 50 characters');
   }
 
   const emailVal = data.email.trim();
   if (!emailVal) {
-    errors.email = 'Email is required';
+    setFieldError(errors, 'email', 'Email is required');
   } else if (emailVal.length > 150) {
-    errors.email = 'Email cannot exceed 150 characters';
+    setFieldError(errors, 'email', 'Email cannot exceed 150 characters');
   } else if (!EMAIL_REGEX.test(emailVal.toLowerCase())) {
-    errors.email = 'Invalid email address format';
+    setFieldError(errors, 'email', 'Invalid email address format');
   }
 
-  if (!data.password) {
-    errors.password = 'Password is required';
-  } else if (data.password.length < 6) {
-    errors.password = 'Password must be at least 6 characters long';
-  } else if (data.password.length > 100) {
-    errors.password = 'Password cannot exceed 100 characters';
+  const pwdVal = data.password;
+  if (!pwdVal) {
+    setFieldError(errors, 'password', 'Password is required');
+  } else if (pwdVal.length < 6) {
+    setFieldError(errors, 'password', 'Password must be at least 6 characters long');
+  } else if (pwdVal.length > 100) {
+    setFieldError(errors, 'password', 'Password cannot exceed 100 characters');
   }
 
   const phoneVal = data.phone.trim();
   if (phoneVal && !PHONE_10_DIGIT_REGEX.test(phoneVal)) {
-    errors.phone = 'Phone number must be exactly 10 digits';
+    setFieldError(errors, 'phone', 'Phone number must be exactly 10 digits');
   }
 
   return errors;
@@ -74,50 +79,50 @@ const validateAddressFields = (data) => {
 
   const addrName = data.addressName.trim() || nameVal;
   if (!addrName) {
-    errors.addressName = 'Full name is required';
+    setFieldError(errors, 'addressName', 'Full name is required');
   } else if (addrName.length < 2) {
-    errors.addressName = 'Name must be at least 2 characters long';
+    setFieldError(errors, 'addressName', 'Name must be at least 2 characters long');
   } else if (addrName.length > 100) {
-    errors.addressName = 'Name cannot exceed 100 characters';
+    setFieldError(errors, 'addressName', 'Name cannot exceed 100 characters');
   }
 
   const addrPhone = data.addressPhone.trim() || phoneVal;
   if (!addrPhone) {
-    errors.addressPhone = 'Phone number is required';
+    setFieldError(errors, 'addressPhone', 'Phone number is required');
   } else if (!PHONE_10_DIGIT_REGEX.test(addrPhone)) {
-    errors.addressPhone = 'Phone number must be exactly 10 digits';
+    setFieldError(errors, 'addressPhone', 'Phone number must be exactly 10 digits');
   }
 
   const streetVal = data.address.trim();
   if (!streetVal) {
-    errors.address = 'Street address is required';
+    setFieldError(errors, 'address', 'Street address is required');
   } else if (streetVal.length < 5) {
-    errors.address = 'Address must be at least 5 characters long';
+    setFieldError(errors, 'address', 'Address must be at least 5 characters long');
   }
 
   const cityVal = data.city.trim();
   if (!cityVal) {
-    errors.city = 'City is required';
+    setFieldError(errors, 'city', 'City is required');
   } else if (cityVal.length < 2) {
-    errors.city = 'City must be at least 2 characters long';
+    setFieldError(errors, 'city', 'City must be at least 2 characters long');
   } else if (cityVal.length > 100) {
-    errors.city = 'City cannot exceed 100 characters';
+    setFieldError(errors, 'city', 'City cannot exceed 100 characters');
   }
 
   const stateVal = data.state.trim();
   if (!stateVal) {
-    errors.state = 'State is required';
+    setFieldError(errors, 'state', 'State is required');
   } else if (stateVal.length < 2) {
-    errors.state = 'State must be at least 2 characters long';
+    setFieldError(errors, 'state', 'State must be at least 2 characters long');
   } else if (stateVal.length > 100) {
-    errors.state = 'State cannot exceed 100 characters';
+    setFieldError(errors, 'state', 'State cannot exceed 100 characters');
   }
 
   const pinVal = data.postalCode.trim();
   if (!pinVal) {
-    errors.postalCode = 'PIN / Postal code is required';
+    setFieldError(errors, 'postalCode', 'PIN / Postal code is required');
   } else if (!POSTAL_CODE_6_DIGIT_REGEX.test(pinVal)) {
-    errors.postalCode = 'PIN / Postal code must be exactly 6 digits';
+    setFieldError(errors, 'postalCode', 'PIN / Postal code must be exactly 6 digits');
   }
 
   return errors;
