@@ -22,6 +22,7 @@ import {
   Alert,
 } from '@mui/material';
 import { subcategorySchema } from '../../common/validation/subcategorySchemas.js';
+import { slugify } from '../../../../shared/utils/slugify.js';
 
 export const SubcategoryDialog = ({
   open,
@@ -57,12 +58,7 @@ export const SubcategoryDialog = ({
 
   useEffect(() => {
     if (!isEditing && !isSlugManuallyEdited && watchedName) {
-      const generated = watchedName
-        .toLowerCase()
-        .trim()
-        .replace(/[^\w\s-]/g, '')
-        .replace(/[\s_-]+/g, '-')
-        .replace(/^-+|-+$/g, '');
+      const generated = slugify(watchedName);
       setValue('slug', generated, { shouldValidate: true });
     }
   }, [watchedName, isEditing, isSlugManuallyEdited, setValue]);
