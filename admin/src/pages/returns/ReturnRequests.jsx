@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Typography,
@@ -21,11 +22,12 @@ import {
 } from '@mui/icons-material';
 import { useReturnRequests } from '../../hooks/index.js';
 import ReturnRequestTable from '../../components/returns/ReturnRequestTable.jsx';
-import ReturnDetailDialog from '../../components/returns/ReturnDetailDialog.jsx';
 import RejectConfirmDialog from '../../components/returns/RejectConfirmDialog.jsx';
 import ApproveConfirmDialog from '../../components/returns/ApproveConfirmDialog.jsx';
 
 export const ReturnRequests = () => {
+  const navigate = useNavigate();
+
   // Filters State
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [typeFilter, setTypeFilter] = useState('ALL');
@@ -42,7 +44,6 @@ export const ReturnRequests = () => {
 
   // Dialogs State
   const [selectedRequest, setSelectedRequest] = useState(null);
-  const [detailOpen, setDetailOpen] = useState(false);
   const [approveOpen, setApproveOpen] = useState(false);
   const [rejectOpen, setRejectOpen] = useState(false);
 
@@ -91,8 +92,7 @@ export const ReturnRequests = () => {
   }, [requests, search]);
 
   const handleViewDetail = (req) => {
-    setSelectedRequest(req);
-    setDetailOpen(true);
+    navigate(`/admin/returns/${req.id}`);
   };
 
   const handleOpenApprove = (req) => {
@@ -240,21 +240,6 @@ export const ReturnRequests = () => {
         onViewDetail={handleViewDetail}
         onApprove={handleOpenApprove}
         onReject={handleOpenReject}
-      />
-
-      {/* Detail Dialog */}
-      <ReturnDetailDialog
-        open={detailOpen}
-        request={selectedRequest}
-        onClose={() => setDetailOpen(false)}
-        onApprove={(req) => {
-          setSelectedRequest(req);
-          setApproveOpen(true);
-        }}
-        onReject={(req) => {
-          setSelectedRequest(req);
-          setRejectOpen(true);
-        }}
       />
 
       {/* Approve Confirm Dialog */}

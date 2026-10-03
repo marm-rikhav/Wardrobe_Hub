@@ -8,6 +8,7 @@ export { default as useStock } from './useStock.js';
 export { default as useOrders } from './useOrders.js';
 export { default as useOrderDetail } from './useOrderDetail.js';
 export { default as useReturnRequests } from './useReturnRequests.js';
+export { default as useReturnRequest } from './useReturnRequest.js';
 export { default as useCustomers } from './useCustomers.js';
 export { default as useCustomer } from './useCustomer.js';
 export { default as useSettings } from './useSettings.js';
