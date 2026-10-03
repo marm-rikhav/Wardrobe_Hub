@@ -1,7 +1,8 @@
 import { z } from "zod";
-
-const PHONE_10_DIGIT_REGEX = /^\d{10}$/;
-const POSTAL_CODE_6_DIGIT_REGEX = /^\d{6}$/;
+import {
+  PHONE_10_DIGIT_REGEX,
+  POSTAL_CODE_6_DIGIT_REGEX,
+} from "../../../shared/validations/validationRules.js";
 
 export const createAddressSchema = z.object({
   name: z

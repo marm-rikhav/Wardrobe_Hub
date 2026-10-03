@@ -27,7 +27,7 @@ export const VALID_STATUS_TRANSITIONS = {
   RETURNED: [],
 };
 
-const adminOrderIncludeOptions = {
+const orderIncludeOptions = {
   user: {
     select: {
       id: true,
@@ -58,6 +58,8 @@ const adminOrderIncludeOptions = {
     orderBy: { createdAt: "desc" },
   },
 };
+
+const adminOrderIncludeOptions = orderIncludeOptions;
 
 /**
  * Format raw Prisma order for frontend consumption, preserving historical snapshots
@@ -144,38 +146,6 @@ export const formatOrder = (order) => {
     payments,
     returnRequests,
   };
-};
-
-const orderIncludeOptions = {
-  user: {
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      phone: true,
-    },
-  },
-  items: {
-    include: {
-      variant: {
-        include: {
-          product: {
-            include: {
-              images: {
-                orderBy: { sortOrder: "asc" },
-              },
-            },
-          },
-        },
-      },
-    },
-  },
-  payments: {
-    orderBy: { createdAt: "desc" },
-  },
-  returnRequests: {
-    orderBy: { createdAt: "desc" },
-  },
 };
 
 

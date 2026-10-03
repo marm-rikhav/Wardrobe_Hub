@@ -1,6 +1,5 @@
 import { z } from "zod";
-
-const POSTAL_CODE_6_DIGIT_REGEX = /^\d{6}$/;
+import { POSTAL_CODE_6_DIGIT_REGEX } from "../../../shared/validations/validationRules.js";
 
 const TYPO_DOMAINS = new Set([
   "gamil.com", "gmial.com", "gmaill.com", "gmai.com", "gmal.com", "gmaik.com",

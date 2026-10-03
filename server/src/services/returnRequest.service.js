@@ -6,6 +6,27 @@ import {
 } from "./email.service.js";
 
 
+const returnRequestWithRelationsInclude = {
+  order: {
+    select: {
+      id: true,
+      orderNumber: true,
+      total: true,
+      status: true,
+      shipName: true,
+      createdAt: true,
+    },
+  },
+  user: {
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      phone: true,
+    },
+  },
+};
+
 /**
  * Format a ReturnRequest record for client/admin consumption without exposing customer ID.
  */
@@ -77,26 +98,7 @@ export const createReturnRequest = async (userId, orderId, { type, reason, detai
         details: details ? details.trim() : null,
         status: "PENDING",
       },
-      include: {
-        order: {
-          select: {
-            id: true,
-            orderNumber: true,
-            total: true,
-            status: true,
-            shipName: true,
-            createdAt: true,
-          },
-        },
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            phone: true,
-          },
-        },
-      },
+      include: returnRequestWithRelationsInclude,
     });
 
     const formatted = formatReturnRequest(created);
@@ -124,26 +126,7 @@ export const getReturnRequestByOrderId = async (userId, orderId) => {
   const request = await prisma.returnRequest.findFirst({
     where: { orderId, userId },
     orderBy: { createdAt: "desc" },
-    include: {
-      order: {
-        select: {
-          id: true,
-          orderNumber: true,
-          total: true,
-          status: true,
-          shipName: true,
-          createdAt: true,
-        },
-      },
-      user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          phone: true,
-        },
-      },
-    },
+    include: returnRequestWithRelationsInclude,
   });
 
   return formatReturnRequest(request);
@@ -174,27 +157,8 @@ export const getAllReturnRequestsAdmin = async ({ status, type, page, limit }) =
     orderBy: { createdAt: "desc" },
     skip,
     take,
-    include: {
-        order: {
-          select: {
-            id: true,
-            orderNumber: true,
-            total: true,
-            status: true,
-            shipName: true,
-            createdAt: true,
-          },
-        },
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            phone: true,
-          },
-        },
-      },
-    });
+    include: returnRequestWithRelationsInclude,
+  });
 
   return {
     requests: requests.map(formatReturnRequest),
@@ -277,26 +241,7 @@ export const updateReturnRequestStatusAdmin = async (id, { status, adminResponse
         status,
         adminResponse: adminResponse ? adminResponse.trim() : null,
       },
-      include: {
-        order: {
-          select: {
-            id: true,
-            orderNumber: true,
-            total: true,
-            status: true,
-            shipName: true,
-            createdAt: true,
-          },
-        },
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            phone: true,
-          },
-        },
-      },
+      include: returnRequestWithRelationsInclude,
     });
 
     const formatted = formatReturnRequest(updated);
