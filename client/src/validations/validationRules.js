@@ -46,8 +46,8 @@ const STANDARD_EMAIL_REGEX =
 const CONSECUTIVE_CONSONANTS_REGEX = /[bcdfghjklmnpqrstvwxyz]{5,}/i;
 const ALLOWED_5_CONSONANTS = /^(ngths|rchts)$/i;
 const REPEATED_3_CHARS_REGEX = /([a-zA-Z0-9])\1{2,}/;
-const REPEATED_CHUNK_REGEX = /([a-zA-Z0-9]{3,})\1+/i;
-const REPEATED_2CHAR_REGEX = /([a-zA-Z0-9]{2,})\1{2,}/i;
+const REPEATED_CHUNK_REGEX = /([a-z0-9]{3,})\1+/i;
+const REPEATED_2CHAR_REGEX = /([a-z0-9]{2,})\1{2,}/i;
 const VOWELS_REGEX = /[aeiouy]/i;
 const KEYBOARD_MASH_PATTERNS = [
   'asdf', 'sdfg', 'dfgh', 'fghj', 'ghjk', 'hjkl', 'lkjh', 'kjhg', 'jhgf', 'hgfd', 'gfds', 'fdsa',
@@ -56,6 +56,62 @@ const KEYBOARD_MASH_PATTERNS = [
   '1234', '2345', '3456', '4567', '5678', '6789', '7890', '0987', '9876', '8765', '7654', '6543', '5432', '4321',
 ];
 const IMPOSSIBLE_CONSONANT_CLUSTERS = /(bf[wjf]|fw[jb]|q[^ue]|j[kxz]|z[bcdfghjklmnpqrstvwxyz]{2,}|[bcdfghjklmnpqrstvwxyz]x[bcdfghjklmnpqrstvwxyz])/i;
+
+/**
+ * Validates domain rules including typo domains and valid TLD.
+ * @param {string} domainPart
+ * @returns {string|null} Error message or null if valid
+ */
+const validateEmailDomain = (domainPart) => {
+  if (TYPO_DOMAINS.has(domainPart)) {
+    return 'Invalid email domain (did you mean @gmail.com or another major provider?)';
+  }
+
+  const domainLabels = domainPart.split('.');
+  const tld = domainLabels.at(-1);
+  if (!tld || tld.length < 2 || !/^[a-z]+$/.test(tld)) {
+    return 'Email has an invalid top-level domain';
+  }
+
+  return null;
+};
+
+/**
+ * Validates local-part sanity rules (repetition, mash, impossible clusters, consonants, vowels).
+ * @param {string} localPart
+ * @returns {string|null} Error message or null if valid
+ */
+const validateLocalPartSanity = (localPart) => {
+  if (REPEATED_3_CHARS_REGEX.test(localPart)) {
+    return 'Email username cannot contain 3 or more repeated characters';
+  }
+
+  if (REPEATED_CHUNK_REGEX.test(localPart) || REPEATED_2CHAR_REGEX.test(localPart)) {
+    return 'Email username contains repeating character patterns';
+  }
+
+  for (const mash of KEYBOARD_MASH_PATTERNS) {
+    if (localPart.includes(mash)) {
+      return 'Email username contains keyboard mash patterns';
+    }
+  }
+
+  if (IMPOSSIBLE_CONSONANT_CLUSTERS.test(localPart)) {
+    return 'Email username contains invalid random character patterns';
+  }
+
+  const consonantMatch = CONSECUTIVE_CONSONANTS_REGEX.exec(localPart);
+  if (consonantMatch && !ALLOWED_5_CONSONANTS.test(consonantMatch[0])) {
+    return 'Email username contains invalid consonant patterns';
+  }
+
+  const alphaChars = localPart.replaceAll(/[^a-z]/g, '');
+  if (alphaChars.length >= 4 && !VOWELS_REGEX.test(alphaChars)) {
+    return 'Email username must contain valid pronounceable characters';
+  }
+
+  return null;
+};
 
 /**
  * Validates whether an email string meets strict formatting, domain, and sanity requirements.
@@ -92,57 +148,14 @@ export const validateStrictEmail = (email) => {
     return { isValid: false, message: 'Email username must be at least 3 characters' };
   }
 
-  // Domain checks
-  if (TYPO_DOMAINS.has(domainPart)) {
-    return {
-      isValid: false,
-      message: 'Invalid email domain (did you mean @gmail.com or another major provider?)',
-    };
+  const domainError = validateEmailDomain(domainPart);
+  if (domainError) {
+    return { isValid: false, message: domainError };
   }
 
-  const domainLabels = domainPart.split('.');
-  const tld = domainLabels.at(-1);
-  if (!tld || tld.length < 2 || !/^[a-z]+$/.test(tld)) {
-    return { isValid: false, message: 'Email has an invalid top-level domain' };
-  }
-
-  // Local-part sanity checks: disallow 3 or more repeated identical characters
-  if (REPEATED_3_CHARS_REGEX.test(localPart)) {
-    return { isValid: false, message: 'Email username cannot contain 3 or more repeated characters' };
-  }
-
-  // Disallow repeated multi-character sequence / n-grams (e.g. webfwebf, abcabc)
-  if (REPEATED_CHUNK_REGEX.test(localPart)) {
-    return { isValid: false, message: 'Email username contains repeating character patterns' };
-  }
-
-  // Disallow 2-character repeated sequences 3+ times (e.g. ababab, 121212)
-  if (REPEATED_2CHAR_REGEX.test(localPart)) {
-    return { isValid: false, message: 'Email username contains repeating character patterns' };
-  }
-
-  // Disallow keyboard mash patterns
-  for (const mash of KEYBOARD_MASH_PATTERNS) {
-    if (localPart.includes(mash)) {
-      return { isValid: false, message: 'Email username contains keyboard mash patterns' };
-    }
-  }
-
-  // Disallow impossible random consonant clusters (e.g. bfw, bfj, etc.)
-  if (IMPOSSIBLE_CONSONANT_CLUSTERS.test(localPart)) {
-    return { isValid: false, message: 'Email username contains invalid random character patterns' };
-  }
-
-  // Disallow 5 or more consecutive consonants unless allowed
-  const consonantMatch = localPart.match(CONSECUTIVE_CONSONANTS_REGEX);
-  if (consonantMatch && !ALLOWED_5_CONSONANTS.test(consonantMatch[0])) {
-    return { isValid: false, message: 'Email username contains invalid consonant patterns' };
-  }
-
-  // Ensure alpha characters contain pronounceable vowels
-  const alphaChars = localPart.replace(/[^a-z]/g, '');
-  if (alphaChars.length >= 4 && !VOWELS_REGEX.test(alphaChars)) {
-    return { isValid: false, message: 'Email username must contain valid pronounceable characters' };
+  const localPartError = validateLocalPartSanity(localPart);
+  if (localPartError) {
+    return { isValid: false, message: localPartError };
   }
 
   return { isValid: true };

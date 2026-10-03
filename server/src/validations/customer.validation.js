@@ -16,8 +16,8 @@ const STANDARD_EMAIL_REGEX =
 const CONSECUTIVE_CONSONANTS_REGEX = /[bcdfghjklmnpqrstvwxyz]{5,}/i;
 const ALLOWED_5_CONSONANTS = /^(ngths|rchts)$/i;
 const REPEATED_3_CHARS_REGEX = /([a-zA-Z0-9])\1{2,}/;
-const REPEATED_CHUNK_REGEX = /([a-zA-Z0-9]{3,})\1+/i;
-const REPEATED_2CHAR_REGEX = /([a-zA-Z0-9]{2,})\1{2,}/i;
+const REPEATED_CHUNK_REGEX = /([a-z0-9]{3,})\1+/i;
+const REPEATED_2CHAR_REGEX = /([a-z0-9]{2,})\1{2,}/i;
 const VOWELS_REGEX = /[aeiouy]/i;
 const KEYBOARD_MASH_PATTERNS = [
   "asdf", "sdfg", "dfgh", "fghj", "ghjk", "hjkl", "lkjh", "kjhg", "jhgf", "hgfd", "gfds", "fdsa",
@@ -26,6 +26,36 @@ const KEYBOARD_MASH_PATTERNS = [
   "1234", "2345", "3456", "4567", "5678", "6789", "7890", "0987", "9876", "8765", "7654", "6543", "5432", "4321",
 ];
 const IMPOSSIBLE_CONSONANT_CLUSTERS = /(bf[wjf]|fw[jb]|q[^ue]|j[kxz]|z[bcdfghjklmnpqrstvwxyz]{2,}|[bcdfghjklmnpqrstvwxyz]x[bcdfghjklmnpqrstvwxyz])/i;
+
+const checkDomainSanity = (domainPart) => {
+  if (TYPO_DOMAINS.has(domainPart)) return false;
+  const domainLabels = domainPart.split(".");
+  const tld = domainLabels.at(-1);
+  return Boolean(tld && tld.length >= 2 && /^[a-z]+$/.test(tld));
+};
+
+const checkLocalPartSanity = (localPart) => {
+  if (
+    REPEATED_3_CHARS_REGEX.test(localPart) ||
+    REPEATED_CHUNK_REGEX.test(localPart) ||
+    REPEATED_2CHAR_REGEX.test(localPart) ||
+    IMPOSSIBLE_CONSONANT_CLUSTERS.test(localPart)
+  ) {
+    return false;
+  }
+
+  for (const mash of KEYBOARD_MASH_PATTERNS) {
+    if (localPart.includes(mash)) return false;
+  }
+
+  const consonantMatch = CONSECUTIVE_CONSONANTS_REGEX.exec(localPart);
+  if (consonantMatch && !ALLOWED_5_CONSONANTS.test(consonantMatch[0])) return false;
+
+  const alphaChars = localPart.replaceAll(/[^a-z]/g, "");
+  if (alphaChars.length >= 4 && !VOWELS_REGEX.test(alphaChars)) return false;
+
+  return true;
+};
 
 export const isStrictEmail = (email) => {
   if (!email || typeof email !== "string") return false;
@@ -37,37 +67,8 @@ export const isStrictEmail = (email) => {
   if (parts.length !== 2) return false;
   const [localPart, domainPart] = parts;
   if (localPart.length < 3) return false;
-  if (TYPO_DOMAINS.has(domainPart)) return false;
-  const domainLabels = domainPart.split(".");
-  const tld = domainLabels.at(-1);
-  if (!tld || tld.length < 2 || !/^[a-z]+$/.test(tld)) return false;
-
-  // Local-part sanity checks: disallow 3 or more repeated identical characters
-  if (REPEATED_3_CHARS_REGEX.test(localPart)) return false;
-
-  // Disallow repeated multi-character sequence / n-grams (e.g. webfwebf, abcabc)
-  if (REPEATED_CHUNK_REGEX.test(localPart)) return false;
-
-  // Disallow 2-character repeated sequences 3+ times (e.g. ababab, 121212)
-  if (REPEATED_2CHAR_REGEX.test(localPart)) return false;
-
-  // Disallow keyboard mash patterns
-  for (const mash of KEYBOARD_MASH_PATTERNS) {
-    if (localPart.includes(mash)) return false;
-  }
-
-  // Disallow impossible random consonant clusters (e.g. bfw, bfj, etc.)
-  if (IMPOSSIBLE_CONSONANT_CLUSTERS.test(localPart)) return false;
-
-  // Disallow 5 or more consecutive consonants unless allowed
-  const consonantMatch = localPart.match(CONSECUTIVE_CONSONANTS_REGEX);
-  if (consonantMatch && !ALLOWED_5_CONSONANTS.test(consonantMatch[0])) return false;
-
-  // Ensure alpha characters contain pronounceable vowels
-  const alphaChars = localPart.replace(/[^a-z]/g, "");
-  if (alphaChars.length >= 4 && !VOWELS_REGEX.test(alphaChars)) return false;
-
-  return true;
+  if (!checkDomainSanity(domainPart)) return false;
+  return checkLocalPartSanity(localPart);
 };
 
 export const isStrictPhone = (phone) => {
