@@ -218,7 +218,7 @@ export const CustomerDetailPage = () => {
                 />
               </Box>
               <Typography variant="caption" color="text.secondary">
-                Customer ID: {customer.id} • Role: {customer.role}
+                • Role: {customer.role}
               </Typography>
             </Box>
           </Box>
