@@ -62,18 +62,6 @@ export const ProfileForm = () => {
       noValidate
       sx={{ maxWidth: 540 }}
     >
-      {errorMessage && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {errorMessage}
-        </Alert>
-      )}
-
-      {successMessage && (
-        <Alert severity="success" sx={{ mb: 3 }}>
-          {successMessage}
-        </Alert>
-      )}
-
       <TextField
         margin="normal"
         required
@@ -128,12 +116,39 @@ export const ProfileForm = () => {
         </Button>
       </Box>
 
+      {/* Error Snackbar */}
+      <Snackbar
+        open={Boolean(errorMessage)}
+        autoHideDuration={6000}
+        onClose={() => setErrorMessage('')}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert
+          onClose={() => setErrorMessage('')}
+          severity="error"
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {errorMessage}
+        </Alert>
+      </Snackbar>
+
+      {/* Success Snackbar */}
       <Snackbar
         open={Boolean(successMessage)}
         autoHideDuration={4000}
         onClose={() => setSuccessMessage('')}
-        message={successMessage}
-      />
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert
+          onClose={() => setSuccessMessage('')}
+          severity="success"
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {successMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

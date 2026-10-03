@@ -12,6 +12,7 @@ import {
   DialogContent,
   DialogActions,
   Alert,
+  Snackbar,
 } from '@mui/material';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -85,19 +86,14 @@ export const AddressForm = ({
   }
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <>
+      <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle fontWeight={600} sx={{ py: 1.5, px: 3 }}>
         {isEditing ? 'Edit Address' : 'Add New Address'}
       </DialogTitle>
 
       <Box component="form" onSubmit={handleSubmit(onFormSubmit)} noValidate>
         <DialogContent dividers sx={{ py: 2, px: 3 }}>
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
-            </Alert>
-          )}
-
           <Grid container spacing={1.5}>
             <Grid size={12}>
               <TextField
@@ -237,7 +233,23 @@ export const AddressForm = ({
         </DialogActions>
       </Box>
     </Dialog>
-  );
+
+    {/* Error Snackbar */}
+    <Snackbar
+      open={Boolean(error && open)}
+      autoHideDuration={6000}
+      anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+    >
+      <Alert
+        severity="error"
+        variant="filled"
+        sx={{ width: '100%' }}
+      >
+        {error}
+      </Alert>
+    </Snackbar>
+  </>
+);
 };
 
 AddressForm.propTypes = {

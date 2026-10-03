@@ -593,16 +593,7 @@ export const OrderDetail = () => {
           </Typography>
         </Breadcrumbs>
 
-        {/* Error Alert if action failed */}
-        {error && (
-          <Alert
-            severity="error"
-            onClose={() => dispatch(clearOrderError())}
-            sx={{ mb: 3, borderRadius: 2 }}
-          >
-            {error}
-          </Alert>
-        )}
+
 
         {/* Success Banner if redirected from checkout */}
         {showOrderPlacedBanner && (
@@ -710,12 +701,29 @@ export const OrderDetail = () => {
         onSubmit={handleSubmitReturnRequest}
       />
 
+      {/* Error Snackbar */}
+      <Snackbar
+        open={Boolean(error)}
+        autoHideDuration={6000}
+        onClose={() => dispatch(clearOrderError())}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert
+          onClose={() => dispatch(clearOrderError())}
+          severity="error"
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {error}
+        </Alert>
+      </Snackbar>
+
       {/* Feedback Snackbar */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={5000}
         onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
         <Alert
           onClose={handleCloseSnackbar}

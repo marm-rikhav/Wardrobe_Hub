@@ -5,6 +5,7 @@ import {
   TextField,
   Button,
   Alert,
+  Snackbar,
   InputAdornment,
   IconButton,
 } from '@mui/material';
@@ -48,11 +49,22 @@ export const RegisterForm = ({ onSuccess }) => {
 
   return (
     <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ mt: 1 }}>
-      {serverError && (
-        <Alert severity="error" sx={{ mb: 2 }}>
+      {/* Error Snackbar */}
+      <Snackbar
+        open={Boolean(serverError)}
+        autoHideDuration={6000}
+        onClose={() => setServerError('')}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert
+          onClose={() => setServerError('')}
+          severity="error"
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
           {serverError}
         </Alert>
-      )}
+      </Snackbar>
 
       <TextField
         margin="normal"

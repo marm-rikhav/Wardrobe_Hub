@@ -9,6 +9,7 @@ import {
   Radio,
   Chip,
   Alert,
+  Snackbar,
   Divider,
   Breadcrumbs,
   Link as MuiLink,
@@ -170,16 +171,6 @@ export const Checkout = () => {
           Checkout
         </Typography>
 
-        {orderError && (
-          <Alert
-            severity="error"
-            onClose={() => setOrderError(null)}
-            sx={{ mb: 3, borderRadius: 2 }}
-          >
-            {orderError}
-          </Alert>
-        )}
-
         <Grid container spacing={{ xs: 3, md: 4 }}>
           {/* Main Checkout Column (Left) */}
           <Grid item xs={12} md={8}>
@@ -215,12 +206,6 @@ export const Checkout = () => {
                   Add New Address
                 </Button>
               </Box>
-
-              {addressError && (
-                <Alert severity="error" sx={{ mb: 2 }}>
-                  {addressError}
-                </Alert>
-              )}
 
               {addresses.length === 0 ? (
                 <Box
@@ -501,6 +486,40 @@ export const Checkout = () => {
         isSubmitting={isAddingAddress}
         error={addAddressError}
       />
+
+      {/* Order Error Snackbar */}
+      <Snackbar
+        open={Boolean(orderError)}
+        autoHideDuration={6000}
+        onClose={() => setOrderError(null)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert
+          onClose={() => setOrderError(null)}
+          severity="error"
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {orderError}
+        </Alert>
+      </Snackbar>
+
+      {/* Address Error Snackbar */}
+      <Snackbar
+        open={Boolean(addressError)}
+        autoHideDuration={6000}
+        onClose={() => setAddressError(null)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert
+          onClose={() => setAddressError(null)}
+          severity="error"
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {addressError}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

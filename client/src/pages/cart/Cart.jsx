@@ -6,6 +6,7 @@ import {
   Typography,
   Button,
   Alert,
+  Snackbar,
   Breadcrumbs,
   Link as MuiLink,
 } from '@mui/material';
@@ -85,16 +86,6 @@ export const Cart = () => {
           Shopping Cart {totalItems > 0 && `(${totalItems})`}
         </Typography>
 
-        {error && (
-          <Alert
-            severity="error"
-            onClose={dismissError}
-            sx={{ mb: 3, borderRadius: 2 }}
-          >
-            {error}
-          </Alert>
-        )}
-
         {items.length === 0 ? (
           <EmptyState
             icon={ShoppingBagOutlinedIcon}
@@ -148,6 +139,23 @@ export const Cart = () => {
           </Grid>
         )}
       </Container>
+
+      {/* Error Snackbar */}
+      <Snackbar
+        open={Boolean(error)}
+        autoHideDuration={6000}
+        onClose={dismissError}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert
+          onClose={dismissError}
+          severity="error"
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {error}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

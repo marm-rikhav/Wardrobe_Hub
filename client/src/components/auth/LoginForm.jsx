@@ -5,6 +5,7 @@ import {
   TextField,
   Button,
   Alert,
+  Snackbar,
   InputAdornment,
   IconButton,
 } from '@mui/material';
@@ -47,27 +48,38 @@ export const LoginForm = ({ onSuccess }) => {
 
   return (
     <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ mt: 1 }}>
-      {serverError && (
-        isDeactivated ? (
-          <Alert severity="warning" sx={{ mb: 2 }}>
-            <Box sx={{ fontWeight: 600, mb: 0.5 }}>Account Deactivated</Box>
-            <Box sx={{ mb: 1.5, fontSize: '0.875rem' }}>{serverError}</Box>
-            <Button
-              variant="outlined"
-              color="warning"
-              size="small"
-              href="mailto:admin@wardrobehub.com?subject=Account%20Reactivation%20Request"
-              startIcon={<EmailOutlined />}
-            >
-              Email Admin
-            </Button>
-          </Alert>
-        ) : (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {serverError}
-          </Alert>
-        )
+      {serverError && isDeactivated && (
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          <Box sx={{ fontWeight: 600, mb: 0.5 }}>Account Deactivated</Box>
+          <Box sx={{ mb: 1.5, fontSize: '0.875rem' }}>{serverError}</Box>
+          <Button
+            variant="outlined"
+            color="warning"
+            size="small"
+            href="mailto:admin@wardrobehub.com?subject=Account%20Reactivation%20Request"
+            startIcon={<EmailOutlined />}
+          >
+            Email Admin
+          </Button>
+        </Alert>
       )}
+
+      {/* Error Snackbar */}
+      <Snackbar
+        open={Boolean(serverError && !isDeactivated)}
+        autoHideDuration={6000}
+        onClose={() => setServerError('')}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert
+          onClose={() => setServerError('')}
+          severity="error"
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {serverError}
+        </Alert>
+      </Snackbar>
 
       <TextField
         margin="normal"
