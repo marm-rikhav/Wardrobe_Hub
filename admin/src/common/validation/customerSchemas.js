@@ -1,7 +1,11 @@
 import { z } from 'zod';
-import { validateStrictEmail, validateStrictPhone } from '../../utils/validationRules.js';
+import {
+  validateStrictEmail,
+  validateStrictPhone,
+  POSTAL_CODE_6_DIGIT_REGEX,
+} from '../../utils/validationRules.js';
 
-export const POSTAL_CODE_6_DIGIT_REGEX = /^\d{6}$/;
+export { POSTAL_CODE_6_DIGIT_REGEX };
 
 const addCustomIssue = (ctx, path, message) => {
   ctx.addIssue({

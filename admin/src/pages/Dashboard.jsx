@@ -33,27 +33,11 @@ import {
 } from '@mui/icons-material';
 import { useDashboard } from '../hooks/index.js';
 import OrderStatusChip from '../components/orders/OrderStatusChip.jsx';
+import { formatCurrency, formatDate } from '../utils/orderConstants.js';
 
 export const Dashboard = () => {
   const navigate = useNavigate();
   const { stats, loading, error, refetch: fetchDashboardData } = useDashboard();
-
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 2,
-    }).format(amount || 0);
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return '—';
-    return new Date(dateString).toLocaleDateString('en-IN', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    });
-  };
 
   let lowStockContent = null;
   if (loading) {
@@ -532,7 +516,7 @@ export const Dashboard = () => {
                             #{order.orderNumber}
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
-                            {formatDate(order.createdAt)}
+                            {formatDate(order.createdAt, '—')}
                           </Typography>
                         </TableCell>
                         <TableCell>

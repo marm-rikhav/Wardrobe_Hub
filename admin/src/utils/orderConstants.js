@@ -66,37 +66,10 @@ export const getPrimaryStatusAction = (currentStatus) => {
   }
 };
 
-/**
- * Currency formatter for Indian Rupees
- * @param {number|string} amount
- * @returns {string}
- */
-export const formatCurrency = (amount) => {
-  const numeric = Number(amount) || 0;
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    maximumFractionDigits: 2,
-  }).format(numeric);
-};
-
-/**
- * Format timestamp to user-friendly string
- * @param {string|Date} dateStr
- * @returns {string}
- */
-export const formatOrderDate = (dateStr) => {
-  if (!dateStr) return 'N/A';
-  const date = new Date(dateStr);
-  return new Intl.DateTimeFormat('en-IN', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
-  }).format(date);
-};
+export {
+  formatCurrency,
+  formatOrderDate,
+} from '../../../shared/utils/formatters.js';
 
 export default {
   ORDER_STATUSES,

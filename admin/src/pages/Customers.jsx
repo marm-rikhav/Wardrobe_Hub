@@ -39,6 +39,7 @@ import {
 } from '@mui/icons-material';
 import { useCustomers } from '../hooks/index.js';
 import DeleteConfirmDialog from '../components/common/DeleteConfirmDialog.jsx';
+import { formatDate } from '../utils/orderConstants.js';
 
 export const Customers = () => {
   const navigate = useNavigate();
@@ -140,15 +141,6 @@ export const Customers = () => {
 
   const handleCloseSnackbar = () => {
     setSnackbar((prev) => ({ ...prev, open: false }));
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return '—';
-    return new Date(dateString).toLocaleDateString('en-IN', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    });
   };
 
   let customersContent = null;
@@ -367,7 +359,7 @@ export const Customers = () => {
                       {/* Joined Date */}
                       <TableCell>
                         <Typography variant="body2" color="text.secondary">
-                          {formatDate(customer.createdAt)}
+                          {formatDate(customer.createdAt, '—')}
                         </Typography>
                       </TableCell>
 
