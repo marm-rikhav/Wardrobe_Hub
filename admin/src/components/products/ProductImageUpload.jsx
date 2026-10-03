@@ -193,15 +193,10 @@ export const ProductImageUpload = ({
 
   return (
     <Box sx={{ width: '100%' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Box>
-          <Typography variant="subtitle1" fontWeight={700}>
-            Product Images ({images.length}/{MAX_IMAGES})
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            Cloudinary-backed storage • 4:5 Portrait Ratio • 150 KB – 300 KB file size • Up to {MAX_IMAGES} photos
-          </Typography>
-        </Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+        <Typography variant="subtitle1" fontWeight={700}>
+          Product Images ({images.length}/{MAX_IMAGES})
+        </Typography>
 
         <Chip
           label={`${images.length} of ${MAX_IMAGES} slots used`}
@@ -212,73 +207,43 @@ export const ProductImageUpload = ({
         />
       </Box>
 
-      {/* Meaningful Image Guidelines Specifications Banner */}
-      <Paper
-        variant="outlined"
+      {/* Small & Concise Image Guidelines Note */}
+      <Box
         sx={{
-          p: 2,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1.5,
+          py: 1,
+          px: 1.5,
           mb: 2.5,
-          borderRadius: 2,
+          borderRadius: 1.5,
           bgcolor: 'rgba(191, 168, 138, 0.08)',
           border: '1px solid',
-          borderColor: 'primary.light',
+          borderColor: 'divider',
+          flexWrap: 'wrap',
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-          <InfoOutlined color="primary" fontSize="small" />
-          <Typography variant="subtitle2" fontWeight={700} color="primary.main">
-            Image Guidelines & Quality Standards
-          </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, color: 'primary.main', fontWeight: 700, fontSize: '0.8rem' }}>
+          <InfoOutlined sx={{ fontSize: 16 }} />
+          <span>Image Guidelines:</span>
         </Box>
-
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5, fontSize: '0.85rem' }}>
-          To maintain visual consistency across the store catalog and ensure lightning-fast shopping experiences, all uploaded product photos must satisfy these specifications:
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5,
+            flexWrap: 'wrap',
+            fontSize: '0.78rem',
+          }}
+        >
+          <span>• Ratio: <strong>4:5 portrait</strong> (e.g. 1200×1500px)</span>
+          <span>• Size: <strong>150 KB – 300 KB</strong></span>
+          <span>• Format: <strong>JPG, PNG, WebP</strong></span>
+          <span>• Max: <strong>5 images</strong></span>
         </Typography>
-
-        <Grid container spacing={1.5}>
-          <Grid item xs={12} sm={4}>
-            <Box sx={{ p: 1.25, bgcolor: 'background.paper', borderRadius: 1.5, border: '1px solid', borderColor: 'divider' }}>
-              <Typography variant="caption" color="text.secondary" fontWeight={700} display="block">
-                ASPECT RATIO
-              </Typography>
-              <Typography variant="body2" fontWeight={700} color="text.primary">
-                4:5 (Portrait)
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                e.g. 1200×1500px or 800×1000px
-              </Typography>
-            </Box>
-          </Grid>
-
-          <Grid item xs={12} sm={4}>
-            <Box sx={{ p: 1.25, bgcolor: 'background.paper', borderRadius: 1.5, border: '1px solid', borderColor: 'divider' }}>
-              <Typography variant="caption" color="text.secondary" fontWeight={700} display="block">
-                FILE SIZE RANGE
-              </Typography>
-              <Typography variant="body2" fontWeight={700} color="text.primary">
-                150 KB – 300 KB
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Min 150 KB, Max 300 KB strictly
-              </Typography>
-            </Box>
-          </Grid>
-
-          <Grid item xs={12} sm={4}>
-            <Box sx={{ p: 1.25, bgcolor: 'background.paper', borderRadius: 1.5, border: '1px solid', borderColor: 'divider' }}>
-              <Typography variant="caption" color="text.secondary" fontWeight={700} display="block">
-                FORMAT & CAPACITY
-              </Typography>
-              <Typography variant="body2" fontWeight={700} color="text.primary">
-                JPG, PNG, WebP
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Max {MAX_IMAGES} images ({MAX_IMAGES - images.length} remaining)
-              </Typography>
-            </Box>
-          </Grid>
-        </Grid>
-      </Paper>
+      </Box>
 
       {uploadError && (
         <Alert severity="error" sx={{ mb: 2 }} onClose={() => setUploadError(null)}>
