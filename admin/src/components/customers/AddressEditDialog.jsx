@@ -17,8 +17,8 @@ import {
   Box,
 } from '@mui/material';
 import { Close as CloseIcon, Save as SaveIcon } from '@mui/icons-material';
+import { validateStrictPhone } from '../../utils/validationRules.js';
 
-const PHONE_10_DIGIT_REGEX = /^\d{10}$/;
 const POSTAL_CODE_6_DIGIT_REGEX = /^\d{6}$/;
 
 export const AddressEditDialog = ({
@@ -81,8 +81,11 @@ export const AddressEditDialog = ({
     const phoneVal = formData.phone.trim();
     if (!phoneVal) {
       newErrors.phone = 'Phone number is required';
-    } else if (!PHONE_10_DIGIT_REGEX.test(phoneVal)) {
-      newErrors.phone = 'Phone number must be exactly 10 digits';
+    } else {
+      const phoneResult = validateStrictPhone(phoneVal);
+      if (!phoneResult.isValid) {
+        newErrors.phone = phoneResult.message;
+      }
     }
 
     const streetVal = formData.address.trim();

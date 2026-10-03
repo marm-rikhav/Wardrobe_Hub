@@ -15,16 +15,19 @@ import {
   FormControlLabel,
   Chip,
   Avatar,
+  Paper,
 } from '@mui/material';
 import {
   ArrowBack as ArrowBackIcon,
   Save as SaveIcon,
+  PersonOutline,
+  HomeOutlined,
 } from '@mui/icons-material';
 import { useCustomer } from '../../hooks/index.js';
 import NotFound from '../NotFound.jsx';
+import { validateStrictEmail, validateStrictPhone } from '../../utils/validationRules.js';
 
-const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-const PHONE_10_DIGIT_REGEX = /^\d{10}$/;
+const POSTAL_CODE_6_DIGIT_REGEX = /^\d{6}$/;
 
 export const CustomerEditPage = () => {
   const { id } = useParams();
@@ -45,16 +48,39 @@ export const CustomerEditPage = () => {
     email: '',
     phone: '',
     isActive: true,
+    // Address fields
+    addressId: '',
+    addressName: '',
+    addressPhone: '',
+    address: '',
+    city: '',
+    state: '',
+    postalCode: '',
+    country: 'India',
   });
+
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
     if (customer) {
+      let defaultAddress = null;
+      if (Array.isArray(customer.addresses) && customer.addresses.length > 0) {
+        defaultAddress = customer.addresses.find((a) => a.isDefault) || customer.addresses[0];
+      }
+
       setFormData({
         name: customer.name || '',
         email: customer.email || '',
         phone: customer.phone || '',
         isActive: typeof customer.isActive === 'boolean' ? customer.isActive : true,
+        addressId: defaultAddress?.id || '',
+        addressName: defaultAddress?.name || customer.name || '',
+        addressPhone: defaultAddress?.phone || customer.phone || '',
+        address: defaultAddress?.address || '',
+        city: defaultAddress?.city || '',
+        state: defaultAddress?.state || '',
+        postalCode: defaultAddress?.postalCode || '',
+        country: defaultAddress?.country || 'India',
       });
     }
   }, [customer]);
@@ -76,9 +102,10 @@ export const CustomerEditPage = () => {
   const validate = () => {
     const newErrors = {};
 
+    // 1. Validate Customer Information
     const nameVal = formData.name.trim();
     if (!nameVal) {
-      newErrors.name = 'Name is required';
+      newErrors.name = 'Full name is required';
     } else if (nameVal.length < 3) {
       newErrors.name = 'Name must be at least 3 characters long';
     } else if (nameVal.length > 50) {
@@ -86,17 +113,75 @@ export const CustomerEditPage = () => {
     }
 
     const emailVal = formData.email.trim();
-    if (!emailVal) {
-      newErrors.email = 'Email is required';
-    } else if (emailVal.length > 150) {
-      newErrors.email = 'Email cannot exceed 150 characters';
-    } else if (!EMAIL_REGEX.test(emailVal.toLowerCase())) {
-      newErrors.email = 'Invalid email address format';
+    const emailResult = validateStrictEmail(emailVal);
+    if (!emailResult.isValid) {
+      newErrors.email = emailResult.message;
     }
 
     const phoneVal = formData.phone.trim();
-    if (phoneVal && !PHONE_10_DIGIT_REGEX.test(phoneVal)) {
-      newErrors.phone = 'Phone number must be exactly 10 digits';
+    if (phoneVal) {
+      const phoneResult = validateStrictPhone(phoneVal, true);
+      if (!phoneResult.isValid) {
+        newErrors.phone = phoneResult.message;
+      }
+    }
+
+    // 2. Validate Address Information (if any address field is entered or editing existing address)
+    const hasAnyAddressValue = Boolean(
+      formData.addressId ||
+      formData.address.trim() ||
+      formData.city.trim() ||
+      formData.state.trim() ||
+      formData.postalCode.trim()
+    );
+
+    if (hasAnyAddressValue) {
+      const addrName = formData.addressName.trim() || nameVal;
+      if (!addrName) {
+        newErrors.addressName = 'Recipient name is required';
+      } else if (addrName.length < 2) {
+        newErrors.addressName = 'Name must be at least 2 characters long';
+      } else if (addrName.length > 100) {
+        newErrors.addressName = 'Name cannot exceed 100 characters';
+      }
+
+      const addrPhone = formData.addressPhone.trim() || phoneVal;
+      if (!addrPhone) {
+        newErrors.addressPhone = 'Contact phone number is required';
+      } else {
+        const addrPhoneResult = validateStrictPhone(addrPhone);
+        if (!addrPhoneResult.isValid) {
+          newErrors.addressPhone = addrPhoneResult.message;
+        }
+      }
+
+      const streetVal = formData.address.trim();
+      if (!streetVal) {
+        newErrors.address = 'Street address is required';
+      } else if (streetVal.length < 5) {
+        newErrors.address = 'Address must be at least 5 characters long';
+      }
+
+      const cityVal = formData.city.trim();
+      if (!cityVal) {
+        newErrors.city = 'City is required';
+      } else if (cityVal.length < 2) {
+        newErrors.city = 'City must be at least 2 characters long';
+      }
+
+      const stateVal = formData.state.trim();
+      if (!stateVal) {
+        newErrors.state = 'State is required';
+      } else if (stateVal.length < 2) {
+        newErrors.state = 'State must be at least 2 characters long';
+      }
+
+      const pinVal = formData.postalCode.trim();
+      if (!pinVal) {
+        newErrors.postalCode = 'PIN / Postal code is required';
+      } else if (!POSTAL_CODE_6_DIGIT_REGEX.test(pinVal)) {
+        newErrors.postalCode = 'PIN / Postal code must be exactly 6 digits';
+      }
     }
 
     setErrors(newErrors);
@@ -109,16 +194,40 @@ export const CustomerEditPage = () => {
 
     setSaveError(null);
     try {
-      await updateCustomer({
+      const hasAnyAddressValue = Boolean(
+        formData.addressId ||
+        formData.address.trim() ||
+        formData.city.trim() ||
+        formData.state.trim() ||
+        formData.postalCode.trim()
+      );
+
+      const payload = {
         name: formData.name.trim(),
         email: formData.email.trim(),
         phone: formData.phone.trim() || undefined,
         isActive: formData.isActive,
-      });
+      };
+
+      if (hasAnyAddressValue) {
+        payload.address = {
+          id: formData.addressId || undefined,
+          name: formData.addressName.trim() || formData.name.trim(),
+          phone: formData.addressPhone.trim() || formData.phone.trim() || undefined,
+          address: formData.address.trim(),
+          city: formData.city.trim(),
+          state: formData.state.trim(),
+          postalCode: formData.postalCode.trim(),
+          country: formData.country.trim() || 'India',
+          isDefault: true,
+        };
+      }
+
+      await updateCustomer(payload);
 
       navigate(`/admin/customers/${id}`, {
         state: {
-          message: 'Customer profile updated successfully.',
+          message: 'Customer profile and address updated successfully in one click.',
         },
       });
     } catch (err) {
@@ -148,7 +257,7 @@ export const CustomerEditPage = () => {
   }
 
   return (
-    <Box sx={{ width: '100%', maxWidth: 850, mx: 'auto', pb: 6 }}>
+    <Box sx={{ width: '100%', maxWidth: 950, mx: 'auto', pb: 6 }}>
       {/* Back Button & Header */}
       <Box sx={{ mb: 3 }}>
         <Button
@@ -165,9 +274,10 @@ export const CustomerEditPage = () => {
               sx={{
                 bgcolor: 'primary.main',
                 color: 'primary.contrastText',
-                width: 48,
-                height: 48,
+                width: 52,
+                height: 52,
                 fontWeight: 700,
+                fontSize: '1.25rem',
               }}
             >
               {(formData.name || formData.email || 'C').charAt(0).toUpperCase()}
@@ -177,7 +287,7 @@ export const CustomerEditPage = () => {
                 Edit Customer
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                Customer ID: {id}
+                Customer ID: {id} • Update user profile and address together
               </Typography>
             </Box>
           </Box>
@@ -202,13 +312,18 @@ export const CustomerEditPage = () => {
         </Alert>
       )}
 
-      {/* Edit Form Card */}
-      <Card sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
-        <CardContent sx={{ p: { xs: 2.5, sm: 4 } }}>
-          <Box component="form" onSubmit={handleSubmit} noValidate>
-            <Typography variant="subtitle2" fontWeight={700} color="primary.main" sx={{ mb: 2, letterSpacing: 0.5 }}>
-              CUSTOMER INFORMATION
-            </Typography>
+      {/* Main Unified Edit Form */}
+      <Box component="form" onSubmit={handleSubmit} noValidate>
+        {/* Section 1: Customer Profile Information */}
+        <Card sx={{ mb: 3, border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
+          <CardContent sx={{ p: { xs: 2.5, sm: 3.5 } }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+              <PersonOutline color="primary" />
+              <Typography variant="subtitle1" fontWeight={700} color="primary.main">
+                Customer Profile Information
+              </Typography>
+            </Box>
+            <Divider sx={{ mb: 2.5 }} />
 
             <Grid container spacing={2.5}>
               <Grid item xs={12} sm={6}>
@@ -221,6 +336,7 @@ export const CustomerEditPage = () => {
                   onChange={handleInputChange('name')}
                   error={Boolean(errors.name)}
                   helperText={errors.name}
+                  disabled={saving}
                 />
               </Grid>
 
@@ -235,6 +351,7 @@ export const CustomerEditPage = () => {
                   onChange={handleInputChange('email')}
                   error={Boolean(errors.email)}
                   helperText={errors.email}
+                  disabled={saving}
                 />
               </Grid>
 
@@ -242,12 +359,13 @@ export const CustomerEditPage = () => {
                 <TextField
                   fullWidth
                   size="small"
-                  label="Phone Number"
+                  label="Mobile Phone Number"
                   value={formData.phone}
                   onChange={handleInputChange('phone')}
-                  placeholder="10-digit mobile number"
+                  placeholder="10-digit mobile number (starts with 6-9)"
                   error={Boolean(errors.phone)}
-                  helperText={errors.phone || 'Optional, exactly 10 digits'}
+                  helperText={errors.phone || 'Optional 10-digit mobile number'}
+                  disabled={saving}
                 />
               </Grid>
 
@@ -258,6 +376,7 @@ export const CustomerEditPage = () => {
                       checked={formData.isActive}
                       onChange={handleInputChange('isActive')}
                       color="success"
+                      disabled={saving}
                     />
                   }
                   label={
@@ -268,33 +387,170 @@ export const CustomerEditPage = () => {
                 />
               </Grid>
             </Grid>
+          </CardContent>
+        </Card>
 
-            <Divider sx={{ my: 3 }} />
+        {/* Section 2: Customer Address Details */}
+        <Card sx={{ mb: 3, border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
+          <CardContent sx={{ p: { xs: 2.5, sm: 3.5 } }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, flexWrap: 'wrap', gap: 1 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <HomeOutlined color="primary" />
+                <Typography variant="subtitle1" fontWeight={700} color="primary.main">
+                  Primary Customer Address
+                </Typography>
+              </Box>
 
-            {/* Actions */}
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1.5 }}>
-              <Button
+              <Chip
+                size="small"
+                label={formData.addressId ? 'EXISTING SAVED ADDRESS' : 'NEW ADDRESS'}
                 variant="outlined"
-                color="inherit"
-                onClick={() => navigate(`/admin/customers/${id}`)}
-                disabled={saving}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                disabled={saving}
-                startIcon={saving ? <CircularProgress size={16} color="inherit" /> : <SaveIcon />}
-                sx={{ px: 3, fontWeight: 600 }}
-              >
-                {saving ? 'Saving...' : 'Save Changes'}
-              </Button>
+                color={formData.addressId ? 'primary' : 'default'}
+                sx={{ fontWeight: 600, fontSize: '0.7rem' }}
+              />
             </Box>
+            <Divider sx={{ mb: 2.5 }} />
+
+            <Grid container spacing={2.5}>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="Recipient / Contact Name"
+                  placeholder="Defaults to customer name"
+                  value={formData.addressName}
+                  onChange={handleInputChange('addressName')}
+                  error={Boolean(errors.addressName)}
+                  helperText={errors.addressName}
+                  disabled={saving}
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="Delivery Contact Phone"
+                  placeholder="10-digit mobile number"
+                  value={formData.addressPhone}
+                  onChange={handleInputChange('addressPhone')}
+                  error={Boolean(errors.addressPhone)}
+                  helperText={errors.addressPhone || '10-digit mobile number starting with 6-9'}
+                  disabled={saving}
+                />
+              </Grid>
+
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="Street Address / House No. / Building"
+                  placeholder="e.g. 102 Crystal Residency, MG Road"
+                  value={formData.address}
+                  onChange={handleInputChange('address')}
+                  error={Boolean(errors.address)}
+                  helperText={errors.address}
+                  disabled={saving}
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="City"
+                  placeholder="e.g. Mumbai, Surat"
+                  value={formData.city}
+                  onChange={handleInputChange('city')}
+                  error={Boolean(errors.city)}
+                  helperText={errors.city}
+                  disabled={saving}
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="State"
+                  placeholder="e.g. Gujarat, Maharashtra"
+                  value={formData.state}
+                  onChange={handleInputChange('state')}
+                  error={Boolean(errors.state)}
+                  helperText={errors.state}
+                  disabled={saving}
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="PIN / Postal Code"
+                  placeholder="6-digit PIN code"
+                  value={formData.postalCode}
+                  onChange={handleInputChange('postalCode')}
+                  error={Boolean(errors.postalCode)}
+                  helperText={errors.postalCode}
+                  disabled={saving}
+                  inputProps={{ maxLength: 6 }}
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="Country"
+                  value={formData.country}
+                  onChange={handleInputChange('country')}
+                  disabled={saving}
+                />
+              </Grid>
+            </Grid>
+          </CardContent>
+        </Card>
+
+        {/* One-Click Action Footer */}
+        <Paper
+          variant="outlined"
+          sx={{
+            p: 2.5,
+            borderRadius: 2,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: 2,
+            bgcolor: 'background.paper',
+          }}
+        >
+          <Typography variant="body2" color="text.secondary">
+            Clicking Save will update the customer profile and address information simultaneously.
+          </Typography>
+
+          <Box sx={{ display: 'flex', gap: 1.5 }}>
+            <Button
+              variant="outlined"
+              color="inherit"
+              onClick={() => navigate(`/admin/customers/${id}`)}
+              disabled={saving}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              disabled={saving}
+              startIcon={saving ? <CircularProgress size={16} color="inherit" /> : <SaveIcon />}
+              sx={{ px: 3.5, fontWeight: 700 }}
+            >
+              {saving ? 'Saving Changes...' : 'Save Changes (1-Click)'}
+            </Button>
           </Box>
-        </CardContent>
-      </Card>
+        </Paper>
+      </Box>
     </Box>
   );
 };

@@ -33,7 +33,6 @@ import {
   EmailOutlined,
   PhoneOutlined,
   VisibilityOutlined,
-  EditOutlined,
   DeleteOutline,
   CheckCircleOutline,
   BlockOutlined,
@@ -396,16 +395,6 @@ export const Customers = () => {
                               onClick={() => navigate(`/admin/customers/${customer.id}`)}
                             >
                               <VisibilityOutlined fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-
-                          <Tooltip title="Edit Customer">
-                            <IconButton
-                              size="small"
-                              color="info"
-                              onClick={() => navigate(`/admin/customers/${customer.id}/edit`)}
-                            >
-                              <EditOutlined fontSize="small" />
                             </IconButton>
                           </Tooltip>
 

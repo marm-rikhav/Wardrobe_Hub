@@ -138,6 +138,7 @@ export const getCustomerByIdAdmin = async (id) => {
 export const updateCustomerAdmin = async (id, updateData) => {
   const existingCustomer = await prisma.user.findFirst({
     where: { id, role: "CUSTOMER" },
+    include: { addresses: true },
   });
 
   if (!existingCustomer) {
@@ -157,26 +158,75 @@ export const updateCustomerAdmin = async (id, updateData) => {
     }
   }
 
-  const updated = await prisma.user.update({
-    where: { id },
-    data: {
-      name: updateData.name || undefined,
-      email: updateData.email || undefined,
-      phone: updateData.phone === undefined ? undefined : updateData.phone,
-      isActive: updateData.isActive === undefined ? undefined : updateData.isActive,
-    },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      phone: true,
-      role: true,
-      isActive: true,
-      createdAt: true,
-    },
-  });
+  return await prisma.$transaction(async (tx) => {
+    const updatedUser = await tx.user.update({
+      where: { id },
+      data: {
+        name: updateData.name || undefined,
+        email: updateData.email || undefined,
+        phone: updateData.phone === undefined ? undefined : updateData.phone,
+        isActive: updateData.isActive === undefined ? undefined : updateData.isActive,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        role: true,
+        isActive: true,
+        createdAt: true,
+      },
+    });
 
-  return updated;
+    if (updateData.address) {
+      const addrData = updateData.address;
+      let targetAddressId = addrData.id;
+      if (!targetAddressId && existingCustomer.addresses.length > 0) {
+        const defaultAddr = existingCustomer.addresses.find((a) => a.isDefault) || existingCustomer.addresses[0];
+        targetAddressId = defaultAddr.id;
+      }
+
+      if (targetAddressId) {
+        await tx.address.update({
+          where: { id: targetAddressId },
+          data: {
+            name: addrData.name || undefined,
+            phone: addrData.phone || undefined,
+            address: addrData.address || undefined,
+            city: addrData.city || undefined,
+            state: addrData.state || undefined,
+            postalCode: addrData.postalCode || undefined,
+            country: addrData.country || undefined,
+            isDefault: addrData.isDefault !== undefined ? addrData.isDefault : undefined,
+          },
+        });
+      } else if (addrData.address && addrData.city && addrData.state && addrData.postalCode) {
+        await tx.address.create({
+          data: {
+            userId: id,
+            name: addrData.name || updatedUser.name,
+            phone: addrData.phone || updatedUser.phone || "0000000000",
+            address: addrData.address,
+            city: addrData.city,
+            state: addrData.state,
+            postalCode: addrData.postalCode,
+            country: addrData.country || "India",
+            isDefault: true,
+          },
+        });
+      }
+    }
+
+    const allAddresses = await tx.address.findMany({
+      where: { userId: id },
+      orderBy: { isDefault: "desc" },
+    });
+
+    return {
+      ...updatedUser,
+      addresses: allAddresses,
+    };
+  });
 };
 
 /**

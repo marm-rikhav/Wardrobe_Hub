@@ -26,9 +26,8 @@ import {
   InfoOutlined,
 } from '@mui/icons-material';
 import { useCustomer } from '../../hooks/index.js';
+import { validateStrictEmail, validateStrictPhone } from '../../utils/validationRules.js';
 
-const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-const PHONE_10_DIGIT_REGEX = /^\d{10}$/;
 const POSTAL_CODE_6_DIGIT_REGEX = /^\d{6}$/;
 
 const setFieldError = (errMap, field, msg) => {
@@ -47,12 +46,9 @@ const validateUserFields = (data) => {
   }
 
   const emailVal = data.email.trim();
-  if (!emailVal) {
-    setFieldError(errors, 'email', 'Email is required');
-  } else if (emailVal.length > 150) {
-    setFieldError(errors, 'email', 'Email cannot exceed 150 characters');
-  } else if (!EMAIL_REGEX.test(emailVal.toLowerCase())) {
-    setFieldError(errors, 'email', 'Invalid email address format');
+  const emailResult = validateStrictEmail(emailVal);
+  if (!emailResult.isValid) {
+    setFieldError(errors, 'email', emailResult.message);
   }
 
   const pwdVal = data.password;
@@ -65,8 +61,11 @@ const validateUserFields = (data) => {
   }
 
   const phoneVal = data.phone.trim();
-  if (phoneVal && !PHONE_10_DIGIT_REGEX.test(phoneVal)) {
-    setFieldError(errors, 'phone', 'Phone number must be exactly 10 digits');
+  if (phoneVal) {
+    const phoneResult = validateStrictPhone(phoneVal, true);
+    if (!phoneResult.isValid) {
+      setFieldError(errors, 'phone', phoneResult.message);
+    }
   }
 
   return errors;
@@ -89,8 +88,11 @@ const validateAddressFields = (data) => {
   const addrPhone = data.addressPhone.trim() || phoneVal;
   if (!addrPhone) {
     setFieldError(errors, 'addressPhone', 'Phone number is required');
-  } else if (!PHONE_10_DIGIT_REGEX.test(addrPhone)) {
-    setFieldError(errors, 'addressPhone', 'Phone number must be exactly 10 digits');
+  } else {
+    const addrPhoneResult = validateStrictPhone(addrPhone);
+    if (!addrPhoneResult.isValid) {
+      setFieldError(errors, 'addressPhone', addrPhoneResult.message);
+    }
   }
 
   const streetVal = data.address.trim();
