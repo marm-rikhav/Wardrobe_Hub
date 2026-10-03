@@ -34,6 +34,7 @@ export const ReturnRequests = () => {
   const {
     requests,
     loading,
+    error,
     actionLoading,
     refetch: fetchRequests,
     updateRequestStatus,
