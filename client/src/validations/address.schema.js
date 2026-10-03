@@ -1,7 +1,5 @@
 import { z } from 'zod';
-import { validateStrictPhone } from './validationRules.js';
-
-const POSTAL_CODE_6_DIGIT_REGEX = /^\d{6}$/;
+import { validateStrictPhone, POSTAL_CODE_6_DIGIT_REGEX } from './validationRules.js';
 
 export const addressSchema = z.object({
   name: z
