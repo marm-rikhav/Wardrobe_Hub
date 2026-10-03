@@ -26,6 +26,11 @@ export const themeOptions = {
         root: { border: '1px solid #E5DED3', boxShadow: 'none' },
       },
     },
+    MuiSnackbar: {
+      defaultProps: {
+        anchorOrigin: { vertical: 'top', horizontal: 'right' },
+      },
+    },
   },
 };
 
