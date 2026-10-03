@@ -8,6 +8,7 @@ import {
   Grid,
   Divider,
   Alert,
+  Snackbar,
   Breadcrumbs,
   Link as MuiLink,
 } from '@mui/material';
@@ -26,6 +27,7 @@ import {
   selectOrders,
   selectOrderLoading,
   selectOrderError,
+  clearOrderError,
 } from '../../store/order/orderSlice.js';
 
 const getPaymentStatusColor = (status) => {
@@ -100,12 +102,6 @@ export const OrderHistory = () => {
             Shop More
           </Button>
         </Box>
-
-        {error && (
-          <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
-            {error}
-          </Alert>
-        )}
 
         {orders.length === 0 ? (
           <EmptyState
@@ -273,6 +269,23 @@ export const OrderHistory = () => {
           </Box>
         )}
       </Container>
+
+      {/* Error Snackbar */}
+      <Snackbar
+        open={Boolean(error)}
+        autoHideDuration={6000}
+        onClose={() => dispatch(clearOrderError())}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert
+          onClose={() => dispatch(clearOrderError())}
+          severity="error"
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {error}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
