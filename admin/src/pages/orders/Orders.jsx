@@ -34,7 +34,7 @@ export const Orders = () => {
     loading,
     error,
     refetch: fetchOrders,
-  } = useOrders(statusFilter !== 'ALL' ? { status: statusFilter } : {});
+  } = useOrders(statusFilter === 'ALL' ? {} : { status: statusFilter });
 
   const handleRefresh = useCallback(() => {
     const params = {};

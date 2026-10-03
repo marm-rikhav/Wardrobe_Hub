@@ -97,12 +97,12 @@ export const Products = () => {
   const queryProducts = useCallback(
     (overrides = {}) => {
       const params = {
-        page: overrides.page !== undefined ? overrides.page : pagination.page,
-        limit: overrides.limit !== undefined ? overrides.limit : pagination.limit,
+        page: overrides.page === undefined ? pagination.page : overrides.page,
+        limit: overrides.limit === undefined ? pagination.limit : overrides.limit,
         search: search.trim() ? search.trim() : undefined,
         categoryId: categoryId || undefined,
         subcategoryId: subcategoryId || undefined,
-        isActive: statusFilter !== 'all' ? statusFilter === 'active' : undefined,
+        isActive: statusFilter === 'all' ? undefined : statusFilter === 'active',
         ...overrides,
       };
       fetchProducts(params);

@@ -12,7 +12,7 @@ export const useSubcategories = (initialCategoryId = '') => {
   const fetchSubcategories = useCallback(async (catId) => {
     setLoading(true);
     setError(null);
-    const filterId = catId !== undefined ? catId : selectedCategoryId;
+    const filterId = catId === undefined ? selectedCategoryId : catId;
     try {
       const [subsData, catsData] = await Promise.all([
         subcategoryService.getAllSubcategories(filterId || undefined),

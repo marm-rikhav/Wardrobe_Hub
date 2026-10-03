@@ -90,7 +90,7 @@ export const VariantManager = ({
       sku: v.sku || '',
       size: v.size || '',
       color: v.color || '',
-      price: v.price !== undefined && v.price !== null ? String(v.price) : '',
+      price: v.price === undefined || v.price === null ? '' : String(v.price),
       stock: v.stock ?? 0,
       isActive: v.isActive ?? true,
     });
@@ -132,13 +132,13 @@ export const VariantManager = ({
     }
 
     const updatedVariant = {
-      ...(editingIndex !== null && variants[editingIndex]?.id
-        ? { id: variants[editingIndex].id }
-        : {}),
+      ...(editingIndex === null || !variants[editingIndex]?.id
+        ? {}
+        : { id: variants[editingIndex].id }),
       sku: normalizedSku,
       size: normalizedSize,
       color: normalizedColor,
-      price: data.price !== undefined && data.price !== null && data.price !== '' ? Number(data.price) : null,
+      price: data.price === undefined || data.price === null || data.price === '' ? null : Number(data.price),
       stock: Number(data.stock),
       isActive: data.isActive,
     };
