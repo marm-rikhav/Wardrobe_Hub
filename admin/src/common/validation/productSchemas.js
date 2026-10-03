@@ -63,9 +63,9 @@ export const productSchema = z
     basePrice: z.preprocess(
       (val) => {
         if (val === '' || val === null || val === undefined) return undefined;
-        if (typeof val === 'string' && /[a-zA-Z]/.test(val)) return NaN;
+        if (typeof val === 'string' && /[a-zA-Z]/.test(val)) return Number.NaN;
         const num = Number(val);
-        return Number.isNaN(num) ? NaN : num;
+        return Number.isNaN(num) ? Number.NaN : num;
       },
       z
         .number({ invalid_type_error: 'Base price is required and must be a valid number' })
@@ -79,9 +79,9 @@ export const productSchema = z
     discountPrice: z.preprocess(
       (val) => {
         if (val === '' || val === null || val === undefined) return null;
-        if (typeof val === 'string' && /[a-zA-Z]/.test(val)) return NaN;
+        if (typeof val === 'string' && /[a-zA-Z]/.test(val)) return Number.NaN;
         const num = Number(val);
-        return Number.isNaN(num) ? NaN : num;
+        return Number.isNaN(num) ? Number.NaN : num;
       },
       z
         .number({ invalid_type_error: 'Discount price must be a valid number' })

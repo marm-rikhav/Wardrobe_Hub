@@ -1,11 +1,10 @@
 import { z } from 'zod';
-import {
+import validationRules, {
   validateStrictEmail,
   validateStrictPhone,
-  POSTAL_CODE_6_DIGIT_REGEX,
 } from '../../utils/validationRules.js';
 
-export { POSTAL_CODE_6_DIGIT_REGEX };
+export { POSTAL_CODE_6_DIGIT_REGEX } from '../../utils/validationRules.js';
 
 const addCustomIssue = (ctx, path, message) => {
   ctx.addIssue({
@@ -57,7 +56,7 @@ const validateAddressLocation = (field, val, label, ctx) => {
 const validatePostalCode = (pinVal, ctx) => {
   if (pinVal.length === 0) {
     addCustomIssue(ctx, 'postalCode', 'PIN / Postal code is required');
-  } else if (POSTAL_CODE_6_DIGIT_REGEX.test(pinVal) === false) {
+  } else if (validationRules.POSTAL_CODE_6_DIGIT_REGEX.test(pinVal) === false) {
     addCustomIssue(ctx, 'postalCode', 'PIN / Postal code must be exactly 6 digits');
   }
 };
@@ -122,7 +121,7 @@ export const addressSchema = z.object({
     .string()
     .trim()
     .min(1, 'PIN / Postal code is required')
-    .regex(POSTAL_CODE_6_DIGIT_REGEX, 'PIN / Postal code must be exactly 6 digits'),
+    .regex(validationRules.POSTAL_CODE_6_DIGIT_REGEX, 'PIN / Postal code must be exactly 6 digits'),
   country: z.string().trim().default('India'),
   isDefault: z.boolean().default(false),
 });

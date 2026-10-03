@@ -36,6 +36,20 @@ import VariantManager from '../../components/products/VariantManager.jsx';
 import ProductImageUpload from '../../components/products/ProductImageUpload.jsx';
 import NotFound from '../NotFound.jsx';
 
+const ALLOWED_PRICE_KEYS = new Set([
+  'Backspace',
+  'Delete',
+  'Tab',
+  'Escape',
+  'Enter',
+  'ArrowLeft',
+  'ArrowRight',
+  'ArrowUp',
+  'ArrowDown',
+  'Home',
+  'End',
+]);
+
 /**
  * Sanitizes price input:
  * - Disallows alphabets and symbols (only digits and a single decimal point)
@@ -44,7 +58,7 @@ import NotFound from '../NotFound.jsx';
  */
 const sanitizePriceInput = (val) => {
   if (val === undefined || val === null) return '';
-  let cleaned = String(val).replace(/[^0-9.]/g, '');
+  let cleaned = String(val).replaceAll(/[^0-9.]/g, '');
   const parts = cleaned.split('.');
   const intPart = parts[0].slice(0, 5);
   if (parts.length > 1) {
@@ -54,24 +68,18 @@ const sanitizePriceInput = (val) => {
   return intPart;
 };
 
+const isExceedingPriceDigitLimit = (value, cursorPosition) => {
+  const dotIdx = value.indexOf('.');
+  if (dotIdx === -1 || cursorPosition <= dotIdx) {
+    const intPart = dotIdx === -1 ? value : value.slice(0, dotIdx);
+    return intPart.length >= 5;
+  }
+  const decPart = value.slice(dotIdx + 1);
+  return decPart.length >= 2;
+};
+
 const handlePriceKeyDown = (e) => {
-  if (
-    [
-      'Backspace',
-      'Delete',
-      'Tab',
-      'Escape',
-      'Enter',
-      'ArrowLeft',
-      'ArrowRight',
-      'ArrowUp',
-      'ArrowDown',
-      'Home',
-      'End',
-    ].includes(e.key) ||
-    e.ctrlKey ||
-    e.metaKey
-  ) {
+  if (ALLOWED_PRICE_KEYS.has(e.key) || e.ctrlKey || e.metaKey) {
     return;
   }
 
@@ -88,23 +96,9 @@ const handlePriceKeyDown = (e) => {
   }
 
   // Check digit limits before and after decimal point
-  const target = e.target;
-  const { value, selectionStart, selectionEnd } = target;
-  if (selectionStart === selectionEnd) {
-    const dotIdx = value.indexOf('.');
-    if (e.key !== '.') {
-      if (dotIdx === -1 || selectionStart <= dotIdx) {
-        const intPart = dotIdx === -1 ? value : value.slice(0, dotIdx);
-        if (intPart.length >= 5) {
-          e.preventDefault();
-        }
-      } else {
-        const decPart = value.slice(dotIdx + 1);
-        if (decPart.length >= 2) {
-          e.preventDefault();
-        }
-      }
-    }
+  const { value, selectionStart, selectionEnd } = e.target;
+  if (e.key !== '.' && selectionStart === selectionEnd && isExceedingPriceDigitLimit(value, selectionStart)) {
+    e.preventDefault();
   }
 };
 
