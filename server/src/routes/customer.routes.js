@@ -8,6 +8,8 @@ import {
   toggleCustomerStatusSchema,
   updateCustomerAddressSchema,
   createCustomerAdminSchema,
+  customerIdParamSchema,
+  customerAddressParamsSchema,
 } from "../validations/customer.validation.js";
 
 const adminCustomerRouter = Router();
@@ -21,21 +23,32 @@ adminCustomerRouter.post(
   validate(createCustomerAdminSchema),
   customerController.createCustomerAdmin
 );
-adminCustomerRouter.get("/:id", customerController.getCustomerByIdAdmin);
+adminCustomerRouter.get(
+  "/:id",
+  validate(customerIdParamSchema, "params"),
+  customerController.getCustomerByIdAdmin
+);
 adminCustomerRouter.put(
   "/:id",
+  validate(customerIdParamSchema, "params"),
   validate(updateCustomerSchema),
   customerController.updateCustomerAdmin
 );
 adminCustomerRouter.patch(
   "/:id/status",
+  validate(customerIdParamSchema, "params"),
   validate(toggleCustomerStatusSchema),
   customerController.toggleCustomerStatusAdmin
 );
-adminCustomerRouter.delete("/:id", customerController.deleteCustomerAdmin);
+adminCustomerRouter.delete(
+  "/:id",
+  validate(customerIdParamSchema, "params"),
+  customerController.deleteCustomerAdmin
+);
 
 adminCustomerRouter.put(
   "/:id/addresses/:addressId",
+  validate(customerAddressParamsSchema, "params"),
   validate(updateCustomerAddressSchema),
   customerController.updateCustomerAddressAdmin
 );

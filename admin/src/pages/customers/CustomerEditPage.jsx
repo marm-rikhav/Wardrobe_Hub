@@ -21,6 +21,7 @@ import {
   Save as SaveIcon,
 } from '@mui/icons-material';
 import { useCustomer } from '../../hooks/index.js';
+import NotFound from '../NotFound.jsx';
 
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const PHONE_10_DIGIT_REGEX = /^\d{10}$/;
@@ -135,18 +136,14 @@ export const CustomerEditPage = () => {
     );
   }
 
-  if (loadError) {
+  if (loadError || !customer) {
     return (
-      <Box sx={{ maxWidth: 900, mx: 'auto', p: 3 }}>
-        <Button
-          startIcon={<ArrowBackIcon />}
-          onClick={() => navigate('/admin/customers')}
-          sx={{ mb: 2 }}
-        >
-          Back to Customers
-        </Button>
-        <Alert severity="error">{loadError}</Alert>
-      </Box>
+      <NotFound
+        title="Customer Not Found"
+        message={loadError || 'The requested customer profile could not be found or the ID is invalid.'}
+        backPath="/admin/customers"
+        backLabel="Back to Customers"
+      />
     );
   }
 

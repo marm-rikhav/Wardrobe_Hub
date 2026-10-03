@@ -34,6 +34,7 @@ import subcategoryService from '../../services/subcategoryService.js';
 import { productSchema } from '../../common/validation/productSchemas.js';
 import VariantManager from '../../components/products/VariantManager.jsx';
 import ProductImageUpload from '../../components/products/ProductImageUpload.jsx';
+import NotFound from '../NotFound.jsx';
 
 export const ProductFormPage = () => {
   const { id } = useParams();
@@ -44,6 +45,7 @@ export const ProductFormPage = () => {
     product,
     loading: initialLoading,
     saveProduct,
+    error: productLoadError,
     refetch: fetchProduct,
   } = useProduct(id);
 
@@ -262,6 +264,17 @@ export const ProductFormPage = () => {
       <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
         <CircularProgress color="primary" />
       </Box>
+    );
+  }
+
+  if (isEditing && (productLoadError || !product)) {
+    return (
+      <NotFound
+        title="Product Not Found"
+        message={productLoadError || 'The requested product could not be found or the ID is invalid.'}
+        backPath="/admin/products"
+        backLabel="Back to Products"
+      />
     );
   }
 

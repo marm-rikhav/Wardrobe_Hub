@@ -31,6 +31,7 @@ import { useReturnRequest } from '../../hooks/index.js';
 import { formatOrderDate } from '../../utils/orderConstants.js';
 import ApproveConfirmDialog from '../../components/returns/ApproveConfirmDialog.jsx';
 import RejectConfirmDialog from '../../components/returns/RejectConfirmDialog.jsx';
+import NotFound from '../NotFound.jsx';
 
 export const ReturnRequestDetailPage = () => {
   const { id } = useParams();
@@ -144,18 +145,12 @@ export const ReturnRequestDetailPage = () => {
 
   if (error || !request) {
     return (
-      <Box sx={{ width: '100%', maxWidth: 1100, mx: 'auto', textAlign: 'center', py: 6 }}>
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {error || 'Return request not found.'}
-        </Alert>
-        <Button
-          variant="contained"
-          startIcon={<ArrowBackIcon />}
-          onClick={() => navigate('/admin/returns')}
-        >
-          Back to Return Requests
-        </Button>
-      </Box>
+      <NotFound
+        title="Return Request Not Found"
+        message={error || 'The requested return or exchange request does not exist or the ID is invalid.'}
+        backPath="/admin/returns"
+        backLabel="Back to Return Requests"
+      />
     );
   }
 

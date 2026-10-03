@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -20,6 +20,7 @@ import {
   CreditCardOutlined,
 } from '@mui/icons-material';
 import { useOrderDetail } from '../../hooks/index.js';
+import NotFound from '../NotFound.jsx';
 import OrderStatusChip from '../../components/orders/OrderStatusChip.jsx';
 import OrderItems from '../../components/orders/OrderItems.jsx';
 import CustomerInfoCard from '../../components/orders/CustomerInfoCard.jsx';
@@ -109,18 +110,12 @@ export const OrderDetail = () => {
 
   if (error || !order) {
     return (
-      <Box sx={{ width: '100%', maxWidth: 1200, mx: 'auto', textAlign: 'center', py: 6 }}>
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {error || 'Order not found.'}
-        </Alert>
-        <Button
-          variant="contained"
-          startIcon={<ArrowBackIcon />}
-          onClick={() => navigate('/admin/orders')}
-        >
-          Return to Orders
-        </Button>
-      </Box>
+      <NotFound
+        title="Order Not Found"
+        message={error || 'The requested order does not exist or the order ID is invalid.'}
+        backPath="/admin/orders"
+        backLabel="Back to Orders"
+      />
     );
   }
 

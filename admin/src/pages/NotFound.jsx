@@ -7,8 +7,21 @@ import {
   SearchOffOutlined,
 } from '@mui/icons-material';
 
-export const NotFound = () => {
+export const NotFound = ({
+  title = 'Admin Page Not Found',
+  message = 'The administrative page or resource you requested does not exist, has been removed, or the link may be mistyped.',
+  backPath,
+  backLabel = 'Go Back',
+}) => {
   const navigate = useNavigate();
+
+  const handleBack = () => {
+    if (backPath) {
+      navigate(backPath);
+    } else {
+      navigate(-1);
+    }
+  };
 
   return (
     <Box
@@ -65,11 +78,11 @@ export const NotFound = () => {
         </Typography>
 
         <Typography variant="h5" component="h2" fontWeight={700} gutterBottom>
-          Admin Page Not Found
+          {title}
         </Typography>
 
         <Typography variant="body1" color="text.secondary" sx={{ mb: 4, maxWidth: 440, mx: 'auto' }}>
-          The administrative page or resource you requested does not exist, has been removed, or the link may be mistyped.
+          {message}
         </Typography>
 
         <Stack
@@ -81,10 +94,10 @@ export const NotFound = () => {
             variant="outlined"
             color="primary"
             startIcon={<ArrowBackIcon />}
-            onClick={() => navigate(-1)}
+            onClick={handleBack}
             sx={{ px: 3, py: 1.25, fontWeight: 600 }}
           >
-            Go Back
+            {backLabel}
           </Button>
 
           <Button

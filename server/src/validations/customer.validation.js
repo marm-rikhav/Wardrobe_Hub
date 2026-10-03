@@ -153,10 +153,22 @@ export const createCustomerAdminSchema = z.object({
     .nullable(),
 });
 
+export const customerIdParamSchema = z.object({
+  id: z.string().uuid("Invalid customer ID format"),
+});
+
+export const customerAddressParamsSchema = z.object({
+  id: z.string().uuid("Invalid customer ID format"),
+  addressId: z.string().uuid("Invalid address ID format"),
+});
+
 export default {
   updateCustomerSchema,
   toggleCustomerStatusSchema,
   customerQuerySchema,
   updateCustomerAddressSchema,
   createCustomerAdminSchema,
+  customerIdParamSchema,
+  customerAddressParamsSchema,
 };
+

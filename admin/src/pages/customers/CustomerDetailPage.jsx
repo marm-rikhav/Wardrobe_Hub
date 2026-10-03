@@ -40,6 +40,7 @@ import { useCustomer } from '../../hooks/index.js';
 import { formatCurrency, formatOrderDate, ORDER_STATUS_COLORS } from '../../utils/orderConstants.js';
 import AddressEditDialog from '../../components/customers/AddressEditDialog.jsx';
 import DeleteConfirmDialog from '../../components/common/DeleteConfirmDialog.jsx';
+import NotFound from '../NotFound.jsx';
 
 export const CustomerDetailPage = () => {
   const { id } = useParams();
@@ -156,18 +157,12 @@ export const CustomerDetailPage = () => {
 
   if (error || !customer) {
     return (
-      <Box sx={{ maxWidth: 900, mx: 'auto', p: 3 }}>
-        <Button
-          startIcon={<ArrowBackIcon />}
-          onClick={() => navigate('/admin/customers')}
-          sx={{ mb: 2 }}
-        >
-          Back to Customers
-        </Button>
-        <Alert severity="error" sx={{ my: 2 }}>
-          {error || 'Customer profile not found.'}
-        </Alert>
-      </Box>
+      <NotFound
+        title="Customer Not Found"
+        message={error || 'The requested customer profile does not exist, has been removed, or the ID is invalid.'}
+        backPath="/admin/customers"
+        backLabel="Back to Customers"
+      />
     );
   }
 

@@ -26,6 +26,25 @@ export const errorHandler = (err, req, res, next) => {
     errors = [{ field: target, message: `${target} already exists` }];
   }
 
+  // Handle Prisma record not found (P2025)
+  if (err.code === "P2025") {
+    statusCode = 404;
+    message = "Resource not found";
+    errors = [{ field: "id", message: "The requested resource was not found" }];
+  }
+
+  // Handle Prisma invalid input syntax / invalid UUID (P2023)
+  if (
+    err.code === "P2023" ||
+    (typeof err.message === "string" &&
+      (err.message.includes("invalid input syntax for type uuid") ||
+        err.message.includes("Inconsistent column data")))
+  ) {
+    statusCode = 404;
+    message = "Resource not found";
+    errors = [{ field: "id", message: "Invalid resource identifier format" }];
+  }
+
   // Handle Multer upload limits (e.g. file size > 2 MB)
   if (err.name === "MulterError" || err.code === "LIMIT_FILE_SIZE") {
     statusCode = 400;
