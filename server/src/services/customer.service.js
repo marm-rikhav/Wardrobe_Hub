@@ -365,7 +365,6 @@ export const createCustomerAdmin = async (customerData) => {
         role: true,
         isActive: true,
         createdAt: true,
-        updatedAt: true,
       },
     });
 

@@ -104,8 +104,18 @@ export const CreateCustomerPage = () => {
         });
       }
     } catch (err) {
+      const rawMsg = err.response?.data?.message;
+      const isInternalError =
+        typeof rawMsg === 'string' &&
+        (rawMsg.includes('prisma.') ||
+          rawMsg.includes('passwordHash') ||
+          rawMsg.includes('Unknown field') ||
+          rawMsg.includes('invocation:'));
+
       setServerError(
-        err.response?.data?.message || 'Failed to create customer account.'
+        isInternalError
+          ? 'Failed to create customer due to a server error. Please try again or contact support.'
+          : rawMsg || 'Failed to create customer account.'
       );
     }
   };

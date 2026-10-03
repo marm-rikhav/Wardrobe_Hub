@@ -1,5 +1,5 @@
 import { ZodError } from "zod";
-
+import { ApiError } from "../utils/apiError.js";
 
 export const errorHandler = (err, req, res, next) => {
   let statusCode = err.statusCode || 500;
@@ -51,6 +51,26 @@ export const errorHandler = (err, req, res, next) => {
     if (err.code === "LIMIT_FILE_SIZE") {
       message = "Image size exceeds the 300 KB limit. Allowed size is 150 KB to 300 KB.";
     }
+  }
+
+  // Prevent internal Prisma or unhandled errors from leaking raw queries or sensitive data
+  const isPrismaError =
+    Boolean(err.name && err.name.startsWith("PrismaClient")) ||
+    Boolean(err.constructor && err.constructor.name && err.constructor.name.startsWith("PrismaClient")) ||
+    (typeof err.message === "string" &&
+      (err.message.includes("prisma.") ||
+        err.message.includes("Invalid `prisma.") ||
+        err.message.includes("Unknown field") ||
+        err.message.includes("passwordHash")));
+
+  if (isPrismaError) {
+    statusCode = 500;
+    message = "A database operation error occurred. Please contact support.";
+    errors = [];
+  } else if (err instanceof ApiError) {
+    // Keep operational ApiError message
+  } else if (statusCode === 500) {
+    message = "An unexpected error occurred. Please try again later.";
   }
 
   // Log non-operational or unexpected errors in development
