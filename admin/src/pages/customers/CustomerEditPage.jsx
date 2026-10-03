@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Box,
   Typography,
@@ -25,9 +27,7 @@ import {
 } from '@mui/icons-material';
 import { useCustomer } from '../../hooks/index.js';
 import NotFound from '../NotFound.jsx';
-import { validateStrictEmail, validateStrictPhone } from '../../utils/validationRules.js';
-
-const POSTAL_CODE_6_DIGIT_REGEX = /^\d{6}$/;
+import { customerEditSchema } from '../../common/validation/customerSchemas.js';
 
 export const CustomerEditPage = () => {
   const { id } = useParams();
@@ -43,23 +43,35 @@ export const CustomerEditPage = () => {
 
   const [saveError, setSaveError] = useState(null);
 
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    isActive: true,
-    // Address fields
-    addressId: '',
-    addressName: '',
-    addressPhone: '',
-    address: '',
-    city: '',
-    state: '',
-    postalCode: '',
-    country: 'India',
+  const {
+    register,
+    handleSubmit,
+    control,
+    reset,
+    watch,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(customerEditSchema),
+    defaultValues: {
+      name: '',
+      email: '',
+      phone: '',
+      isActive: true,
+      addressId: '',
+      addressName: '',
+      addressPhone: '',
+      address: '',
+      city: '',
+      state: '',
+      postalCode: '',
+      country: 'India',
+    },
   });
 
-  const [errors, setErrors] = useState({});
+  const watchedName = watch('name') || '';
+  const watchedEmail = watch('email') || '';
+  const watchedIsActive = watch('isActive');
+  const watchedAddressId = watch('addressId');
 
   useEffect(() => {
     if (customer) {
@@ -68,7 +80,7 @@ export const CustomerEditPage = () => {
         defaultAddress = customer.addresses.find((a) => a.isDefault) || customer.addresses[0];
       }
 
-      setFormData({
+      reset({
         name: customer.name || '',
         email: customer.email || '',
         phone: customer.phone || '',
@@ -83,143 +95,37 @@ export const CustomerEditPage = () => {
         country: defaultAddress?.country || 'India',
       });
     }
-  }, [customer]);
+  }, [customer, reset]);
 
-  const handleInputChange = (field) => (e) => {
-    const value = field === 'isActive' ? e.target.checked : e.target.value;
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-    if (errors[field]) {
-      setErrors((prev) => ({
-        ...prev,
-        [field]: null,
-      }));
-    }
-  };
-
-  const validate = () => {
-    const newErrors = {};
-
-    // 1. Validate Customer Information
-    const nameVal = formData.name.trim();
-    if (!nameVal) {
-      newErrors.name = 'Full name is required';
-    } else if (nameVal.length < 3) {
-      newErrors.name = 'Name must be at least 3 characters long';
-    } else if (nameVal.length > 50) {
-      newErrors.name = 'Name cannot exceed 50 characters';
-    }
-
-    const emailVal = formData.email.trim();
-    const emailResult = validateStrictEmail(emailVal);
-    if (!emailResult.isValid) {
-      newErrors.email = emailResult.message;
-    }
-
-    const phoneVal = formData.phone.trim();
-    if (phoneVal) {
-      const phoneResult = validateStrictPhone(phoneVal, true);
-      if (!phoneResult.isValid) {
-        newErrors.phone = phoneResult.message;
-      }
-    }
-
-    // 2. Validate Address Information (if any address field is entered or editing existing address)
-    const hasAnyAddressValue = Boolean(
-      formData.addressId ||
-      formData.address.trim() ||
-      formData.city.trim() ||
-      formData.state.trim() ||
-      formData.postalCode.trim()
-    );
-
-    if (hasAnyAddressValue) {
-      const addrName = formData.addressName.trim() || nameVal;
-      if (!addrName) {
-        newErrors.addressName = 'Recipient name is required';
-      } else if (addrName.length < 2) {
-        newErrors.addressName = 'Name must be at least 2 characters long';
-      } else if (addrName.length > 100) {
-        newErrors.addressName = 'Name cannot exceed 100 characters';
-      }
-
-      const addrPhone = formData.addressPhone.trim() || phoneVal;
-      if (!addrPhone) {
-        newErrors.addressPhone = 'Contact phone number is required';
-      } else {
-        const addrPhoneResult = validateStrictPhone(addrPhone);
-        if (!addrPhoneResult.isValid) {
-          newErrors.addressPhone = addrPhoneResult.message;
-        }
-      }
-
-      const streetVal = formData.address.trim();
-      if (!streetVal) {
-        newErrors.address = 'Street address is required';
-      } else if (streetVal.length < 5) {
-        newErrors.address = 'Address must be at least 5 characters long';
-      }
-
-      const cityVal = formData.city.trim();
-      if (!cityVal) {
-        newErrors.city = 'City is required';
-      } else if (cityVal.length < 2) {
-        newErrors.city = 'City must be at least 2 characters long';
-      }
-
-      const stateVal = formData.state.trim();
-      if (!stateVal) {
-        newErrors.state = 'State is required';
-      } else if (stateVal.length < 2) {
-        newErrors.state = 'State must be at least 2 characters long';
-      }
-
-      const pinVal = formData.postalCode.trim();
-      if (!pinVal) {
-        newErrors.postalCode = 'PIN / Postal code is required';
-      } else if (!POSTAL_CODE_6_DIGIT_REGEX.test(pinVal)) {
-        newErrors.postalCode = 'PIN / Postal code must be exactly 6 digits';
-      }
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validate()) return;
-
+  const onFormSubmit = async (data) => {
     setSaveError(null);
     try {
       const hasAnyAddressValue = Boolean(
-        formData.addressId ||
-        formData.address.trim() ||
-        formData.city.trim() ||
-        formData.state.trim() ||
-        formData.postalCode.trim()
+        data.addressId ||
+        (data.address && data.address.trim()) ||
+        (data.city && data.city.trim()) ||
+        (data.state && data.state.trim()) ||
+        (data.postalCode && data.postalCode.trim())
       );
 
-      const phoneTrimmed = formData.phone.trim();
+      const phoneTrimmed = data.phone ? data.phone.trim() : '';
       const payload = {
-        name: formData.name.trim(),
-        email: formData.email.trim(),
+        name: data.name.trim(),
+        email: data.email.trim(),
         phone: phoneTrimmed ? phoneTrimmed : null,
-        isActive: formData.isActive,
+        isActive: data.isActive,
       };
 
       if (hasAnyAddressValue) {
         payload.address = {
-          id: formData.addressId || undefined,
-          name: formData.addressName.trim() || formData.name.trim(),
-          phone: formData.addressPhone.trim() || phoneTrimmed || undefined,
-          address: formData.address.trim(),
-          city: formData.city.trim(),
-          state: formData.state.trim(),
-          postalCode: formData.postalCode.trim(),
-          country: formData.country.trim() || 'India',
+          id: data.addressId || undefined,
+          name: (data.addressName && data.addressName.trim()) || data.name.trim(),
+          phone: (data.addressPhone && data.addressPhone.trim()) || phoneTrimmed || undefined,
+          address: data.address.trim(),
+          city: data.city.trim(),
+          state: data.state.trim(),
+          postalCode: data.postalCode.trim(),
+          country: (data.country && data.country.trim()) || 'India',
           isDefault: true,
         };
       }
@@ -281,7 +187,7 @@ export const CustomerEditPage = () => {
                 fontSize: '1.25rem',
               }}
             >
-              {(formData.name || formData.email || 'C').charAt(0).toUpperCase()}
+              {(watchedName || watchedEmail || 'C').charAt(0).toUpperCase()}
             </Avatar>
             <Box>
               <Typography variant="h5" component="h1" fontWeight={700}>
@@ -295,12 +201,12 @@ export const CustomerEditPage = () => {
 
           <Chip
             size="small"
-            label={formData.isActive ? 'ACTIVE' : 'INACTIVE'}
+            label={watchedIsActive ? 'ACTIVE' : 'INACTIVE'}
             sx={{
               fontWeight: 700,
               fontSize: '0.75rem',
-              bgcolor: formData.isActive ? 'rgba(47, 125, 79, 0.12)' : 'rgba(192, 57, 43, 0.12)',
-              color: formData.isActive ? '#2F7D4F' : '#C0392B',
+              bgcolor: watchedIsActive ? 'rgba(47, 125, 79, 0.12)' : 'rgba(192, 57, 43, 0.12)',
+              color: watchedIsActive ? '#2F7D4F' : '#C0392B',
               px: 1,
             }}
           />
@@ -314,7 +220,7 @@ export const CustomerEditPage = () => {
       )}
 
       {/* Main Unified Edit Form */}
-      <Box component="form" onSubmit={handleSubmit} noValidate>
+      <Box component="form" onSubmit={handleSubmit(onFormSubmit)} noValidate>
         {/* Section 1: Customer Profile Information */}
         <Card sx={{ mb: 3, border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
           <CardContent sx={{ p: { xs: 2.5, sm: 3.5 } }}>
@@ -333,10 +239,9 @@ export const CustomerEditPage = () => {
                   size="small"
                   label="Full Name"
                   required
-                  value={formData.name}
-                  onChange={handleInputChange('name')}
+                  {...register('name')}
                   error={Boolean(errors.name)}
-                  helperText={errors.name}
+                  helperText={errors.name?.message}
                   disabled={saving}
                 />
               </Grid>
@@ -348,10 +253,9 @@ export const CustomerEditPage = () => {
                   label="Email Address"
                   type="email"
                   required
-                  value={formData.email}
-                  onChange={handleInputChange('email')}
+                  {...register('email')}
                   error={Boolean(errors.email)}
-                  helperText={errors.email}
+                  helperText={errors.email?.message}
                   disabled={saving}
                 />
               </Grid>
@@ -361,30 +265,35 @@ export const CustomerEditPage = () => {
                   fullWidth
                   size="small"
                   label="Mobile Phone Number"
-                  value={formData.phone}
-                  onChange={handleInputChange('phone')}
                   placeholder="10-digit mobile number (starts with 6-9)"
+                  {...register('phone')}
                   error={Boolean(errors.phone)}
-                  helperText={errors.phone || 'Optional 10-digit mobile number'}
+                  helperText={errors.phone?.message || 'Optional 10-digit mobile number'}
                   disabled={saving}
                 />
               </Grid>
 
               <Grid item xs={12} sm={6} sx={{ display: 'flex', alignItems: 'center' }}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={formData.isActive}
-                      onChange={handleInputChange('isActive')}
-                      color="success"
-                      disabled={saving}
+                <Controller
+                  name="isActive"
+                  control={control}
+                  render={({ field }) => (
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={field.value}
+                          onChange={(e) => field.onChange(e.target.checked)}
+                          color="success"
+                          disabled={saving}
+                        />
+                      }
+                      label={
+                        <Typography variant="body2" fontWeight={600}>
+                          {field.value ? 'Active Account (Allowed to login)' : 'Inactive (Deactivated - login restricted)'}
+                        </Typography>
+                      }
                     />
-                  }
-                  label={
-                    <Typography variant="body2" fontWeight={600}>
-                      {formData.isActive ? 'Active Account (Allowed to login)' : 'Inactive (Deactivated - login restricted)'}
-                    </Typography>
-                  }
+                  )}
                 />
               </Grid>
             </Grid>
@@ -404,9 +313,9 @@ export const CustomerEditPage = () => {
 
               <Chip
                 size="small"
-                label={formData.addressId ? 'EXISTING SAVED ADDRESS' : 'NEW ADDRESS'}
+                label={watchedAddressId ? 'EXISTING SAVED ADDRESS' : 'NEW ADDRESS'}
                 variant="outlined"
-                color={formData.addressId ? 'primary' : 'default'}
+                color={watchedAddressId ? 'primary' : 'default'}
                 sx={{ fontWeight: 600, fontSize: '0.7rem' }}
               />
             </Box>
@@ -419,10 +328,9 @@ export const CustomerEditPage = () => {
                   size="small"
                   label="Recipient / Contact Name"
                   placeholder="Defaults to customer name"
-                  value={formData.addressName}
-                  onChange={handleInputChange('addressName')}
+                  {...register('addressName')}
                   error={Boolean(errors.addressName)}
-                  helperText={errors.addressName}
+                  helperText={errors.addressName?.message}
                   disabled={saving}
                 />
               </Grid>
@@ -433,10 +341,9 @@ export const CustomerEditPage = () => {
                   size="small"
                   label="Delivery Contact Phone"
                   placeholder="10-digit mobile number"
-                  value={formData.addressPhone}
-                  onChange={handleInputChange('addressPhone')}
+                  {...register('addressPhone')}
                   error={Boolean(errors.addressPhone)}
-                  helperText={errors.addressPhone || '10-digit mobile number starting with 6-9'}
+                  helperText={errors.addressPhone?.message || '10-digit mobile number starting with 6-9'}
                   disabled={saving}
                 />
               </Grid>
@@ -447,10 +354,9 @@ export const CustomerEditPage = () => {
                   size="small"
                   label="Street Address / House No. / Building"
                   placeholder="e.g. 102 Crystal Residency, MG Road"
-                  value={formData.address}
-                  onChange={handleInputChange('address')}
+                  {...register('address')}
                   error={Boolean(errors.address)}
-                  helperText={errors.address}
+                  helperText={errors.address?.message}
                   disabled={saving}
                 />
               </Grid>
@@ -461,10 +367,9 @@ export const CustomerEditPage = () => {
                   size="small"
                   label="City"
                   placeholder="e.g. Mumbai, Surat"
-                  value={formData.city}
-                  onChange={handleInputChange('city')}
+                  {...register('city')}
                   error={Boolean(errors.city)}
-                  helperText={errors.city}
+                  helperText={errors.city?.message}
                   disabled={saving}
                 />
               </Grid>
@@ -475,10 +380,9 @@ export const CustomerEditPage = () => {
                   size="small"
                   label="State"
                   placeholder="e.g. Gujarat, Maharashtra"
-                  value={formData.state}
-                  onChange={handleInputChange('state')}
+                  {...register('state')}
                   error={Boolean(errors.state)}
-                  helperText={errors.state}
+                  helperText={errors.state?.message}
                   disabled={saving}
                 />
               </Grid>
@@ -489,10 +393,9 @@ export const CustomerEditPage = () => {
                   size="small"
                   label="PIN / Postal Code"
                   placeholder="6-digit PIN code"
-                  value={formData.postalCode}
-                  onChange={handleInputChange('postalCode')}
+                  {...register('postalCode')}
                   error={Boolean(errors.postalCode)}
-                  helperText={errors.postalCode}
+                  helperText={errors.postalCode?.message}
                   disabled={saving}
                   inputProps={{ maxLength: 6 }}
                 />
@@ -503,8 +406,9 @@ export const CustomerEditPage = () => {
                   fullWidth
                   size="small"
                   label="Country"
-                  value={formData.country}
-                  onChange={handleInputChange('country')}
+                  {...register('country')}
+                  error={Boolean(errors.country)}
+                  helperText={errors.country?.message}
                   disabled={saving}
                 />
               </Grid>

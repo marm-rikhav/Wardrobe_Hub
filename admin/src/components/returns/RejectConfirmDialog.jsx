@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Dialog,
   DialogTitle,
@@ -10,6 +12,7 @@ import {
   Typography,
   CircularProgress,
 } from '@mui/material';
+import { rejectReturnRequestSchema } from '../../common/validation/returnSchemas.js';
 
 export const RejectConfirmDialog = ({
   open,
@@ -18,24 +21,29 @@ export const RejectConfirmDialog = ({
   onClose,
   onConfirm,
 }) => {
-  const [reason, setReason] = useState('');
-  const [error, setError] = useState('');
+  const {
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(rejectReturnRequestSchema),
+    defaultValues: {
+      reason: '',
+    },
+  });
+
+  const reasonValue = watch('reason') || '';
 
   useEffect(() => {
     if (open) {
-      setReason('');
-      setError('');
+      reset({ reason: '' });
     }
-  }, [open]);
+  }, [open, reset]);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const trimmed = reason.trim();
-    if (!trimmed) {
-      setError('Please provide a reason for rejecting this request.');
-      return;
-    }
-    onConfirm(trimmed);
+  const onFormSubmit = (data) => {
+    onConfirm(data.reason.trim());
   };
 
   return (
@@ -46,7 +54,7 @@ export const RejectConfirmDialog = ({
       fullWidth
       aria-labelledby="reject-dialog-title"
     >
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit(onFormSubmit)}>
         <DialogTitle id="reject-dialog-title" sx={{ pb: 1, fontWeight: 700, color: 'error.main' }}>
           Reject {request?.type === 'RETURN' ? 'Return' : 'Exchange'} Request
         </DialogTitle>
@@ -63,13 +71,9 @@ export const RejectConfirmDialog = ({
             rows={3}
             label="Rejection Reason *"
             placeholder="Explain why this request is being rejected (e.g. return window expired, item used/washed, etc.)..."
-            value={reason}
-            onChange={(e) => {
-              setReason(e.target.value);
-              if (error) setError('');
-            }}
-            error={Boolean(error)}
-            helperText={error || `${reason.length}/1000 characters`}
+            {...register('reason')}
+            error={Boolean(errors.reason)}
+            helperText={errors.reason?.message || `${reasonValue.length}/1000 characters`}
             disabled={loading}
             autoFocus
           />

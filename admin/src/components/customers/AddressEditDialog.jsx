@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Dialog,
   DialogTitle,
@@ -17,9 +19,7 @@ import {
   Box,
 } from '@mui/material';
 import { Close as CloseIcon, Save as SaveIcon } from '@mui/icons-material';
-import { validateStrictPhone } from '../../utils/validationRules.js';
-
-const POSTAL_CODE_6_DIGIT_REGEX = /^\d{6}$/;
+import { addressSchema } from '../../common/validation/customerSchemas.js';
 
 export const AddressEditDialog = ({
   open,
@@ -28,116 +28,70 @@ export const AddressEditDialog = ({
   onSave,
   saving = false,
 }) => {
-  const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
-    address: '',
-    city: '',
-    state: '',
-    postalCode: '',
-    country: 'India',
-    isDefault: false,
-  });
-  const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState(null);
 
+  const {
+    register,
+    handleSubmit,
+    control,
+    reset,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(addressSchema),
+    defaultValues: {
+      name: '',
+      phone: '',
+      address: '',
+      city: '',
+      state: '',
+      postalCode: '',
+      country: 'India',
+      isDefault: false,
+    },
+  });
+
   useEffect(() => {
-    if (address) {
-      setFormData({
-        name: address.name || '',
-        phone: address.phone || '',
-        address: address.address || '',
-        city: address.city || '',
-        state: address.state || '',
-        postalCode: address.postalCode || '',
-        country: address.country || 'India',
-        isDefault: Boolean(address.isDefault),
-      });
-      setErrors({});
+    if (open) {
+      if (address) {
+        reset({
+          name: address.name || '',
+          phone: address.phone || '',
+          address: address.address || '',
+          city: address.city || '',
+          state: address.state || '',
+          postalCode: address.postalCode || '',
+          country: address.country || 'India',
+          isDefault: Boolean(address.isDefault),
+        });
+      } else {
+        reset({
+          name: '',
+          phone: '',
+          address: '',
+          city: '',
+          state: '',
+          postalCode: '',
+          country: 'India',
+          isDefault: false,
+        });
+      }
       setServerError(null);
     }
-  }, [address, open]);
+  }, [address, open, reset]);
 
-  const handleChange = (field) => (e) => {
-    const value = field === 'isDefault' ? e.target.checked : e.target.value;
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: null }));
-    }
-  };
-
-  const validate = () => {
-    const newErrors = {};
-
-    const nameVal = formData.name.trim();
-    if (!nameVal) {
-      newErrors.name = 'Full name is required';
-    } else if (nameVal.length < 2) {
-      newErrors.name = 'Name must be at least 2 characters long';
-    } else if (nameVal.length > 100) {
-      newErrors.name = 'Name cannot exceed 100 characters';
-    }
-
-    const phoneVal = formData.phone.trim();
-    if (!phoneVal) {
-      newErrors.phone = 'Phone number is required';
-    } else {
-      const phoneResult = validateStrictPhone(phoneVal);
-      if (!phoneResult.isValid) {
-        newErrors.phone = phoneResult.message;
-      }
-    }
-
-    const streetVal = formData.address.trim();
-    if (!streetVal) {
-      newErrors.address = 'Street address is required';
-    } else if (streetVal.length < 5) {
-      newErrors.address = 'Address must be at least 5 characters long';
-    }
-
-    const cityVal = formData.city.trim();
-    if (!cityVal) {
-      newErrors.city = 'City is required';
-    } else if (cityVal.length < 2) {
-      newErrors.city = 'City must be at least 2 characters long';
-    } else if (cityVal.length > 100) {
-      newErrors.city = 'City cannot exceed 100 characters';
-    }
-
-    const stateVal = formData.state.trim();
-    if (!stateVal) {
-      newErrors.state = 'State is required';
-    } else if (stateVal.length < 2) {
-      newErrors.state = 'State must be at least 2 characters long';
-    } else if (stateVal.length > 100) {
-      newErrors.state = 'State cannot exceed 100 characters';
-    }
-
-    const pinVal = formData.postalCode.trim();
-    if (!pinVal) {
-      newErrors.postalCode = 'PIN / Postal code is required';
-    } else if (!POSTAL_CODE_6_DIGIT_REGEX.test(pinVal)) {
-      newErrors.postalCode = 'PIN / Postal code must be exactly 6 digits';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validate()) return;
+  const onFormSubmit = async (data) => {
     setServerError(null);
     try {
       await onSave({
-        ...formData,
-        name: formData.name.trim(),
-        phone: formData.phone.trim(),
-        address: formData.address.trim(),
-        city: formData.city.trim(),
-        state: formData.state.trim(),
-        postalCode: formData.postalCode.trim(),
-        country: formData.country.trim() || 'India',
+        ...data,
+        name: data.name.trim(),
+        phone: data.phone.trim(),
+        address: data.address.trim(),
+        city: data.city.trim(),
+        state: data.state.trim(),
+        postalCode: data.postalCode.trim(),
+        country: data.country.trim() || 'India',
+        isDefault: Boolean(data.isDefault),
       });
     } catch (err) {
       setServerError(err.response?.data?.message || 'Failed to update address.');
@@ -183,7 +137,7 @@ export const AddressEditDialog = ({
           </Alert>
         )}
 
-        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+        <Box component="form" id="address-edit-form" onSubmit={handleSubmit(onFormSubmit)} sx={{ mt: 1 }}>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
               <TextField
@@ -191,10 +145,9 @@ export const AddressEditDialog = ({
                 size="small"
                 label="Full Name"
                 required
-                value={formData.name}
-                onChange={handleChange('name')}
+                {...register('name')}
                 error={Boolean(errors.name)}
-                helperText={errors.name}
+                helperText={errors.name?.message}
               />
             </Grid>
 
@@ -204,10 +157,9 @@ export const AddressEditDialog = ({
                 size="small"
                 label="Phone Number"
                 required
-                value={formData.phone}
-                onChange={handleChange('phone')}
+                {...register('phone')}
                 error={Boolean(errors.phone)}
-                helperText={errors.phone}
+                helperText={errors.phone?.message}
               />
             </Grid>
 
@@ -219,10 +171,9 @@ export const AddressEditDialog = ({
                 required
                 multiline
                 rows={2}
-                value={formData.address}
-                onChange={handleChange('address')}
+                {...register('address')}
                 error={Boolean(errors.address)}
-                helperText={errors.address}
+                helperText={errors.address?.message}
               />
             </Grid>
 
@@ -232,10 +183,9 @@ export const AddressEditDialog = ({
                 size="small"
                 label="City"
                 required
-                value={formData.city}
-                onChange={handleChange('city')}
+                {...register('city')}
                 error={Boolean(errors.city)}
-                helperText={errors.city}
+                helperText={errors.city?.message}
               />
             </Grid>
 
@@ -245,10 +195,9 @@ export const AddressEditDialog = ({
                 size="small"
                 label="State"
                 required
-                value={formData.state}
-                onChange={handleChange('state')}
+                {...register('state')}
                 error={Boolean(errors.state)}
-                helperText={errors.state}
+                helperText={errors.state?.message}
               />
             </Grid>
 
@@ -258,10 +207,9 @@ export const AddressEditDialog = ({
                 size="small"
                 label="Postal / PIN Code"
                 required
-                value={formData.postalCode}
-                onChange={handleChange('postalCode')}
+                {...register('postalCode')}
                 error={Boolean(errors.postalCode)}
-                helperText={errors.postalCode}
+                helperText={errors.postalCode?.message}
               />
             </Grid>
 
@@ -270,25 +218,32 @@ export const AddressEditDialog = ({
                 fullWidth
                 size="small"
                 label="Country"
-                value={formData.country}
-                onChange={handleChange('country')}
+                {...register('country')}
+                error={Boolean(errors.country)}
+                helperText={errors.country?.message}
               />
             </Grid>
 
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={formData.isDefault}
-                    onChange={handleChange('isDefault')}
-                    color="primary"
+              <Controller
+                name="isDefault"
+                control={control}
+                render={({ field }) => (
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={field.value}
+                        onChange={(e) => field.onChange(e.target.checked)}
+                        color="primary"
+                      />
+                    }
+                    label={
+                      <Typography variant="body2" fontWeight={600}>
+                        Set as Default Shipping Address
+                      </Typography>
+                    }
                   />
-                }
-                label={
-                  <Typography variant="body2" fontWeight={600}>
-                    Set as Default Shipping Address
-                  </Typography>
-                }
+                )}
               />
             </Grid>
           </Grid>
@@ -300,7 +255,8 @@ export const AddressEditDialog = ({
           Cancel
         </Button>
         <Button
-          onClick={handleSubmit}
+          type="submit"
+          form="address-edit-form"
           variant="contained"
           color="primary"
           disabled={saving}

@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Box,
   Typography,
@@ -26,109 +28,7 @@ import {
   InfoOutlined,
 } from '@mui/icons-material';
 import { useCustomer } from '../../hooks/index.js';
-import { validateStrictEmail, validateStrictPhone } from '../../utils/validationRules.js';
-
-const POSTAL_CODE_6_DIGIT_REGEX = /^\d{6}$/;
-
-const setFieldError = (errMap, field, msg) => {
-  errMap[field] = msg;
-};
-
-const validateUserFields = (data) => {
-  const errors = {};
-  const nameVal = data.name.trim();
-  if (!nameVal) {
-    setFieldError(errors, 'name', 'Name is required');
-  } else if (nameVal.length < 3) {
-    setFieldError(errors, 'name', 'Name must be at least 3 characters long');
-  } else if (nameVal.length > 50) {
-    setFieldError(errors, 'name', 'Name cannot exceed 50 characters');
-  }
-
-  const emailVal = data.email.trim();
-  const emailResult = validateStrictEmail(emailVal);
-  if (!emailResult.isValid) {
-    setFieldError(errors, 'email', emailResult.message);
-  }
-
-  const pwdVal = data.password;
-  if (!pwdVal) {
-    setFieldError(errors, 'password', 'Password is required');
-  } else if (pwdVal.length < 6) {
-    setFieldError(errors, 'password', 'Password must be at least 6 characters long');
-  } else if (pwdVal.length > 100) {
-    setFieldError(errors, 'password', 'Password cannot exceed 100 characters');
-  }
-
-  const phoneVal = data.phone.trim();
-  if (phoneVal) {
-    const phoneResult = validateStrictPhone(phoneVal, true);
-    if (!phoneResult.isValid) {
-      setFieldError(errors, 'phone', phoneResult.message);
-    }
-  }
-
-  return errors;
-};
-
-const validateAddressFields = (data) => {
-  const errors = {};
-  const nameVal = data.name.trim();
-  const phoneVal = data.phone.trim();
-
-  const addrName = data.addressName.trim() || nameVal;
-  if (!addrName) {
-    setFieldError(errors, 'addressName', 'Full name is required');
-  } else if (addrName.length < 2) {
-    setFieldError(errors, 'addressName', 'Name must be at least 2 characters long');
-  } else if (addrName.length > 100) {
-    setFieldError(errors, 'addressName', 'Name cannot exceed 100 characters');
-  }
-
-  const addrPhone = data.addressPhone.trim() || phoneVal;
-  if (!addrPhone) {
-    setFieldError(errors, 'addressPhone', 'Phone number is required');
-  } else {
-    const addrPhoneResult = validateStrictPhone(addrPhone);
-    if (!addrPhoneResult.isValid) {
-      setFieldError(errors, 'addressPhone', addrPhoneResult.message);
-    }
-  }
-
-  const streetVal = data.address.trim();
-  if (!streetVal) {
-    setFieldError(errors, 'address', 'Street address is required');
-  } else if (streetVal.length < 5) {
-    setFieldError(errors, 'address', 'Address must be at least 5 characters long');
-  }
-
-  const cityVal = data.city.trim();
-  if (!cityVal) {
-    setFieldError(errors, 'city', 'City is required');
-  } else if (cityVal.length < 2) {
-    setFieldError(errors, 'city', 'City must be at least 2 characters long');
-  } else if (cityVal.length > 100) {
-    setFieldError(errors, 'city', 'City cannot exceed 100 characters');
-  }
-
-  const stateVal = data.state.trim();
-  if (!stateVal) {
-    setFieldError(errors, 'state', 'State is required');
-  } else if (stateVal.length < 2) {
-    setFieldError(errors, 'state', 'State must be at least 2 characters long');
-  } else if (stateVal.length > 100) {
-    setFieldError(errors, 'state', 'State cannot exceed 100 characters');
-  }
-
-  const pinVal = data.postalCode.trim();
-  if (!pinVal) {
-    setFieldError(errors, 'postalCode', 'PIN / Postal code is required');
-  } else if (!POSTAL_CODE_6_DIGIT_REGEX.test(pinVal)) {
-    setFieldError(errors, 'postalCode', 'PIN / Postal code must be exactly 6 digits');
-  }
-
-  return errors;
-};
+import { createCustomerSchema } from '../../common/validation/customerSchemas.js';
 
 export const CreateCustomerPage = () => {
   const navigate = useNavigate();
@@ -136,67 +36,55 @@ export const CreateCustomerPage = () => {
 
   const [serverError, setServerError] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
-  const [includeAddress, setIncludeAddress] = useState(true);
 
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    phone: '',
-    addressName: '',
-    addressPhone: '',
-    address: '',
-    city: '',
-    state: '',
-    postalCode: '',
-    country: 'India',
+  const {
+    register,
+    handleSubmit,
+    control,
+    watch,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(createCustomerSchema),
+    defaultValues: {
+      name: '',
+      email: '',
+      password: '',
+      phone: '',
+      includeAddress: true,
+      addressName: '',
+      addressPhone: '',
+      address: '',
+      city: '',
+      state: '',
+      postalCode: '',
+      country: 'India',
+    },
   });
-  const [errors, setErrors] = useState({});
 
-  const handleInputChange = (field) => (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: e.target.value,
-    }));
-    if (errors[field]) {
-      setErrors((prev) => ({
-        ...prev,
-        [field]: null,
-      }));
-    }
-  };
+  const includeAddress = watch('includeAddress');
+  const watchedName = watch('name') || '';
+  const watchedPhone = watch('phone') || '';
 
-  const validate = () => {
-    const userErrors = validateUserFields(formData);
-    const addressErrors = includeAddress ? validateAddressFields(formData) : {};
-    const newErrors = { ...userErrors, ...addressErrors };
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validate()) return;
-
+  const onFormSubmit = async (data) => {
     setServerError(null);
     try {
+      const phoneTrimmed = data.phone ? data.phone.trim() : '';
       const payload = {
-        name: formData.name.trim(),
-        email: formData.email.trim(),
-        password: formData.password,
-        phone: formData.phone.trim() || undefined,
+        name: data.name.trim(),
+        email: data.email.trim(),
+        password: data.password,
+        phone: phoneTrimmed || undefined,
       };
 
-      if (includeAddress) {
+      if (data.includeAddress) {
         payload.address = {
-          name: formData.addressName.trim() || formData.name.trim(),
-          phone: formData.addressPhone.trim() || formData.phone.trim() || undefined,
-          address: formData.address.trim(),
-          city: formData.city.trim(),
-          state: formData.state.trim(),
-          postalCode: formData.postalCode.trim(),
-          country: formData.country.trim() || 'India',
+          name: (data.addressName && data.addressName.trim()) || data.name.trim(),
+          phone: (data.addressPhone && data.addressPhone.trim()) || phoneTrimmed || undefined,
+          address: data.address.trim(),
+          city: data.city.trim(),
+          state: data.state.trim(),
+          postalCode: data.postalCode.trim(),
+          country: (data.country && data.country.trim()) || 'India',
         };
       }
 
@@ -275,7 +163,7 @@ export const CreateCustomerPage = () => {
       {/* Form Card */}
       <Card sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
         <CardContent sx={{ p: { xs: 2.5, sm: 4 } }}>
-          <Box component="form" onSubmit={handleSubmit} noValidate>
+          <Box component="form" onSubmit={handleSubmit(onFormSubmit)} noValidate>
             {/* Account & Profile */}
             <Typography variant="subtitle2" fontWeight={700} color="primary.main" sx={{ mb: 2, letterSpacing: 0.5 }}>
               ACCOUNT & PROFILE INFORMATION
@@ -288,10 +176,9 @@ export const CreateCustomerPage = () => {
                   size="small"
                   label="Full Name"
                   required
-                  value={formData.name}
-                  onChange={handleInputChange('name')}
+                  {...register('name')}
                   error={Boolean(errors.name)}
-                  helperText={errors.name}
+                  helperText={errors.name?.message}
                 />
               </Grid>
 
@@ -302,10 +189,9 @@ export const CreateCustomerPage = () => {
                   label="Email Address"
                   type="email"
                   required
-                  value={formData.email}
-                  onChange={handleInputChange('email')}
+                  {...register('email')}
                   error={Boolean(errors.email)}
-                  helperText={errors.email}
+                  helperText={errors.email?.message}
                 />
               </Grid>
 
@@ -316,10 +202,9 @@ export const CreateCustomerPage = () => {
                   label="Password"
                   required
                   type={showPassword ? 'text' : 'password'}
-                  value={formData.password}
-                  onChange={handleInputChange('password')}
+                  {...register('password')}
                   error={Boolean(errors.password)}
-                  helperText={errors.password || 'Minimum 6 characters'}
+                  helperText={errors.password?.message || 'Minimum 6 characters'}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
@@ -341,11 +226,10 @@ export const CreateCustomerPage = () => {
                   fullWidth
                   size="small"
                   label="Phone Number"
-                  value={formData.phone}
-                  onChange={handleInputChange('phone')}
                   placeholder="10-digit mobile number"
+                  {...register('phone')}
                   error={Boolean(errors.phone)}
-                  helperText={errors.phone || 'Optional, exactly 10 digits'}
+                  helperText={errors.phone?.message || 'Optional, exactly 10 digits'}
                 />
               </Grid>
             </Grid>
@@ -360,19 +244,25 @@ export const CreateCustomerPage = () => {
                   INITIAL SHIPPING ADDRESS
                 </Typography>
               </Box>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={includeAddress}
-                    onChange={(e) => setIncludeAddress(e.target.checked)}
-                    color="primary"
+              <Controller
+                name="includeAddress"
+                control={control}
+                render={({ field }) => (
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={field.value}
+                        onChange={(e) => field.onChange(e.target.checked)}
+                        color="primary"
+                      />
+                    }
+                    label={
+                      <Typography variant="body2" fontWeight={600}>
+                        Include Address
+                      </Typography>
+                    }
                   />
-                }
-                label={
-                  <Typography variant="body2" fontWeight={600}>
-                    Include Address
-                  </Typography>
-                }
+                )}
               />
             </Box>
 
@@ -383,11 +273,10 @@ export const CreateCustomerPage = () => {
                     fullWidth
                     size="small"
                     label="Recipient Full Name"
-                    placeholder={formData.name || 'Leave blank to use customer name'}
-                    value={formData.addressName}
-                    onChange={handleInputChange('addressName')}
+                    placeholder={watchedName || 'Leave blank to use customer name'}
+                    {...register('addressName')}
                     error={Boolean(errors.addressName)}
-                    helperText={errors.addressName || 'Defaults to customer name if blank'}
+                    helperText={errors.addressName?.message || 'Defaults to customer name if blank'}
                   />
                 </Grid>
 
@@ -396,11 +285,10 @@ export const CreateCustomerPage = () => {
                     fullWidth
                     size="small"
                     label="Contact Phone"
-                    placeholder={formData.phone || 'Leave blank to use customer phone'}
-                    value={formData.addressPhone}
-                    onChange={handleInputChange('addressPhone')}
+                    placeholder={watchedPhone || 'Leave blank to use customer phone'}
+                    {...register('addressPhone')}
                     error={Boolean(errors.addressPhone)}
-                    helperText={errors.addressPhone || 'Defaults to customer phone if blank'}
+                    helperText={errors.addressPhone?.message || 'Defaults to customer phone if blank'}
                   />
                 </Grid>
 
@@ -412,10 +300,9 @@ export const CreateCustomerPage = () => {
                     required
                     multiline
                     rows={2}
-                    value={formData.address}
-                    onChange={handleInputChange('address')}
+                    {...register('address')}
                     error={Boolean(errors.address)}
-                    helperText={errors.address}
+                    helperText={errors.address?.message}
                   />
                 </Grid>
 
@@ -425,10 +312,9 @@ export const CreateCustomerPage = () => {
                     size="small"
                     label="City"
                     required
-                    value={formData.city}
-                    onChange={handleInputChange('city')}
+                    {...register('city')}
                     error={Boolean(errors.city)}
-                    helperText={errors.city}
+                    helperText={errors.city?.message}
                   />
                 </Grid>
 
@@ -438,10 +324,9 @@ export const CreateCustomerPage = () => {
                     size="small"
                     label="State"
                     required
-                    value={formData.state}
-                    onChange={handleInputChange('state')}
+                    {...register('state')}
                     error={Boolean(errors.state)}
-                    helperText={errors.state}
+                    helperText={errors.state?.message}
                   />
                 </Grid>
 
@@ -451,10 +336,9 @@ export const CreateCustomerPage = () => {
                     size="small"
                     label="Postal / PIN Code"
                     required
-                    value={formData.postalCode}
-                    onChange={handleInputChange('postalCode')}
+                    {...register('postalCode')}
                     error={Boolean(errors.postalCode)}
-                    helperText={errors.postalCode}
+                    helperText={errors.postalCode?.message}
                   />
                 </Grid>
 
@@ -463,8 +347,9 @@ export const CreateCustomerPage = () => {
                     fullWidth
                     size="small"
                     label="Country"
-                    value={formData.country}
-                    onChange={handleInputChange('country')}
+                    {...register('country')}
+                    error={Boolean(errors.country)}
+                    helperText={errors.country?.message}
                   />
                 </Grid>
               </Grid>
