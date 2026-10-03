@@ -13,8 +13,6 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Snackbar,
-  Alert,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -34,23 +32,9 @@ export const Orders = () => {
   const {
     orders,
     loading,
+    error,
     refetch: fetchOrders,
   } = useOrders(statusFilter !== 'ALL' ? { status: statusFilter } : {});
-
-  // Feedback Snackbar
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: '',
-    severity: 'success',
-  });
-
-  const showSnackbar = (message, severity = 'success') => {
-    setSnackbar({ open: true, message, severity });
-  };
-
-  const handleCloseSnackbar = () => {
-    setSnackbar((prev) => ({ ...prev, open: false }));
-  };
 
   const handleRefresh = useCallback(() => {
     const params = {};
@@ -169,23 +153,6 @@ export const Orders = () => {
         filterStatus={statusFilter}
         onViewDetail={handleViewDetail}
       />
-
-      {/* Feedback Snackbar */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-      >
-        <Alert
-          onClose={handleCloseSnackbar}
-          severity={snackbar.severity}
-          variant="filled"
-          sx={{ width: '100%' }}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
     </Box>
   );
 };
