@@ -71,7 +71,13 @@ export const updateCustomerSchema = z.object({
       "Phone number must be a valid 10-digit mobile number starting with 6, 7, 8, or 9"
     )
     .optional()
-    .nullable(),
+    .nullable()
+    .transform((val) => {
+      if (val === undefined) {
+        return undefined;
+      }
+      return val && val.trim() ? val.trim() : null;
+    }),
   isActive: z.boolean().optional(),
   address: z
     .object({

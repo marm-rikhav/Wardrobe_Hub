@@ -164,7 +164,7 @@ export const updateCustomerAdmin = async (id, updateData) => {
       data: {
         name: updateData.name || undefined,
         email: updateData.email || undefined,
-        phone: updateData.phone === undefined ? undefined : updateData.phone,
+        phone: updateData.phone === undefined ? undefined : (updateData.phone ? updateData.phone : null),
         isActive: updateData.isActive === undefined ? undefined : updateData.isActive,
       },
       select: {

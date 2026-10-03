@@ -202,10 +202,11 @@ export const CustomerEditPage = () => {
         formData.postalCode.trim()
       );
 
+      const phoneTrimmed = formData.phone.trim();
       const payload = {
         name: formData.name.trim(),
         email: formData.email.trim(),
-        phone: formData.phone.trim() || undefined,
+        phone: phoneTrimmed ? phoneTrimmed : null,
         isActive: formData.isActive,
       };
 
@@ -213,7 +214,7 @@ export const CustomerEditPage = () => {
         payload.address = {
           id: formData.addressId || undefined,
           name: formData.addressName.trim() || formData.name.trim(),
-          phone: formData.addressPhone.trim() || formData.phone.trim() || undefined,
+          phone: formData.addressPhone.trim() || phoneTrimmed || undefined,
           address: formData.address.trim(),
           city: formData.city.trim(),
           state: formData.state.trim(),
