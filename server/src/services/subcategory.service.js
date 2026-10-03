@@ -15,8 +15,11 @@ export const createSubcategory = async ({ categoryId, name, slug, isActive = tru
     throw new ApiError(404, "Parent category not found or is currently inactive");
   }
 
-  // 2. Generate slug
-  const finalSlug = slug ? slugify(slug) : slugify(`${category.slug}-${name}`);
+  // 2. Validate and generate slug
+  if (!slug || typeof slug !== "string" || !slug.trim()) {
+    throw new ApiError(400, "Subcategory slug is required");
+  }
+  const finalSlug = slugify(slug);
 
   if (!finalSlug) {
     throw new ApiError(400, "Unable to generate a valid slug for this subcategory");

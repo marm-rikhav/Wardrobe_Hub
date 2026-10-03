@@ -33,12 +33,15 @@ export const SubcategoryDialog = ({
   error = null,
 }) => {
   const isEditing = Boolean(subcategory);
+  const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(false);
 
   const {
     register,
     handleSubmit,
     control,
     reset,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(subcategorySchema),
@@ -50,8 +53,23 @@ export const SubcategoryDialog = ({
     },
   });
 
+  const watchedName = watch('name');
+
+  useEffect(() => {
+    if (!isEditing && !isSlugManuallyEdited && watchedName) {
+      const generated = watchedName
+        .toLowerCase()
+        .trim()
+        .replace(/[^\w\s-]/g, '')
+        .replace(/[\s_-]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+      setValue('slug', generated, { shouldValidate: true });
+    }
+  }, [watchedName, isEditing, isSlugManuallyEdited, setValue]);
+
   useEffect(() => {
     if (open) {
+      setIsSlugManuallyEdited(false);
       if (subcategory) {
         reset({
           categoryId: subcategory.categoryId || '',
@@ -74,7 +92,7 @@ export const SubcategoryDialog = ({
     const payload = {
       categoryId: data.categoryId,
       name: data.name.trim(),
-      slug: data.slug ? data.slug.trim() : undefined,
+      slug: data.slug.trim(),
       isActive: data.isActive,
     };
     onSubmit(payload);
@@ -151,15 +169,20 @@ export const SubcategoryDialog = ({
 
           {/* Slug */}
           <TextField
-            label="Slug (Optional)"
-            placeholder="e.g. shirts, jeans (auto-generated if empty)"
+            label="Slug"
+            placeholder="e.g. casual-shirts"
             fullWidth
+            required
             disabled={loading}
             {...register('slug')}
+            onChange={(e) => {
+              setIsSlugManuallyEdited(true);
+              register('slug').onChange(e);
+            }}
             error={Boolean(errors.slug)}
             helperText={
               errors.slug?.message ||
-              'Leave blank to automatically generate from name.'
+              'URL-friendly identifier (e.g. casual-shirts).'
             }
           />
 
