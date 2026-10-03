@@ -162,8 +162,8 @@ export const updateCustomerAdmin = async (id, updateData) => {
     data: {
       name: updateData.name || undefined,
       email: updateData.email || undefined,
-      phone: updateData.phone !== undefined ? updateData.phone : undefined,
-      isActive: updateData.isActive !== undefined ? updateData.isActive : undefined,
+      phone: updateData.phone === undefined ? undefined : updateData.phone,
+      isActive: updateData.isActive === undefined ? undefined : updateData.isActive,
     },
     select: {
       id: true,
@@ -307,11 +307,21 @@ export const createCustomerAdmin = async (customerData) => {
         role: "CUSTOMER",
         isActive: false, // strictly deactivated on creation
       },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        role: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
 
     // If initial address is provided, create it as the default address
     let newAddress = null;
-    if (address && address.address && address.city && address.state && address.postalCode) {
+    if (address?.address && address?.city && address?.state && address?.postalCode) {
       newAddress = await tx.address.create({
         data: {
           userId: newUser.id,
@@ -327,9 +337,8 @@ export const createCustomerAdmin = async (customerData) => {
       });
     }
 
-    const { passwordHash: _, ...safeUser } = newUser;
     return {
-      ...safeUser,
+      ...newUser,
       addresses: newAddress ? [newAddress] : [],
       totalOrders: 0,
       recentOrders: [],
