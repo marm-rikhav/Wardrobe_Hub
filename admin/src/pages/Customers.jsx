@@ -217,21 +217,6 @@ export const Customers = () => {
         </Box>
       </Box>
 
-      {/* Error Alert */}
-      {error && (
-        <Alert
-          severity="error"
-          sx={{ mb: 3 }}
-          action={
-            <Button color="inherit" size="small" onClick={fetchCustomers}>
-              Retry
-            </Button>
-          }
-        >
-          {error}
-        </Alert>
-      )}
-
       {/* Search Bar */}
       <Card sx={{ mb: 3, border: '1px solid', borderColor: 'divider' }}>
         <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
@@ -455,12 +440,34 @@ export const Customers = () => {
         onConfirm={handleConfirmDelete}
       />
 
+      {/* Error Snackbar */}
+      <Snackbar
+        open={Boolean(error)}
+        autoHideDuration={6000}
+        onClose={() => setError(null)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert
+          onClose={() => setError(null)}
+          severity="error"
+          variant="filled"
+          sx={{ width: '100%', fontWeight: 600 }}
+          action={
+            <Button color="inherit" size="small" onClick={fetchCustomers}>
+              Retry
+            </Button>
+          }
+        >
+          {error}
+        </Alert>
+      </Snackbar>
+
       {/* Feedback Snackbar */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4500}
         onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
         <Alert
           onClose={handleCloseSnackbar}

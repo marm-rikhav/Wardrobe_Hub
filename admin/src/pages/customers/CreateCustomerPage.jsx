@@ -18,6 +18,7 @@ import {
   FormControlLabel,
   Checkbox,
   Chip,
+  Snackbar,
 } from '@mui/material';
 import {
   ArrowBack as ArrowBackIcon,
@@ -162,14 +163,7 @@ export const CreateCustomerPage = () => {
         sx={{ mb: 3, borderRadius: 2 }}
       >
         Per application policy, newly created customer accounts are set to <strong>Inactive (Deactivated)</strong> upon creation. The customer will not be able to log in until an administrator explicitly activates their account.
-      </Alert>
-
-      {serverError && (
-        <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
-          {serverError}
-        </Alert>
-      )}
-
+</Alert>
       {/* Form Card */}
       <Card sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
         <CardContent sx={{ p: { xs: 2.5, sm: 4 } }}>
@@ -389,6 +383,23 @@ export const CreateCustomerPage = () => {
           </Box>
         </CardContent>
       </Card>
+
+      {/* Error Snackbar */}
+      <Snackbar
+        open={Boolean(serverError)}
+        autoHideDuration={6000}
+        onClose={() => setServerError('')}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert
+          onClose={() => setServerError('')}
+          severity="error"
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {serverError}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

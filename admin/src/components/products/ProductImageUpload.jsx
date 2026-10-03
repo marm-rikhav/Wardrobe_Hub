@@ -10,6 +10,7 @@ import {
   TextField,
   Chip,
   Alert,
+  Snackbar,
   CircularProgress,
   Dialog,
   DialogTitle,
@@ -485,12 +486,6 @@ export const ProductImageUpload = ({
 
       <ImageGuidelinesBanner />
 
-      {uploadError && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setUploadError(null)}>
-          {uploadError}
-        </Alert>
-      )}
-
       {/* Existing Images Gallery */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
         {images.map((img, index) => (
@@ -588,6 +583,23 @@ export const ProductImageUpload = ({
         onConfirm={handleConfirmDelete}
         deleting={deleting}
       />
+
+      {/* Error Snackbar */}
+      <Snackbar
+        open={Boolean(uploadError)}
+        autoHideDuration={6000}
+        onClose={() => setUploadError(null)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert
+          onClose={() => setUploadError(null)}
+          severity="error"
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {uploadError}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

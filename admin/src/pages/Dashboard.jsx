@@ -18,6 +18,7 @@ import {
   Skeleton,
 
   Alert,
+  Snackbar,
   IconButton,
   Tooltip,
 } from '@mui/material';
@@ -128,20 +129,7 @@ export const Dashboard = () => {
         </Button>
       </Box>
 
-      {/* Error State */}
-      {error && (
-        <Alert
-          severity="error"
-          sx={{ mb: 3 }}
-          action={
-            <Button color="inherit" size="small" onClick={fetchDashboardData}>
-              Retry
-            </Button>
-          }
-        >
-          {error}
-        </Alert>
-      )}
+
 
       {/* Metric KPI Cards */}
       <Grid container spacing={2.5} sx={{ mb: 4 }}>
@@ -555,6 +543,28 @@ export const Dashboard = () => {
           </Card>
         </Grid>
       </Grid>
+
+      {/* Error Snackbar */}
+      <Snackbar
+        open={Boolean(error)}
+        autoHideDuration={6000}
+        onClose={() => setError(null)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert
+          onClose={() => setError(null)}
+          severity="error"
+          variant="filled"
+          sx={{ width: '100%' }}
+          action={
+            <Button color="inherit" size="small" onClick={fetchDashboardData}>
+              Retry
+            </Button>
+          }
+        >
+          {error}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

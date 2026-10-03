@@ -519,7 +519,7 @@ export const CustomerDetailPage = () => {
         open={snackbar.open}
         autoHideDuration={4500}
         onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
         <Alert
           onClose={handleCloseSnackbar}

@@ -18,6 +18,7 @@ import {
   Chip,
   Avatar,
   Paper,
+  Snackbar,
 } from '@mui/material';
 import {
   ArrowBack as ArrowBackIcon,
@@ -218,14 +219,7 @@ export const CustomerEditPage = () => {
             }}
           />
         </Box>
-      </Box>
-
-      {saveError && (
-        <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
-          {saveError}
-        </Alert>
-      )}
-
+</Box>
       {/* Main Unified Edit Form */}
       <Box component="form" onSubmit={handleSubmit(onFormSubmit)} noValidate>
         {/* Section 1: Customer Profile Information */}
@@ -463,6 +457,23 @@ export const CustomerEditPage = () => {
           </Box>
         </Paper>
       </Box>
+
+      {/* Error Snackbar */}
+      <Snackbar
+        open={Boolean(saveError)}
+        autoHideDuration={6000}
+        onClose={() => setSaveError('')}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert
+          onClose={() => setSaveError('')}
+          severity="error"
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {saveError}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

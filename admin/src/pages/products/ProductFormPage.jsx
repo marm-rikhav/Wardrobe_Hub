@@ -407,12 +407,6 @@ export const ProductFormPage = () => {
         </Box>
       </Box>
 
-      {formError && (
-        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setFormError(null)}>
-          {formError}
-        </Alert>
-      )}
-
       <form onSubmit={handleSubmit(onSubmit, onInvalid)} noValidate>
         {/* Section 1: Basic Information */}
         <Card sx={{ mb: 3, border: '1px solid', borderColor: 'divider' }}>
@@ -682,12 +676,29 @@ export const ProductFormPage = () => {
         </Box>
       </form>
 
-      {/* Snackbar */}
+      {/* Form Error Snackbar */}
+      <Snackbar
+        open={Boolean(formError)}
+        autoHideDuration={6000}
+        onClose={() => setFormError(null)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert
+          onClose={() => setFormError(null)}
+          severity="error"
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {formError}
+        </Alert>
+      </Snackbar>
+
+      {/* Feedback Snackbar */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
         onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
         <Alert
           onClose={handleCloseSnackbar}

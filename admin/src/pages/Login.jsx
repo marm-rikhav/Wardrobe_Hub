@@ -14,6 +14,7 @@ import {
   Alert,
   CircularProgress,
   Container,
+  Snackbar,
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import useAuth from '../hooks/useAuth.js';
@@ -124,21 +125,6 @@ export const Login = () => {
                 Admin Management Portal
               </Typography>
             </Box>
-
-            {/* Backend Error Alert */}
-            {backendError && (
-              <Alert
-                severity="error"
-                sx={{
-                  mb: 3,
-                  fontSize: '0.875rem',
-                  alignItems: 'center',
-                }}
-                onClose={() => setBackendError('')}
-              >
-                {backendError}
-              </Alert>
-            )}
 
             {/* Login Form using React Hook Form */}
             <Box
@@ -251,6 +237,23 @@ export const Login = () => {
           </CardContent>
         </Card>
       </Container>
+
+      {/* Error Snackbar */}
+      <Snackbar
+        open={Boolean(backendError)}
+        autoHideDuration={6000}
+        onClose={() => setBackendError('')}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert
+          onClose={() => setBackendError('')}
+          severity="error"
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {backendError}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
