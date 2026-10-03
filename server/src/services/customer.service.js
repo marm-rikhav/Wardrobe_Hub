@@ -117,6 +117,7 @@ export const getCustomerByIdAdmin = async (id) => {
     role: customer.role,
     isActive: customer.isActive,
     createdAt: customer.createdAt,
+    updatedAt: customer.updatedAt,
     addresses: customer.addresses || [],
     totalOrders: customer._count?.orders ?? 0,
     recentOrders: (customer.orders || []).map((o) => ({
@@ -175,6 +176,7 @@ export const updateCustomerAdmin = async (id, updateData) => {
         role: true,
         isActive: true,
         createdAt: true,
+        updatedAt: true,
       },
     });
 
@@ -365,6 +367,7 @@ export const createCustomerAdmin = async (customerData) => {
         role: true,
         isActive: true,
         createdAt: true,
+        updatedAt: true,
       },
     });
 
