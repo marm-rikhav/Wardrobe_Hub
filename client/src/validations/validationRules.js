@@ -88,7 +88,7 @@ export const validateStrictEmail = (email) => {
   }
 
   const domainLabels = domainPart.split('.');
-  const tld = domainLabels[domainLabels.length - 1];
+  const tld = domainLabels.at(-1);
   if (!tld || tld.length < 2 || !/^[a-z]+$/.test(tld)) {
     return { isValid: false, message: 'Email has an invalid top-level domain' };
   }

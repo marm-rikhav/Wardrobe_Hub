@@ -31,6 +31,98 @@ const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const PHONE_10_DIGIT_REGEX = /^\d{10}$/;
 const POSTAL_CODE_6_DIGIT_REGEX = /^\d{6}$/;
 
+const validateUserFields = (data) => {
+  const errors = {};
+  const nameVal = data.name.trim();
+  if (!nameVal) {
+    errors.name = 'Name is required';
+  } else if (nameVal.length < 3) {
+    errors.name = 'Name must be at least 3 characters long';
+  } else if (nameVal.length > 50) {
+    errors.name = 'Name cannot exceed 50 characters';
+  }
+
+  const emailVal = data.email.trim();
+  if (!emailVal) {
+    errors.email = 'Email is required';
+  } else if (emailVal.length > 150) {
+    errors.email = 'Email cannot exceed 150 characters';
+  } else if (!EMAIL_REGEX.test(emailVal.toLowerCase())) {
+    errors.email = 'Invalid email address format';
+  }
+
+  if (!data.password) {
+    errors.password = 'Password is required';
+  } else if (data.password.length < 6) {
+    errors.password = 'Password must be at least 6 characters long';
+  } else if (data.password.length > 100) {
+    errors.password = 'Password cannot exceed 100 characters';
+  }
+
+  const phoneVal = data.phone.trim();
+  if (phoneVal && !PHONE_10_DIGIT_REGEX.test(phoneVal)) {
+    errors.phone = 'Phone number must be exactly 10 digits';
+  }
+
+  return errors;
+};
+
+const validateAddressFields = (data) => {
+  const errors = {};
+  const nameVal = data.name.trim();
+  const phoneVal = data.phone.trim();
+
+  const addrName = data.addressName.trim() || nameVal;
+  if (!addrName) {
+    errors.addressName = 'Full name is required';
+  } else if (addrName.length < 2) {
+    errors.addressName = 'Name must be at least 2 characters long';
+  } else if (addrName.length > 100) {
+    errors.addressName = 'Name cannot exceed 100 characters';
+  }
+
+  const addrPhone = data.addressPhone.trim() || phoneVal;
+  if (!addrPhone) {
+    errors.addressPhone = 'Phone number is required';
+  } else if (!PHONE_10_DIGIT_REGEX.test(addrPhone)) {
+    errors.addressPhone = 'Phone number must be exactly 10 digits';
+  }
+
+  const streetVal = data.address.trim();
+  if (!streetVal) {
+    errors.address = 'Street address is required';
+  } else if (streetVal.length < 5) {
+    errors.address = 'Address must be at least 5 characters long';
+  }
+
+  const cityVal = data.city.trim();
+  if (!cityVal) {
+    errors.city = 'City is required';
+  } else if (cityVal.length < 2) {
+    errors.city = 'City must be at least 2 characters long';
+  } else if (cityVal.length > 100) {
+    errors.city = 'City cannot exceed 100 characters';
+  }
+
+  const stateVal = data.state.trim();
+  if (!stateVal) {
+    errors.state = 'State is required';
+  } else if (stateVal.length < 2) {
+    errors.state = 'State must be at least 2 characters long';
+  } else if (stateVal.length > 100) {
+    errors.state = 'State cannot exceed 100 characters';
+  }
+
+  const pinVal = data.postalCode.trim();
+  if (!pinVal) {
+    errors.postalCode = 'PIN / Postal code is required';
+  } else if (!POSTAL_CODE_6_DIGIT_REGEX.test(pinVal)) {
+    errors.postalCode = 'PIN / Postal code must be exactly 6 digits';
+  }
+
+  return errors;
+};
+
 export const CreateCustomerPage = () => {
   const navigate = useNavigate();
 
@@ -68,93 +160,9 @@ export const CreateCustomerPage = () => {
   };
 
   const validate = () => {
-    const newErrors = {};
-
-    // 1. Name: matches client registerSchema
-    const nameVal = formData.name.trim();
-    if (!nameVal) {
-      newErrors.name = 'Name is required';
-    } else if (nameVal.length < 3) {
-      newErrors.name = 'Name must be at least 3 characters long';
-    } else if (nameVal.length > 50) {
-      newErrors.name = 'Name cannot exceed 50 characters';
-    }
-
-    // 2. Email: matches client registerSchema
-    const emailVal = formData.email.trim();
-    if (!emailVal) {
-      newErrors.email = 'Email is required';
-    } else if (emailVal.length > 150) {
-      newErrors.email = 'Email cannot exceed 150 characters';
-    } else if (!EMAIL_REGEX.test(emailVal.toLowerCase())) {
-      newErrors.email = 'Invalid email address format';
-    }
-
-    // 3. Password: matches client registerSchema
-    if (!formData.password) {
-      newErrors.password = 'Password is required';
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters long';
-    } else if (formData.password.length > 100) {
-      newErrors.password = 'Password cannot exceed 100 characters';
-    }
-
-    // 4. Phone: matches client registerSchema
-    const phoneVal = formData.phone.trim();
-    if (phoneVal && !PHONE_10_DIGIT_REGEX.test(phoneVal)) {
-      newErrors.phone = 'Phone number must be exactly 10 digits';
-    }
-
-    // 5. Address (if included): matches client addressSchema
-    if (includeAddress) {
-      const addrName = formData.addressName.trim() || nameVal;
-      if (!addrName) {
-        newErrors.addressName = 'Full name is required';
-      } else if (addrName.length < 2) {
-        newErrors.addressName = 'Name must be at least 2 characters long';
-      } else if (addrName.length > 100) {
-        newErrors.addressName = 'Name cannot exceed 100 characters';
-      }
-
-      const addrPhone = formData.addressPhone.trim() || phoneVal;
-      if (!addrPhone) {
-        newErrors.addressPhone = 'Phone number is required';
-      } else if (!PHONE_10_DIGIT_REGEX.test(addrPhone)) {
-        newErrors.addressPhone = 'Phone number must be exactly 10 digits';
-      }
-
-      const streetVal = formData.address.trim();
-      if (!streetVal) {
-        newErrors.address = 'Street address is required';
-      } else if (streetVal.length < 5) {
-        newErrors.address = 'Address must be at least 5 characters long';
-      }
-
-      const cityVal = formData.city.trim();
-      if (!cityVal) {
-        newErrors.city = 'City is required';
-      } else if (cityVal.length < 2) {
-        newErrors.city = 'City must be at least 2 characters long';
-      } else if (cityVal.length > 100) {
-        newErrors.city = 'City cannot exceed 100 characters';
-      }
-
-      const stateVal = formData.state.trim();
-      if (!stateVal) {
-        newErrors.state = 'State is required';
-      } else if (stateVal.length < 2) {
-        newErrors.state = 'State must be at least 2 characters long';
-      } else if (stateVal.length > 100) {
-        newErrors.state = 'State cannot exceed 100 characters';
-      }
-
-      const pinVal = formData.postalCode.trim();
-      if (!pinVal) {
-        newErrors.postalCode = 'PIN / Postal code is required';
-      } else if (!POSTAL_CODE_6_DIGIT_REGEX.test(pinVal)) {
-        newErrors.postalCode = 'PIN / Postal code must be exactly 6 digits';
-      }
-    }
+    const userErrors = validateUserFields(formData);
+    const addressErrors = includeAddress ? validateAddressFields(formData) : {};
+    const newErrors = { ...userErrors, ...addressErrors };
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;

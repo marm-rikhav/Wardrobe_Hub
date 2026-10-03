@@ -19,7 +19,6 @@ import {
 import {
   ArrowBack as ArrowBackIcon,
   Save as SaveIcon,
-  EditOutlined as EditIcon,
 } from '@mui/icons-material';
 import customerService from '../../services/customerService.js';
 
