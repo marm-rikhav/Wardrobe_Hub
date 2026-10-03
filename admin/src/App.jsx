@@ -20,6 +20,7 @@ import CreateCustomerPage from './pages/customers/CreateCustomerPage.jsx';
 import CustomerDetailPage from './pages/customers/CustomerDetailPage.jsx';
 import CustomerEditPage from './pages/customers/CustomerEditPage.jsx';
 import Settings from './pages/Settings.jsx';
+import NotFound from './pages/NotFound.jsx';
 
 export function App() {
   return (
@@ -67,13 +68,16 @@ export function App() {
             <Route path="customers/:id" element={<CustomerDetailPage />} />
             <Route path="customers/:id/edit" element={<CustomerEditPage />} />
             <Route path="settings" element={<Settings />} />
+
+            {/* Admin 404 Catch-all */}
+            <Route path="*" element={<NotFound />} />
           </Route>
 
           {/* Root redirect: default to /admin */}
           <Route path="/" element={<Navigate to="/admin" replace />} />
 
-          {/* Fallback route */}
-          <Route path="*" element={<Navigate to="/admin" replace />} />
+          {/* Global Fallback 404 route */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>
