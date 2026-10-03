@@ -12,6 +12,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import EmailOutlined from '@mui/icons-material/EmailOutlined';
 import { loginSchema } from '../../validations/auth.schema.js';
 import { useAuth } from '../../hooks/useAuth.js';
 
@@ -42,12 +43,30 @@ export const LoginForm = ({ onSuccess }) => {
     }
   };
 
+  const isDeactivated = serverError.toLowerCase().includes('deactivated');
+
   return (
     <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ mt: 1 }}>
       {serverError && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {serverError}
-        </Alert>
+        isDeactivated ? (
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            <Box sx={{ fontWeight: 600, mb: 0.5 }}>Account Deactivated</Box>
+            <Box sx={{ mb: 1.5, fontSize: '0.875rem' }}>{serverError}</Box>
+            <Button
+              variant="outlined"
+              color="warning"
+              size="small"
+              href="mailto:admin@wardrobehub.com?subject=Account%20Reactivation%20Request"
+              startIcon={<EmailOutlined />}
+            >
+              Email Admin
+            </Button>
+          </Alert>
+        ) : (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {serverError}
+          </Alert>
+        )
       )}
 
       <TextField

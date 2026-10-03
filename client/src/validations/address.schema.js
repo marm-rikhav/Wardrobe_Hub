@@ -1,6 +1,6 @@
 import { z } from 'zod';
+import { validateStrictPhone } from './validationRules.js';
 
-const PHONE_10_DIGIT_REGEX = /^\d{10}$/;
 const POSTAL_CODE_6_DIGIT_REGEX = /^\d{6}$/;
 
 export const addressSchema = z.object({
@@ -14,7 +14,15 @@ export const addressSchema = z.object({
     .string()
     .trim()
     .min(1, 'Phone number is required')
-    .regex(PHONE_10_DIGIT_REGEX, 'Phone number must be exactly 10 digits'),
+    .superRefine((val, ctx) => {
+      const res = validateStrictPhone(val);
+      if (!res.isValid) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: res.message || 'Invalid phone number',
+        });
+      }
+    }),
   address: z
     .string()
     .min(1, 'Street address is required')

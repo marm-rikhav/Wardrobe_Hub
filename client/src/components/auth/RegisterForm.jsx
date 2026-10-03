@@ -85,10 +85,18 @@ export const RegisterForm = ({ onSuccess }) => {
         id="phone"
         label="Phone Number (Optional)"
         autoComplete="tel"
-        inputProps={{ maxLength: 10, inputMode: 'numeric' }}
+        inputProps={{
+          maxLength: 10,
+          inputMode: 'numeric',
+          pattern: '[0-9]*',
+        }}
         error={Boolean(errors.phone)}
         helperText={errors.phone?.message}
-        {...register('phone')}
+        {...register('phone', {
+          onChange: (e) => {
+            e.target.value = e.target.value.replaceAll(/\D/g, '').slice(0, 10);
+          },
+        })}
       />
 
       <TextField

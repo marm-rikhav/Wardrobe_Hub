@@ -1,6 +1,5 @@
 import { z } from 'zod';
-
-const PHONE_10_DIGIT_REGEX = /^\d{10}$/;
+import { validateStrictEmail, validateStrictPhone } from './validationRules.js';
 
 export const profileSchema = z.object({
   name: z
@@ -11,15 +10,32 @@ export const profileSchema = z.object({
     .max(50, 'Name cannot exceed 50 characters'),
   email: z
     .string()
-    .email('Invalid email address')
+    .trim()
+    .toLowerCase()
+    .superRefine((val, ctx) => {
+      if (!val) return;
+      const res = validateStrictEmail(val);
+      if (!res.isValid) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: res.message || 'Invalid email address format',
+        });
+      }
+    })
     .optional(),
   phone: z
     .string()
     .trim()
-    .refine(
-      (val) => !val || PHONE_10_DIGIT_REGEX.test(val),
-      'Phone number must be exactly 10 digits'
-    )
+    .superRefine((val, ctx) => {
+      if (!val) return;
+      const res = validateStrictPhone(val);
+      if (!res.isValid) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: res.message || 'Invalid phone number',
+        });
+      }
+    })
     .optional()
     .or(z.literal('')),
 });

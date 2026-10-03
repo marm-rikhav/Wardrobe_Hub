@@ -1,7 +1,5 @@
 import { z } from 'zod';
-
-const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-const PHONE_10_DIGIT_REGEX = /^\d{10}$/;
+import { validateStrictEmail, validateStrictPhone } from './validationRules.js';
 
 export const loginSchema = z.object({
   email: z
@@ -9,7 +7,15 @@ export const loginSchema = z.object({
     .min(1, 'Email is required')
     .trim()
     .toLowerCase()
-    .regex(EMAIL_REGEX, 'Invalid email address format'),
+    .superRefine((val, ctx) => {
+      const res = validateStrictEmail(val);
+      if (!res.isValid) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: res.message || 'Invalid email address format',
+        });
+      }
+    }),
   password: z
     .string()
     .min(1, 'Password is required'),
@@ -29,14 +35,28 @@ export const registerSchema = z
       .trim()
       .toLowerCase()
       .max(150, 'Email cannot exceed 150 characters')
-      .regex(EMAIL_REGEX, 'Invalid email address format'),
+      .superRefine((val, ctx) => {
+        const res = validateStrictEmail(val);
+        if (!res.isValid) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: res.message || 'Invalid email address format',
+          });
+        }
+      }),
     phone: z
       .string()
       .trim()
-      .refine(
-        (val) => !val || PHONE_10_DIGIT_REGEX.test(val),
-        'Phone number must be exactly 10 digits'
-      )
+      .superRefine((val, ctx) => {
+        if (!val) return;
+        const res = validateStrictPhone(val);
+        if (!res.isValid) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: res.message || 'Invalid phone number',
+          });
+        }
+      })
       .optional()
       .or(z.literal('')),
     password: z
