@@ -209,7 +209,12 @@ export const validateStrictPhone = (phone, isOptional = false) => {
   return { isValid: true };
 };
 
+export const POSTAL_CODE_6_DIGIT_REGEX = /^\d{6}$/;
+export const PHONE_10_DIGIT_REGEX = /^\d{10}$/;
+
 export default {
   validateStrictEmail,
   validateStrictPhone,
+  POSTAL_CODE_6_DIGIT_REGEX,
+  PHONE_10_DIGIT_REGEX,
 };
