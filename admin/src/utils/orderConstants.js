@@ -66,19 +66,14 @@ export const getPrimaryStatusAction = (currentStatus) => {
   }
 };
 
-import {
-  formatCurrency,
-  formatDate,
-  formatOrderDate,
-  formatDateTime,
-} from '../../../shared/utils/formatters.js';
+import formatters from '../../../shared/utils/formatters.js';
 
 export {
   formatCurrency,
   formatDate,
   formatOrderDate,
   formatDateTime,
-};
+} from '../../../shared/utils/formatters.js';
 
 export default {
   ORDER_STATUSES,
@@ -86,6 +81,6 @@ export default {
   ORDER_STATUS_COLORS,
   ALLOWED_STATUS_TRANSITIONS,
   getPrimaryStatusAction,
-  formatCurrency,
-  formatOrderDate,
+  formatCurrency: formatters.formatCurrency,
+  formatOrderDate: formatters.formatOrderDate,
 };

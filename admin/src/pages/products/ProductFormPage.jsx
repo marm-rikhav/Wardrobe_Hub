@@ -36,6 +36,78 @@ import VariantManager from '../../components/products/VariantManager.jsx';
 import ProductImageUpload from '../../components/products/ProductImageUpload.jsx';
 import NotFound from '../NotFound.jsx';
 
+/**
+ * Sanitizes price input:
+ * - Disallows alphabets and symbols (only digits and a single decimal point)
+ * - Maximum 5 digits before decimal
+ * - Maximum 2 digits after decimal
+ */
+const sanitizePriceInput = (val) => {
+  if (val === undefined || val === null) return '';
+  let cleaned = String(val).replace(/[^0-9.]/g, '');
+  const parts = cleaned.split('.');
+  const intPart = parts[0].slice(0, 5);
+  if (parts.length > 1) {
+    const decPart = parts.slice(1).join('').slice(0, 2);
+    return `${intPart}.${decPart}`;
+  }
+  return intPart;
+};
+
+const handlePriceKeyDown = (e) => {
+  if (
+    [
+      'Backspace',
+      'Delete',
+      'Tab',
+      'Escape',
+      'Enter',
+      'ArrowLeft',
+      'ArrowRight',
+      'ArrowUp',
+      'ArrowDown',
+      'Home',
+      'End',
+    ].includes(e.key) ||
+    e.ctrlKey ||
+    e.metaKey
+  ) {
+    return;
+  }
+
+  // Prevent alphabets, symbols, exponent 'e', minus, plus
+  if (!/^[0-9.]$/.test(e.key)) {
+    e.preventDefault();
+    return;
+  }
+
+  // Prevent multiple dots
+  if (e.key === '.' && e.target.value.includes('.')) {
+    e.preventDefault();
+    return;
+  }
+
+  // Check digit limits before and after decimal point
+  const target = e.target;
+  const { value, selectionStart, selectionEnd } = target;
+  if (selectionStart === selectionEnd) {
+    const dotIdx = value.indexOf('.');
+    if (e.key !== '.') {
+      if (dotIdx === -1 || selectionStart <= dotIdx) {
+        const intPart = dotIdx === -1 ? value : value.slice(0, dotIdx);
+        if (intPart.length >= 5) {
+          e.preventDefault();
+        }
+      } else {
+        const decPart = value.slice(dotIdx + 1);
+        if (decPart.length >= 2) {
+          e.preventDefault();
+        }
+      }
+    }
+  }
+};
+
 export const ProductFormPage = () => {
   const { id } = useParams();
   const isEditing = Boolean(id);
@@ -501,13 +573,18 @@ export const ProductFormPage = () => {
               <Grid item xs={12} sm={6}>
                 <TextField
                   label="Base Price (₹)"
-                  type="number"
                   placeholder="0.00"
                   fullWidth
                   required
-                  inputProps={{ min: 0.01, step: 0.01 }}
+                  inputProps={{ inputMode: 'decimal', maxLength: 8 }}
                   disabled={submitting}
-                  {...register('basePrice')}
+                  {...register('basePrice', {
+                    onChange: (e) => {
+                      const sanitized = sanitizePriceInput(e.target.value);
+                      setValue('basePrice', sanitized, { shouldValidate: true });
+                    },
+                  })}
+                  onKeyDown={handlePriceKeyDown}
                   error={Boolean(errors.basePrice)}
                   helperText={errors.basePrice?.message}
                 />
@@ -516,12 +593,17 @@ export const ProductFormPage = () => {
               <Grid item xs={12} sm={6}>
                 <TextField
                   label="Discount Price (₹) (Optional)"
-                  type="number"
                   placeholder="Must be <= Base Price"
                   fullWidth
-                  inputProps={{ min: 0.01, step: 0.01 }}
+                  inputProps={{ inputMode: 'decimal', maxLength: 8 }}
                   disabled={submitting}
-                  {...register('discountPrice')}
+                  {...register('discountPrice', {
+                    onChange: (e) => {
+                      const sanitized = sanitizePriceInput(e.target.value);
+                      setValue('discountPrice', sanitized, { shouldValidate: true });
+                    },
+                  })}
+                  onKeyDown={handlePriceKeyDown}
                   error={Boolean(errors.discountPrice)}
                   helperText={errors.discountPrice?.message}
                 />

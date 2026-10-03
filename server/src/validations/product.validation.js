@@ -61,11 +61,21 @@ export const createProductSchema = z
       .min(1, "Brand is required")
       .max(100, "Brand cannot exceed 100 characters"),
     basePrice: z
-      .number("Base price is required and must be a number")
-      .positive("Base price must be greater than 0"),
+      .number({ required_error: "Base price is required and must be a number" })
+      .positive("Base price must be greater than 0")
+      .max(99999.99, "Base price cannot exceed 99,999.99")
+      .refine(
+        (val) => /^\d{1,5}(\.\d{1,2})?$/.test(String(val)),
+        "Base price can have at most 5 digits before decimal and 2 decimal places"
+      ),
     discountPrice: z
-      .number("Discount price must be a valid number")
+      .number({ invalid_type_error: "Discount price must be a valid number" })
       .positive("Discount price must be greater than 0")
+      .max(99999.99, "Discount price cannot exceed 99,999.99")
+      .refine(
+        (val) => val === null || val === undefined || /^\d{1,5}(\.\d{1,2})?$/.test(String(val)),
+        "Discount price can have at most 5 digits before decimal and 2 decimal places"
+      )
       .nullable()
       .optional(),
     isActive: z.boolean().optional(),
@@ -108,10 +118,20 @@ export const updateProductSchema = z
     basePrice: z
       .number()
       .positive("Base price must be greater than 0")
+      .max(99999.99, "Base price cannot exceed 99,999.99")
+      .refine(
+        (val) => val === undefined || /^\d{1,5}(\.\d{1,2})?$/.test(String(val)),
+        "Base price can have at most 5 digits before decimal and 2 decimal places"
+      )
       .optional(),
     discountPrice: z
       .number()
       .positive("Discount price must be greater than 0")
+      .max(99999.99, "Discount price cannot exceed 99,999.99")
+      .refine(
+        (val) => val === null || val === undefined || /^\d{1,5}(\.\d{1,2})?$/.test(String(val)),
+        "Discount price can have at most 5 digits before decimal and 2 decimal places"
+      )
       .nullable()
       .optional(),
     isActive: z.boolean().optional(),
