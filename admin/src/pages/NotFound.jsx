@@ -1,4 +1,4 @@
-import React from 'react';
+import PropTypes from 'prop-types';
 import { Box, Typography, Button, Paper, Stack } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -113,6 +113,13 @@ export const NotFound = ({
       </Paper>
     </Box>
   );
+};
+
+NotFound.propTypes = {
+  title: PropTypes.string,
+  message: PropTypes.string,
+  backPath: PropTypes.string,
+  backLabel: PropTypes.string,
 };
 
 export default NotFound;

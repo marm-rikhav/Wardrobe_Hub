@@ -39,7 +39,7 @@ export const isStrictEmail = (email) => {
   if (localPart.length < 3) return false;
   if (TYPO_DOMAINS.has(domainPart)) return false;
   const domainLabels = domainPart.split(".");
-  const tld = domainLabels[domainLabels.length - 1];
+  const tld = domainLabels.at(-1);
   if (!tld || tld.length < 2 || !/^[a-z]+$/.test(tld)) return false;
 
   // Local-part sanity checks: disallow 3 or more repeated identical characters
@@ -109,7 +109,7 @@ export const updateCustomerSchema = z.object({
       if (val === undefined) {
         return undefined;
       }
-      return val && val.trim() ? val.trim() : null;
+      return val?.trim() ? val.trim() : null;
     }),
   isActive: z.boolean().optional(),
   address: z

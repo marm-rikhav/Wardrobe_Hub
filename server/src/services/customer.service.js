@@ -159,13 +159,22 @@ export const updateCustomerAdmin = async (id, updateData) => {
     }
   }
 
+  let targetPhone;
+  if (updateData.phone === undefined) {
+    targetPhone = undefined;
+  } else if (updateData.phone) {
+    targetPhone = updateData.phone;
+  } else {
+    targetPhone = null;
+  }
+
   return await prisma.$transaction(async (tx) => {
     const updatedUser = await tx.user.update({
       where: { id },
       data: {
         name: updateData.name || undefined,
         email: updateData.email || undefined,
-        phone: updateData.phone === undefined ? undefined : (updateData.phone ? updateData.phone : null),
+        phone: targetPhone,
         isActive: updateData.isActive === undefined ? undefined : updateData.isActive,
       },
       select: {
@@ -199,7 +208,7 @@ export const updateCustomerAdmin = async (id, updateData) => {
             state: addrData.state || undefined,
             postalCode: addrData.postalCode || undefined,
             country: addrData.country || undefined,
-            isDefault: addrData.isDefault !== undefined ? addrData.isDefault : undefined,
+            isDefault: typeof addrData.isDefault === "boolean" ? addrData.isDefault : undefined,
           },
         });
       } else if (addrData.address && addrData.city && addrData.state && addrData.postalCode) {

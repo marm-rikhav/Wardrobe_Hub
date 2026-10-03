@@ -3,6 +3,82 @@ import { validateStrictEmail, validateStrictPhone } from '../../utils/validation
 
 export const POSTAL_CODE_6_DIGIT_REGEX = /^\d{6}$/;
 
+const addCustomIssue = (ctx, path, message) => {
+  ctx.addIssue({
+    code: z.ZodIssueCode.custom,
+    path: [path],
+    message,
+  });
+};
+
+const validateAddressName = (addrName, ctx, nameLabel) => {
+  if (addrName.length === 0) {
+    addCustomIssue(ctx, 'addressName', `${nameLabel} is required`);
+  } else if (addrName.length < 2) {
+    addCustomIssue(ctx, 'addressName', 'Name must be at least 2 characters long');
+  } else if (addrName.length > 100) {
+    addCustomIssue(ctx, 'addressName', 'Name cannot exceed 100 characters');
+  }
+};
+
+const validateAddressPhone = (addrPhone, ctx, phoneLabel) => {
+  if (addrPhone.length === 0) {
+    addCustomIssue(ctx, 'addressPhone', `${phoneLabel} is required`);
+    return;
+  }
+  const phoneResult = validateStrictPhone(addrPhone);
+  if (phoneResult.isValid === false) {
+    addCustomIssue(ctx, 'addressPhone', phoneResult.message || 'Invalid phone number');
+  }
+};
+
+const validateAddressText = (streetVal, ctx) => {
+  if (streetVal.length === 0) {
+    addCustomIssue(ctx, 'address', 'Street address is required');
+  } else if (streetVal.length < 5) {
+    addCustomIssue(ctx, 'address', 'Address must be at least 5 characters long');
+  }
+};
+
+const validateAddressLocation = (field, val, label, ctx) => {
+  if (val.length === 0) {
+    addCustomIssue(ctx, field, `${label} is required`);
+  } else if (val.length < 2) {
+    addCustomIssue(ctx, field, `${label} must be at least 2 characters long`);
+  } else if (val.length > 100) {
+    addCustomIssue(ctx, field, `${label} cannot exceed 100 characters`);
+  }
+};
+
+const validatePostalCode = (pinVal, ctx) => {
+  if (pinVal.length === 0) {
+    addCustomIssue(ctx, 'postalCode', 'PIN / Postal code is required');
+  } else if (POSTAL_CODE_6_DIGIT_REGEX.test(pinVal) === false) {
+    addCustomIssue(ctx, 'postalCode', 'PIN / Postal code must be exactly 6 digits');
+  }
+};
+
+const validateFullAddressData = (data, ctx, isEdit) => {
+  const nameVal = data.name.trim();
+  const phoneVal = (data.phone || '').trim();
+  const addrName = data.addressName?.trim() || nameVal;
+  const addrPhone = data.addressPhone?.trim() || phoneVal;
+  const streetVal = data.address?.trim() || '';
+  const cityVal = data.city?.trim() || '';
+  const stateVal = data.state?.trim() || '';
+  const pinVal = data.postalCode?.trim() || '';
+
+  const nameLabel = isEdit ? 'Recipient name' : 'Full name';
+  const phoneLabel = isEdit ? 'Contact phone number' : 'Phone number';
+
+  validateAddressName(addrName, ctx, nameLabel);
+  validateAddressPhone(addrPhone, ctx, phoneLabel);
+  validateAddressText(streetVal, ctx);
+  validateAddressLocation('city', cityVal, 'City', ctx);
+  validateAddressLocation('state', stateVal, 'State', ctx);
+  validatePostalCode(pinVal, ctx);
+};
+
 /**
  * Zod schema for editing customer shipping address dialog
  */
@@ -96,121 +172,7 @@ export const createCustomerSchema = z
   })
   .superRefine((data, ctx) => {
     if (data.includeAddress) {
-      const nameVal = data.name.trim();
-      const phoneVal = (data.phone || '').trim();
-
-      const addrName = (data.addressName || '').trim() || nameVal;
-      if (!addrName) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['addressName'],
-          message: 'Full name is required',
-        });
-      } else if (addrName.length < 2) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['addressName'],
-          message: 'Name must be at least 2 characters long',
-        });
-      } else if (addrName.length > 100) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['addressName'],
-          message: 'Name cannot exceed 100 characters',
-        });
-      }
-
-      const addrPhone = (data.addressPhone || '').trim() || phoneVal;
-      if (!addrPhone) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['addressPhone'],
-          message: 'Phone number is required',
-        });
-      } else {
-        const phoneResult = validateStrictPhone(addrPhone);
-        if (phoneResult.isValid) {
-          // valid
-        } else {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['addressPhone'],
-            message: phoneResult.message || 'Invalid phone number',
-          });
-        }
-      }
-
-      const streetVal = (data.address || '').trim();
-      if (!streetVal) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['address'],
-          message: 'Street address is required',
-        });
-      } else if (streetVal.length < 5) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['address'],
-          message: 'Address must be at least 5 characters long',
-        });
-      }
-
-      const cityVal = (data.city || '').trim();
-      if (!cityVal) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['city'],
-          message: 'City is required',
-        });
-      } else if (cityVal.length < 2) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['city'],
-          message: 'City must be at least 2 characters long',
-        });
-      } else if (cityVal.length > 100) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['city'],
-          message: 'City cannot exceed 100 characters',
-        });
-      }
-
-      const stateVal = (data.state || '').trim();
-      if (!stateVal) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['state'],
-          message: 'State is required',
-        });
-      } else if (stateVal.length < 2) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['state'],
-          message: 'State must be at least 2 characters long',
-        });
-      } else if (stateVal.length > 100) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['state'],
-          message: 'State cannot exceed 100 characters',
-        });
-      }
-
-      const pinVal = (data.postalCode || '').trim();
-      if (!pinVal) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['postalCode'],
-          message: 'PIN / Postal code is required',
-        });
-      } else if (!POSTAL_CODE_6_DIGIT_REGEX.test(pinVal)) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['postalCode'],
-          message: 'PIN / Postal code must be exactly 6 digits',
-        });
-      }
+      validateFullAddressData(data, ctx, false);
     }
   });
 
@@ -260,128 +222,14 @@ export const customerEditSchema = z
   .superRefine((data, ctx) => {
     const hasAnyAddressValue = Boolean(
       data.addressId ||
-      (data.address && data.address.trim()) ||
-      (data.city && data.city.trim()) ||
-      (data.state && data.state.trim()) ||
-      (data.postalCode && data.postalCode.trim())
+      data.address?.trim() ||
+      data.city?.trim() ||
+      data.state?.trim() ||
+      data.postalCode?.trim()
     );
 
     if (hasAnyAddressValue) {
-      const nameVal = data.name.trim();
-      const phoneVal = (data.phone || '').trim();
-
-      const addrName = (data.addressName || '').trim() || nameVal;
-      if (!addrName) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['addressName'],
-          message: 'Recipient name is required',
-        });
-      } else if (addrName.length < 2) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['addressName'],
-          message: 'Name must be at least 2 characters long',
-        });
-      } else if (addrName.length > 100) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['addressName'],
-          message: 'Name cannot exceed 100 characters',
-        });
-      }
-
-      const addrPhone = (data.addressPhone || '').trim() || phoneVal;
-      if (!addrPhone) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['addressPhone'],
-          message: 'Contact phone number is required',
-        });
-      } else {
-        const phoneResult = validateStrictPhone(addrPhone);
-        if (phoneResult.isValid) {
-          // valid
-        } else {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['addressPhone'],
-            message: phoneResult.message || 'Invalid phone number',
-          });
-        }
-      }
-
-      const streetVal = (data.address || '').trim();
-      if (!streetVal) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['address'],
-          message: 'Street address is required',
-        });
-      } else if (streetVal.length < 5) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['address'],
-          message: 'Address must be at least 5 characters long',
-        });
-      }
-
-      const cityVal = (data.city || '').trim();
-      if (!cityVal) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['city'],
-          message: 'City is required',
-        });
-      } else if (cityVal.length < 2) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['city'],
-          message: 'City must be at least 2 characters long',
-        });
-      } else if (cityVal.length > 100) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['city'],
-          message: 'City cannot exceed 100 characters',
-        });
-      }
-
-      const stateVal = (data.state || '').trim();
-      if (!stateVal) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['state'],
-          message: 'State is required',
-        });
-      } else if (stateVal.length < 2) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['state'],
-          message: 'State must be at least 2 characters long',
-        });
-      } else if (stateVal.length > 100) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['state'],
-          message: 'State cannot exceed 100 characters',
-        });
-      }
-
-      const pinVal = (data.postalCode || '').trim();
-      if (!pinVal) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['postalCode'],
-          message: 'PIN / Postal code is required',
-        });
-      } else if (!POSTAL_CODE_6_DIGIT_REGEX.test(pinVal)) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['postalCode'],
-          message: 'PIN / Postal code must be exactly 6 digits',
-        });
-      }
+      validateFullAddressData(data, ctx, true);
     }
   });
 

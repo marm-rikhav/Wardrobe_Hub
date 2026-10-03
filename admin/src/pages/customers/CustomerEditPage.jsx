@@ -102,30 +102,30 @@ export const CustomerEditPage = () => {
     try {
       const hasAnyAddressValue = Boolean(
         data.addressId ||
-        (data.address && data.address.trim()) ||
-        (data.city && data.city.trim()) ||
-        (data.state && data.state.trim()) ||
-        (data.postalCode && data.postalCode.trim())
+        data.address?.trim() ||
+        data.city?.trim() ||
+        data.state?.trim() ||
+        data.postalCode?.trim()
       );
 
       const phoneTrimmed = data.phone ? data.phone.trim() : '';
       const payload = {
         name: data.name.trim(),
         email: data.email.trim(),
-        phone: phoneTrimmed ? phoneTrimmed : null,
+        phone: phoneTrimmed || null,
         isActive: data.isActive,
       };
 
       if (hasAnyAddressValue) {
         payload.address = {
           id: data.addressId || undefined,
-          name: (data.addressName && data.addressName.trim()) || data.name.trim(),
-          phone: (data.addressPhone && data.addressPhone.trim()) || phoneTrimmed || undefined,
+          name: data.addressName?.trim() || data.name.trim(),
+          phone: data.addressPhone?.trim() || phoneTrimmed || undefined,
           address: data.address.trim(),
           city: data.city.trim(),
           state: data.state.trim(),
           postalCode: data.postalCode.trim(),
-          country: (data.country && data.country.trim()) || 'India',
+          country: data.country?.trim() || 'India',
           isDefault: true,
         };
       }

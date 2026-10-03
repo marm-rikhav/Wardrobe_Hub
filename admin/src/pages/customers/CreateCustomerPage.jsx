@@ -78,13 +78,13 @@ export const CreateCustomerPage = () => {
 
       if (data.includeAddress) {
         payload.address = {
-          name: (data.addressName && data.addressName.trim()) || data.name.trim(),
-          phone: (data.addressPhone && data.addressPhone.trim()) || phoneTrimmed || undefined,
+          name: data.addressName?.trim() || data.name.trim(),
+          phone: data.addressPhone?.trim() || phoneTrimmed || undefined,
           address: data.address.trim(),
           city: data.city.trim(),
           state: data.state.trim(),
           postalCode: data.postalCode.trim(),
-          country: (data.country && data.country.trim()) || 'India',
+          country: data.country?.trim() || 'India',
         };
       }
 
