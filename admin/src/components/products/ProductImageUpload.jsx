@@ -264,7 +264,7 @@ const SelectedImagePreview = ({
               size="small"
               startIcon={uploading ? <CircularProgress size={16} color="inherit" /> : <CloudUploadOutlined />}
               onClick={onUpload}
-              disabled={uploading || isSizeValid === false || (imageMeta && isRatioValid === false)}
+              disabled={uploading || isSizeValid === false || imageMeta?.isValidRatio === false}
             >
               {uploading ? 'Uploading to Cloudinary...' : 'Upload Image'}
             </Button>
@@ -420,7 +420,7 @@ export const ProductImageUpload = ({
       return;
     }
 
-    if (imageMeta && imageMeta.isValidRatio === false) {
+    if (imageMeta?.isValidRatio === false) {
       setUploadError('Image must have a 4:5 portrait aspect ratio (recommended 1200×1500px or 800×1000px).');
       return;
     }
@@ -435,9 +435,7 @@ export const ProductImageUpload = ({
       });
 
       handleClearSelected();
-      if (onImagesUpdated) {
-        onImagesUpdated();
-      }
+      onImagesUpdated?.();
     } catch (err) {
       setUploadError(
         err.response?.data?.message || 'Failed to upload image. Please try again.'
@@ -459,9 +457,7 @@ export const ProductImageUpload = ({
       await productService.deleteProductImage(productId, imageToDelete.id);
       setDeleteConfirmOpen(false);
       setImageToDelete(null);
-      if (onImagesUpdated) {
-        onImagesUpdated();
-      }
+      onImagesUpdated?.();
     } catch (err) {
       setUploadError(
         err.response?.data?.message || 'Failed to delete image.'
