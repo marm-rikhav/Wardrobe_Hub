@@ -22,12 +22,18 @@ import {
   DeleteOutline,
   PhotoCameraOutlined,
   InfoOutlined,
+  CheckCircleOutline,
+  ErrorOutline,
+  AspectRatioOutlined,
 } from '@mui/icons-material';
 import productService from '../../services/productService.js';
 
 const MAX_IMAGES = 5;
-const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2 MB
+const MIN_FILE_SIZE = 150 * 1024; // 150 KB
+const MAX_FILE_SIZE = 300 * 1024; // 300 KB
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+const MIN_ASPECT_RATIO = 0.75;
+const MAX_ASPECT_RATIO = 0.85;
 
 export const ProductImageUpload = ({
   productId,
@@ -42,6 +48,7 @@ export const ProductImageUpload = ({
   const [colorTag, setColorTag] = useState('');
   const [sortOrder, setSortOrder] = useState(images.length);
   const [aspectRatioWarning, setAspectRatioWarning] = useState(null);
+  const [imageMeta, setImageMeta] = useState(null);
 
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState(null);
@@ -56,31 +63,48 @@ export const ProductImageUpload = ({
 
     setUploadError(null);
     setAspectRatioWarning(null);
+    setImageMeta(null);
 
     // Validate type
     if (!ALLOWED_TYPES.includes(file.type.toLowerCase())) {
-      setUploadError('Invalid format. Only JPG, PNG, and WebP images are supported.');
+      setUploadError('Invalid format. Only JPG, JPEG, PNG, and WebP images are supported.');
       return;
     }
 
-    // Validate size
-    if (file.size > MAX_FILE_SIZE) {
-      setUploadError('File size exceeds the 2 MB limit. Please select a smaller image.');
-      return;
+    const sizeKb = Number((file.size / 1024).toFixed(1));
+    const isValidSize = file.size >= MIN_FILE_SIZE && file.size <= MAX_FILE_SIZE;
+
+    if (file.size < MIN_FILE_SIZE) {
+      setUploadError(`File size is too small (${sizeKb} KB). The image size must be between 150 KB and 300 KB.`);
+    } else if (file.size > MAX_FILE_SIZE) {
+      setUploadError(`File size exceeds the 300 KB limit (${sizeKb} KB). The image size must be between 150 KB and 300 KB.`);
     }
 
     setSelectedFile(file);
     const objectUrl = URL.createObjectURL(file);
     setPreviewUrl(objectUrl);
 
-    // Validate aspect ratio via client-side Image load (~4:5 = 0.80)
+    // Validate aspect ratio via client-side Image load (strictly 4:5 = 0.80)
     const img = new Image();
     img.src = objectUrl;
     img.onload = () => {
-      const ratio = img.naturalWidth / img.naturalHeight;
-      if (ratio < 0.68 || ratio > 0.92) {
+      const width = img.naturalWidth;
+      const height = img.naturalHeight;
+      const ratio = width / height;
+      const isValidRatio = ratio >= MIN_ASPECT_RATIO && ratio <= MAX_ASPECT_RATIO;
+
+      setImageMeta({
+        width,
+        height,
+        ratio,
+        isValidRatio,
+        isValidSize,
+        sizeKb,
+      });
+
+      if (!isValidRatio) {
         setAspectRatioWarning(
-          `Image ratio is ${ratio.toFixed(2)}:1. Recommended is ~4:5 (0.80:1, e.g. 1200x1500px). Upload might be rejected by backend aspect-ratio validation.`
+          `Invalid aspect ratio (${ratio.toFixed(2)}:1 from ${width}×${height}px). Images must have a 4:5 portrait ratio (recommended 1200×1500px or 800×1000px).`
         );
       }
     };
@@ -95,6 +119,7 @@ export const ProductImageUpload = ({
     setColorTag('');
     setAspectRatioWarning(null);
     setUploadError(null);
+    setImageMeta(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -105,6 +130,16 @@ export const ProductImageUpload = ({
 
     if (images.length >= MAX_IMAGES) {
       setUploadError(`Maximum of ${MAX_IMAGES} images reached for this product.`);
+      return;
+    }
+
+    if (selectedFile.size < MIN_FILE_SIZE || selectedFile.size > MAX_FILE_SIZE) {
+      setUploadError('Image size must be between 150 KB and 300 KB.');
+      return;
+    }
+
+    if (imageMeta && !imageMeta.isValidRatio) {
+      setUploadError('Image must have a 4:5 portrait aspect ratio (recommended 1200×1500px or 800×1000px).');
       return;
     }
 
@@ -164,17 +199,86 @@ export const ProductImageUpload = ({
             Product Images ({images.length}/{MAX_IMAGES})
           </Typography>
           <Typography variant="caption" color="text.secondary">
-            Cloudinary-backed storage. Max 2MB, JPG/PNG/WebP, 4:5 aspect ratio.
+            Cloudinary-backed storage • 4:5 Portrait Ratio • 150 KB – 300 KB file size • Up to {MAX_IMAGES} photos
           </Typography>
         </Box>
 
         <Chip
-          label={`${images.length} of ${MAX_IMAGES} slots`}
+          label={`${images.length} of ${MAX_IMAGES} slots used`}
           size="small"
           color={images.length >= MAX_IMAGES ? 'warning' : 'default'}
           variant="outlined"
+          sx={{ fontWeight: 600 }}
         />
       </Box>
+
+      {/* Meaningful Image Guidelines Specifications Banner */}
+      <Paper
+        variant="outlined"
+        sx={{
+          p: 2,
+          mb: 2.5,
+          borderRadius: 2,
+          bgcolor: 'rgba(191, 168, 138, 0.08)',
+          border: '1px solid',
+          borderColor: 'primary.light',
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+          <InfoOutlined color="primary" fontSize="small" />
+          <Typography variant="subtitle2" fontWeight={700} color="primary.main">
+            Image Guidelines & Quality Standards
+          </Typography>
+        </Box>
+
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5, fontSize: '0.85rem' }}>
+          To maintain visual consistency across the store catalog and ensure lightning-fast shopping experiences, all uploaded product photos must satisfy these specifications:
+        </Typography>
+
+        <Grid container spacing={1.5}>
+          <Grid item xs={12} sm={4}>
+            <Box sx={{ p: 1.25, bgcolor: 'background.paper', borderRadius: 1.5, border: '1px solid', borderColor: 'divider' }}>
+              <Typography variant="caption" color="text.secondary" fontWeight={700} display="block">
+                ASPECT RATIO
+              </Typography>
+              <Typography variant="body2" fontWeight={700} color="text.primary">
+                4:5 (Portrait)
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                e.g. 1200×1500px or 800×1000px
+              </Typography>
+            </Box>
+          </Grid>
+
+          <Grid item xs={12} sm={4}>
+            <Box sx={{ p: 1.25, bgcolor: 'background.paper', borderRadius: 1.5, border: '1px solid', borderColor: 'divider' }}>
+              <Typography variant="caption" color="text.secondary" fontWeight={700} display="block">
+                FILE SIZE RANGE
+              </Typography>
+              <Typography variant="body2" fontWeight={700} color="text.primary">
+                150 KB – 300 KB
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Min 150 KB, Max 300 KB strictly
+              </Typography>
+            </Box>
+          </Grid>
+
+          <Grid item xs={12} sm={4}>
+            <Box sx={{ p: 1.25, bgcolor: 'background.paper', borderRadius: 1.5, border: '1px solid', borderColor: 'divider' }}>
+              <Typography variant="caption" color="text.secondary" fontWeight={700} display="block">
+                FORMAT & CAPACITY
+              </Typography>
+              <Typography variant="body2" fontWeight={700} color="text.primary">
+                JPG, PNG, WebP
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Max {MAX_IMAGES} images ({MAX_IMAGES - images.length} remaining)
+              </Typography>
+            </Box>
+          </Grid>
+        </Grid>
+      </Paper>
 
       {uploadError && (
         <Alert severity="error" sx={{ mb: 2 }} onClose={() => setUploadError(null)}>
@@ -279,12 +383,58 @@ export const ProductImageUpload = ({
 
           {selectedFile ? (
             <Box>
-              <Typography variant="subtitle2" fontWeight={700} gutterBottom>
-                Ready to Upload: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(0)} KB)
-              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1, mb: 1.5 }}>
+                <Typography variant="subtitle2" fontWeight={700}>
+                  Selected: {selectedFile.name}
+                </Typography>
+
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                  <Chip
+                    size="small"
+                    icon={
+                      selectedFile.size >= MIN_FILE_SIZE && selectedFile.size <= MAX_FILE_SIZE ? (
+                        <CheckCircleOutline fontSize="small" />
+                      ) : (
+                        <ErrorOutline fontSize="small" />
+                      )
+                    }
+                    label={`${imageMeta ? imageMeta.sizeKb : (selectedFile.size / 1024).toFixed(1)} KB (${
+                      selectedFile.size >= MIN_FILE_SIZE && selectedFile.size <= MAX_FILE_SIZE
+                        ? '150–300 KB Valid'
+                        : 'Must be 150–300 KB'
+                    })`}
+                    color={
+                      selectedFile.size >= MIN_FILE_SIZE && selectedFile.size <= MAX_FILE_SIZE
+                        ? 'success'
+                        : 'error'
+                    }
+                    variant="outlined"
+                    sx={{ fontWeight: 700 }}
+                  />
+
+                  {imageMeta && (
+                    <Chip
+                      size="small"
+                      icon={
+                        imageMeta.isValidRatio ? (
+                          <CheckCircleOutline fontSize="small" />
+                        ) : (
+                          <AspectRatioOutlined fontSize="small" />
+                        )
+                      }
+                      label={`${imageMeta.width}×${imageMeta.height} px (${
+                        imageMeta.isValidRatio ? '4:5 Match' : `${imageMeta.ratio.toFixed(2)}:1 (Not 4:5)`
+                      })`}
+                      color={imageMeta.isValidRatio ? 'success' : 'error'}
+                      variant="outlined"
+                      sx={{ fontWeight: 700 }}
+                    />
+                  )}
+                </Box>
+              </Box>
 
               {aspectRatioWarning && (
-                <Alert severity="warning" icon={<InfoOutlined />} sx={{ my: 1.5 }}>
+                <Alert severity="error" icon={<InfoOutlined />} sx={{ my: 1.5, borderRadius: 1.5 }}>
                   {aspectRatioWarning}
                 </Alert>
               )}
@@ -298,9 +448,9 @@ export const ProductImageUpload = ({
                       alt="Preview"
                       sx={{
                         width: '100%',
-                        maxHeight: 140,
+                        maxHeight: 160,
                         objectFit: 'contain',
-                        borderRadius: 1,
+                        borderRadius: 1.5,
                         bgcolor: 'background.paper',
                         border: '1px solid',
                         borderColor: 'divider',
@@ -350,7 +500,12 @@ export const ProductImageUpload = ({
                       size="small"
                       startIcon={uploading ? <CircularProgress size={16} color="inherit" /> : <CloudUploadOutlined />}
                       onClick={handleUpload}
-                      disabled={uploading}
+                      disabled={
+                        uploading ||
+                        selectedFile.size < MIN_FILE_SIZE ||
+                        selectedFile.size > MAX_FILE_SIZE ||
+                        Boolean(imageMeta && !imageMeta.isValidRatio)
+                      }
                     >
                       {uploading ? 'Uploading to Cloudinary...' : 'Upload Image'}
                     </Button>
@@ -359,13 +514,13 @@ export const ProductImageUpload = ({
               </Grid>
             </Box>
           ) : (
-            <Box sx={{ textAlign: 'center', py: 2 }}>
-              <CloudUploadOutlined sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
-              <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+            <Box sx={{ textAlign: 'center', py: 3, px: 2 }}>
+              <CloudUploadOutlined sx={{ fontSize: 44, color: 'primary.main', mb: 1 }} />
+              <Typography variant="subtitle1" fontWeight={700} gutterBottom>
                 Upload Product Photo
               </Typography>
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
-                Supports JPG, PNG, WebP up to 2MB (Recommended dimensions: 1200x1500px, 4:5 ratio)
+              <Typography variant="body2" color="text.secondary" sx={{ display: 'block', mb: 2, maxWidth: 520, mx: 'auto' }}>
+                Select an image formatted in <strong>4:5 aspect ratio</strong> (e.g. 1200×1500 px or 800×1000 px) with file size between <strong>150 KB and 300 KB</strong> (JPG, PNG, WebP).
               </Typography>
               <Button
                 variant="contained"
@@ -373,8 +528,9 @@ export const ProductImageUpload = ({
                 size="small"
                 startIcon={<CloudUploadOutlined />}
                 onClick={() => fileInputRef.current?.click()}
+                sx={{ px: 3, py: 1, fontWeight: 600 }}
               >
-                Choose File
+                Choose 4:5 Image (150KB – 300KB)
               </Button>
             </Box>
           )}

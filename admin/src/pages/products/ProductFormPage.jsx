@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -40,6 +40,7 @@ export const ProductFormPage = () => {
   const { id } = useParams();
   const isEditing = Boolean(id);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const {
     product,
@@ -197,7 +198,10 @@ export const ProductFormPage = () => {
         const created = await saveProduct(payload);
         showSnackbar(`Product "${payload.name}" created successfully!`);
         // Redirect to edit mode so admin can upload images immediately
-        navigate(`/admin/products/${created.id}/edit`, { replace: true });
+        navigate(`/admin/products/${created.id}/edit`, {
+          replace: true,
+          state: { newlyCreated: true },
+        });
       }
     } catch (err) {
       const responseData = err.response?.data;
@@ -540,8 +544,32 @@ export const ProductFormPage = () => {
 
         {/* Section 5: Image Management (Edit Mode) */}
         {isEditing && (
-          <Card sx={{ mb: 3, border: '1px solid', borderColor: 'divider' }}>
+          <Card
+            sx={{
+              mb: 3,
+              border: '1px solid',
+              borderColor: location.state?.newlyCreated ? 'primary.main' : 'divider',
+              boxShadow: location.state?.newlyCreated ? '0 0 0 2px rgba(191, 168, 138, 0.25)' : 'none',
+            }}
+          >
             <CardContent sx={{ p: { xs: 2.5, sm: 3 } }}>
+              {location.state?.newlyCreated && (
+                <Alert
+                  severity="success"
+                  sx={{
+                    mb: 3,
+                    borderRadius: 2,
+                    fontWeight: 600,
+                  }}
+                >
+                  <Typography variant="subtitle2" fontWeight={700} gutterBottom>
+                    Product Created Successfully!
+                  </Typography>
+                  <Typography variant="body2">
+                    Now complete the product listing by uploading photography below. All images must be in <strong>4:5 portrait ratio</strong> (e.g. 1200×1500px or 800×1000px) and sized between <strong>150 KB and 300 KB</strong>.
+                  </Typography>
+                </Alert>
+              )}
               <ProductImageUpload
                 productId={id}
                 images={productImages}

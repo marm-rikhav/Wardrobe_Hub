@@ -45,11 +45,11 @@ export const errorHandler = (err, req, res, next) => {
     errors = [{ field: "id", message: "Invalid resource identifier format" }];
   }
 
-  // Handle Multer upload limits (e.g. file size > 2 MB)
+  // Handle Multer upload limits (e.g. file size > 300 KB)
   if (err.name === "MulterError" || err.code === "LIMIT_FILE_SIZE") {
     statusCode = 400;
     if (err.code === "LIMIT_FILE_SIZE") {
-      message = "Image size exceeds the 2 MB limit. Maximum allowed size is 2 MB.";
+      message = "Image size exceeds the 300 KB limit. Allowed size is 150 KB to 300 KB.";
     }
   }
 
