@@ -66,10 +66,19 @@ export const getPrimaryStatusAction = (currentStatus) => {
   }
 };
 
+import {
+  formatCurrency,
+  formatDate,
+  formatOrderDate,
+  formatDateTime,
+} from '../../../shared/utils/formatters.js';
+
 export {
   formatCurrency,
+  formatDate,
   formatOrderDate,
-} from '../../../shared/utils/formatters.js';
+  formatDateTime,
+};
 
 export default {
   ORDER_STATUSES,
