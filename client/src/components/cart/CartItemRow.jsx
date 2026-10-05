@@ -42,6 +42,8 @@ export const CartItemRow = ({
   return (
     <Paper
       elevation={0}
+      data-testid="cart-item-row"
+      data-cart-item-id={item.id}
       sx={{
         p: { xs: 2, sm: 2.5 },
         mb: 2,
@@ -181,11 +183,13 @@ export const CartItemRow = ({
               onClick={handleDecrement}
               disabled={item.quantity <= 1 || isUpdating || isRemoving}
               aria-label="decrease quantity"
+              data-testid="cart-item-decrement-btn"
             >
               <RemoveIcon fontSize="small" />
             </Button>
             <Button
               disabled
+              data-testid="cart-item-quantity"
               sx={{
                 fontWeight: 600,
                 color: 'text.primary !important',
@@ -199,6 +203,7 @@ export const CartItemRow = ({
               onClick={handleIncrement}
               disabled={isMaxStockReached || isUpdating || isRemoving}
               aria-label="increase quantity"
+              data-testid="cart-item-increment-btn"
             >
               <AddIcon fontSize="small" />
             </Button>
@@ -209,6 +214,7 @@ export const CartItemRow = ({
         <Typography
           variant="subtitle1"
           fontWeight={700}
+          data-testid="cart-item-subtotal"
           sx={{
             color: 'accent.main',
             minWidth: 80,
@@ -227,6 +233,7 @@ export const CartItemRow = ({
           size="small"
           title="Remove item"
           aria-label="remove item"
+          data-testid="cart-item-remove-btn"
           sx={{ p: 1 }}
         >
           {isRemoving ? (

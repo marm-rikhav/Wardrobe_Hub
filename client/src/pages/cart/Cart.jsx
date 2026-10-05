@@ -82,7 +82,7 @@ export const Cart = () => {
           </Typography>
         </Breadcrumbs>
 
-        <Typography variant="h4" component="h1" fontWeight={700} sx={{ mb: 3 }}>
+        <Typography variant="h4" component="h1" fontWeight={700} sx={{ mb: 3 }} data-testid="cart-page-title">
           Shopping Cart {totalItems > 0 && `(${totalItems})`}
         </Typography>
 

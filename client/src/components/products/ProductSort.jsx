@@ -10,11 +10,12 @@ export const ProductSort = ({ value = 'newest', onChange, sx = {} }) => {
         id="sort-select"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        inputProps={{ 'aria-label': 'Sort by' }}
+        data-testid="product-sort-select"
+        inputProps={{ 'aria-label': 'Sort by', 'data-testid': 'product-sort-select-input' }}
         sx={{ backgroundColor: 'background.paper' }}
       >
         {SORT_OPTIONS.map((opt) => (
-          <MenuItem key={opt.value} value={opt.value}>
+          <MenuItem key={opt.value} value={opt.value} data-testid={`sort-option-${opt.value}`}>
             {opt.label}
           </MenuItem>
         ))}

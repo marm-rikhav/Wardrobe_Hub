@@ -32,6 +32,8 @@ export const ProductCard = ({ product }) => {
 
   return (
     <Card
+      data-testid="product-card"
+      data-product-id={product.id}
       sx={{
         height: '100%',
         display: 'flex',
@@ -47,6 +49,7 @@ export const ProductCard = ({ product }) => {
       <CardActionArea
         component={Link}
         to={targetUrl}
+        data-testid="product-card-link"
         sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}
       >
         <Box sx={{ position: 'relative', pt: '125%', width: '100%', overflow: 'hidden' }}>
@@ -104,6 +107,7 @@ export const ProductCard = ({ product }) => {
           <Typography
             variant="body1"
             component="h3"
+            data-testid="product-card-title"
             sx={{
               fontWeight: 600,
               fontSize: '0.95rem',
@@ -122,6 +126,7 @@ export const ProductCard = ({ product }) => {
           <Box sx={{ mt: 'auto', display: 'flex', alignItems: 'baseline', gap: 1 }}>
             <Typography
               variant="body1"
+              data-testid="product-card-price"
               sx={{
                 color: 'accent.main',
                 fontWeight: 700,

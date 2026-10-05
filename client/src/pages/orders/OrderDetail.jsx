@@ -213,6 +213,7 @@ const OrderActionButtons = ({
         color="error"
         onClick={onOpenCancel}
         disabled={actionLoading}
+        data-testid="cancel-order-btn"
         sx={{ textTransform: 'none', fontWeight: 600, ml: { xs: 0, sm: 'auto' } }}
       >
         Cancel Order
@@ -227,6 +228,7 @@ const OrderActionButtons = ({
           startIcon={<AssignmentReturnOutlinedIcon />}
           onClick={() => onOpenReturn('RETURN')}
           disabled={actionLoading}
+          data-testid="order-return-btn"
           sx={{ textTransform: 'none', fontWeight: 600 }}
         >
           Return
@@ -237,6 +239,7 @@ const OrderActionButtons = ({
           startIcon={<SwapHorizOutlinedIcon />}
           onClick={() => onOpenReturn('EXCHANGE')}
           disabled={actionLoading}
+          data-testid="order-exchange-btn"
           sx={{ textTransform: 'none', fontWeight: 600 }}
         >
           Exchange

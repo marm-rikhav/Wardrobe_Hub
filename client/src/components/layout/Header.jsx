@@ -194,7 +194,7 @@ export const Header = () => {
                 placeholder="Search products, categories (e.g. mens jeans)..."
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
-                inputProps={{ 'aria-label': 'search' }}
+                inputProps={{ 'aria-label': 'search', 'data-testid': 'header-search-input' }}
               />
             </SearchContainer>
 
@@ -215,6 +215,7 @@ export const Header = () => {
               sx={{ ml: 0.5 }}
               title="Shopping Cart"
               aria-label="shopping cart"
+              data-testid="cart-button"
             >
               <Badge badgeContent={totalItems} color="secondary">
                 <ShoppingBagOutlinedIcon />
@@ -227,6 +228,7 @@ export const Header = () => {
                 <Button
                   onClick={handleAccountClick}
                   color="inherit"
+                  data-testid="account-menu-button"
                   startIcon={<PersonOutlineOutlinedIcon />}
                   sx={{
                     display: { xs: 'none', sm: 'inline-flex' },
@@ -242,6 +244,7 @@ export const Header = () => {
                 <IconButton
                   color="inherit"
                   onClick={handleAccountClick}
+                  data-testid="mobile-account-menu-button"
                   sx={{ display: { xs: 'inline-flex', sm: 'none' } }}
                 >
                   <PersonOutlineOutlinedIcon />
@@ -269,6 +272,7 @@ export const Header = () => {
                     component={Link}
                     to="/profile"
                     onClick={handleAccountClose}
+                    data-testid="profile-menu-item"
                   >
                     <AccountCircleOutlinedIcon sx={{ mr: 1.5, fontSize: 20 }} />
                     Profile
@@ -277,12 +281,13 @@ export const Header = () => {
                     component={Link}
                     to="/orders"
                     onClick={handleAccountClose}
+                    data-testid="orders-menu-item"
                   >
                     <ReceiptLongOutlinedIcon sx={{ mr: 1.5, fontSize: 20 }} />
                     My Orders
                   </MenuItem>
                   <Divider />
-                  <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>
+                  <MenuItem onClick={handleLogout} data-testid="logout-menu-item" sx={{ color: 'error.main' }}>
                     <LogoutOutlinedIcon sx={{ mr: 1.5, fontSize: 20 }} />
                     Logout
                   </MenuItem>
@@ -296,6 +301,7 @@ export const Header = () => {
                   variant="outlined"
                   size="small"
                   color="primary"
+                  data-testid="login-button"
                   sx={{ display: { xs: 'none', sm: 'inline-flex' } }}
                 >
                   Login
@@ -306,6 +312,7 @@ export const Header = () => {
                   variant="contained"
                   size="small"
                   color="primary"
+                  data-testid="register-button"
                   sx={{ display: { xs: 'none', sm: 'inline-flex' } }}
                 >
                   Register
@@ -314,6 +321,7 @@ export const Header = () => {
                   component={Link}
                   to="/login"
                   color="inherit"
+                  data-testid="mobile-login-button"
                   sx={{ display: { xs: 'inline-flex', sm: 'none' } }}
                 >
                   <PersonOutlineOutlinedIcon />

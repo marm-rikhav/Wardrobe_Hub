@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "mocha \"src/test/**/*.test.js\" --timeout 30000",
+    "test:report": "mocha --reporter mochawesome --reporter-options reportDir=mochawesome-report,reportFilename=test-report,charts=true --timeout 90000"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -22,10 +24,14 @@
     "react-hook-form": "^7.54.2",
     "react-redux": "^9.3.0",
     "react-router-dom": "^6.28.2",
+    "selenium-webdriver": "^4.50.0",
     "zod": "^3.24.2"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.4",
+    "chai": "^6.3.0",
+    "mocha": "^12.0.3",
+    "mochawesome": "^8.1.1",
     "vite": "^6.2.0"
   }
 }

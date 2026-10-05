@@ -27,7 +27,7 @@ export const ConfirmDialog = ({
         <DialogContentText>{message}</DialogContentText>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2.5 }}>
-        <Button onClick={onClose} disabled={loading} color="inherit">
+        <Button onClick={onClose} disabled={loading} color="inherit" data-testid="confirm-dialog-cancel-btn">
           {cancelText}
         </Button>
         <Button
@@ -35,6 +35,7 @@ export const ConfirmDialog = ({
           disabled={loading}
           variant="contained"
           color={confirmColor}
+          data-testid="confirm-dialog-confirm-btn"
         >
           {loading ? 'Processing...' : confirmText}
         </Button>

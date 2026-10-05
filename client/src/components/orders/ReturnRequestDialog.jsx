@@ -118,13 +118,13 @@ export const ReturnRequestDialog = ({
             >
               <FormControlLabel
                 value="RETURN"
-                control={<Radio />}
+                control={<Radio data-testid="return-type-radio-return" />}
                 label="Return Item(s)"
                 disabled={loading}
               />
               <FormControlLabel
                 value="EXCHANGE"
-                control={<Radio />}
+                control={<Radio data-testid="return-type-radio-exchange" />}
                 label="Exchange Item(s)"
                 disabled={loading}
               />
@@ -140,6 +140,8 @@ export const ReturnRequestDialog = ({
               id="return-reason-select"
               value={reason}
               label="Reason *"
+              data-testid="return-reason-select"
+              inputProps={{ 'data-testid': 'return-reason-select-input' }}
               onChange={(e) => {
                 setReason(e.target.value);
                 if (errors.reason) {
@@ -149,7 +151,7 @@ export const ReturnRequestDialog = ({
               disabled={loading}
             >
               {PREDEFINED_REASONS.map((r) => (
-                <MenuItem key={r} value={r}>
+                <MenuItem key={r} value={r} data-testid={`return-reason-${r}`}>
                   {r}
                 </MenuItem>
               ))}
@@ -170,6 +172,7 @@ export const ReturnRequestDialog = ({
                   : 'Add any extra comments or exchange size/color preferences...'
               }
               value={details}
+              inputProps={{ 'data-testid': 'return-details-input' }}
               onChange={(e) => {
                 setDetails(e.target.value);
                 if (errors.details) {
@@ -191,6 +194,7 @@ export const ReturnRequestDialog = ({
             type="submit"
             variant="contained"
             color="primary"
+            data-testid="return-submit-btn"
             disabled={loading}
             startIcon={loading ? <CircularProgress size={18} color="inherit" /> : null}
             sx={{ fontWeight: 600, minWidth: 120 }}

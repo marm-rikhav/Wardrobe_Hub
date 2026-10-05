@@ -60,6 +60,7 @@ export const RegisterForm = ({ onSuccess }) => {
           onClose={() => setServerError('')}
           severity="error"
           variant="filled"
+          data-testid="register-error-alert"
           sx={{ width: '100%' }}
         >
           {serverError}
@@ -74,6 +75,8 @@ export const RegisterForm = ({ onSuccess }) => {
         label="Full Name"
         autoComplete="name"
         autoFocus
+        inputProps={{ 'data-testid': 'register-name-input' }}
+        FormHelperTextProps={{ 'data-testid': 'register-name-error' }}
         error={Boolean(errors.name)}
         helperText={errors.name?.message}
         {...register('name')}
@@ -86,6 +89,8 @@ export const RegisterForm = ({ onSuccess }) => {
         id="email"
         label="Email Address"
         autoComplete="email"
+        inputProps={{ 'data-testid': 'register-email-input' }}
+        FormHelperTextProps={{ 'data-testid': 'register-email-error' }}
         error={Boolean(errors.email)}
         helperText={errors.email?.message}
         {...register('email')}
@@ -101,7 +106,9 @@ export const RegisterForm = ({ onSuccess }) => {
           maxLength: 10,
           inputMode: 'numeric',
           pattern: '[0-9]*',
+          'data-testid': 'register-phone-input',
         }}
+        FormHelperTextProps={{ 'data-testid': 'register-phone-error' }}
         error={Boolean(errors.phone)}
         helperText={errors.phone?.message}
         {...register('phone', {
@@ -119,6 +126,8 @@ export const RegisterForm = ({ onSuccess }) => {
         type={showPassword ? 'text' : 'password'}
         id="password"
         autoComplete="new-password"
+        inputProps={{ 'data-testid': 'register-password-input' }}
+        FormHelperTextProps={{ 'data-testid': 'register-password-error' }}
         error={Boolean(errors.password)}
         helperText={errors.password?.message}
         {...register('password')}
@@ -127,6 +136,7 @@ export const RegisterForm = ({ onSuccess }) => {
             <InputAdornment position="end">
               <IconButton
                 aria-label="toggle password visibility"
+                data-testid="toggle-register-password-visibility-btn"
                 onClick={() => setShowPassword(!showPassword)}
                 edge="end"
               >
@@ -145,6 +155,8 @@ export const RegisterForm = ({ onSuccess }) => {
         type={showPassword ? 'text' : 'password'}
         id="confirmPassword"
         autoComplete="new-password"
+        inputProps={{ 'data-testid': 'register-confirm-password-input' }}
+        FormHelperTextProps={{ 'data-testid': 'register-confirm-password-error' }}
         error={Boolean(errors.confirmPassword)}
         helperText={errors.confirmPassword?.message}
         {...register('confirmPassword')}
@@ -157,6 +169,7 @@ export const RegisterForm = ({ onSuccess }) => {
         color="primary"
         size="large"
         disabled={isSubmitting}
+        data-testid="register-submit-btn"
         sx={{ mt: 3, mb: 2, py: 1.3, fontWeight: 600 }}
       >
         {isSubmitting ? 'Creating Account...' : 'Create Account'}

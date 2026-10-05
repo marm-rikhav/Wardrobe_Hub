@@ -46,6 +46,7 @@ export const Footer = () => {
               <MuiLink
                 component={Link}
                 to="/products?category=men"
+                data-testid="footer-link-men"
                 sx={{ color: '#BFA88A', textDecoration: 'none', '&:hover': { color: '#FFFFFF' } }}
               >
                 Men
@@ -53,6 +54,7 @@ export const Footer = () => {
               <MuiLink
                 component={Link}
                 to="/products?category=women"
+                data-testid="footer-link-women"
                 sx={{ color: '#BFA88A', textDecoration: 'none', '&:hover': { color: '#FFFFFF' } }}
               >
                 Women
@@ -60,6 +62,7 @@ export const Footer = () => {
               <MuiLink
                 component={Link}
                 to="/products?category=kids"
+                data-testid="footer-link-kids"
                 sx={{ color: '#BFA88A', textDecoration: 'none', '&:hover': { color: '#FFFFFF' } }}
               >
                 Kids
@@ -67,6 +70,7 @@ export const Footer = () => {
               <MuiLink
                 component={Link}
                 to="/products"
+                data-testid="footer-link-all-collections"
                 sx={{ color: '#BFA88A', textDecoration: 'none', '&:hover': { color: '#FFFFFF' } }}
               >
                 All Collections
@@ -83,6 +87,7 @@ export const Footer = () => {
               <MuiLink
                 component={Link}
                 to="/profile"
+                data-testid="footer-link-profile"
                 sx={{ color: '#BFA88A', textDecoration: 'none', '&:hover': { color: '#FFFFFF' } }}
               >
                 My Profile
@@ -90,6 +95,7 @@ export const Footer = () => {
               <MuiLink
                 component={Link}
                 to="/profile/addresses"
+                data-testid="footer-link-addresses"
                 sx={{ color: '#BFA88A', textDecoration: 'none', '&:hover': { color: '#FFFFFF' } }}
               >
                 Address Book
@@ -97,6 +103,7 @@ export const Footer = () => {
               <MuiLink
                 component={Link}
                 to="/login"
+                data-testid="footer-link-login"
                 sx={{ color: '#BFA88A', textDecoration: 'none', '&:hover': { color: '#FFFFFF' } }}
               >
                 Sign In
@@ -104,6 +111,7 @@ export const Footer = () => {
               <MuiLink
                 component={Link}
                 to="/register"
+                data-testid="footer-link-register"
                 sx={{ color: '#BFA88A', textDecoration: 'none', '&:hover': { color: '#FFFFFF' } }}
               >
                 Create Account

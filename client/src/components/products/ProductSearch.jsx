@@ -36,6 +36,7 @@ export const ProductSearch = ({
       onChange={(e) => setInternalValue(e.target.value)}
       onKeyDown={handleKeyDown}
       placeholder={placeholder}
+      inputProps={{ 'data-testid': 'product-search-input' }}
       InputProps={{
         startAdornment: (
           <InputAdornment position="start">
@@ -44,7 +45,7 @@ export const ProductSearch = ({
         ),
         endAdornment: internalValue ? (
           <InputAdornment position="end">
-            <IconButton size="small" onClick={handleClear} edge="end">
+            <IconButton size="small" onClick={handleClear} edge="end" data-testid="product-search-clear-btn">
               <ClearIcon fontSize="small" />
             </IconButton>
           </InputAdornment>

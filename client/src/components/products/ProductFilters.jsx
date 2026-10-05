@@ -150,6 +150,7 @@ export const ProductFilters = ({
           <Button
             size="small"
             color="secondary"
+            data-testid="filters-reset-btn"
             startIcon={<FilterAltOffIcon fontSize="small" />}
             onClick={handleReset}
             sx={{ fontSize: '0.8rem', textTransform: 'none' }}
@@ -195,6 +196,7 @@ export const ProductFilters = ({
                   key={cat.id}
                   label={cat.name}
                   clickable
+                  data-testid={`filter-category-${cat.slug}`}
                   color={isSelected ? 'primary' : 'default'}
                   variant={isSelected ? 'filled' : 'outlined'}
                   size="small"
@@ -233,6 +235,7 @@ export const ProductFilters = ({
                       key={sub.id}
                       label={sub.name}
                       clickable
+                      data-testid={`filter-subcategory-${sub.slug}`}
                       color={isSelected ? 'primary' : 'default'}
                       variant={isSelected ? 'filled' : 'outlined'}
                       size="small"
@@ -266,6 +269,7 @@ export const ProductFilters = ({
                   key={size}
                   label={size}
                   clickable
+                  data-testid={`filter-size-${size}`}
                   color={isSelected ? 'primary' : 'default'}
                   variant={isSelected ? 'filled' : 'outlined'}
                   size="small"
@@ -298,6 +302,7 @@ export const ProductFilters = ({
                   key={color}
                   label={color}
                   clickable
+                  data-testid={`filter-color-${color}`}
                   color={isSelected ? 'primary' : 'default'}
                   variant={isSelected ? 'filled' : 'outlined'}
                   size="small"
@@ -318,6 +323,7 @@ export const ProductFilters = ({
           color="primary"
           fullWidth
           size="medium"
+          data-testid="filters-apply-btn"
           onClick={handleApplyFilters}
           sx={{ fontWeight: 600, py: 1 }}
         >
@@ -347,7 +353,7 @@ export const ProductFilters = ({
                   if (priceError) setPriceError('');
                 }}
                 error={Boolean(priceError)}
-                inputProps={{ min: 0, 'aria-label': 'Minimum Price' }}
+                inputProps={{ min: 0, 'aria-label': 'Minimum Price', 'data-testid': 'filter-min-price-input' }}
                 sx={{ backgroundColor: 'background.default' }}
               />
               <Typography variant="body2" color="text.secondary">
@@ -363,7 +369,7 @@ export const ProductFilters = ({
                   if (priceError) setPriceError('');
                 }}
                 error={Boolean(priceError)}
-                inputProps={{ min: 0, 'aria-label': 'Maximum Price' }}
+                inputProps={{ min: 0, 'aria-label': 'Maximum Price', 'data-testid': 'filter-max-price-input' }}
                 sx={{ backgroundColor: 'background.default' }}
               />
             </Box>
@@ -382,6 +388,7 @@ export const ProductFilters = ({
               size="small"
               fullWidth
               color="primary"
+              data-testid="filter-apply-price-btn"
             >
               Apply Price
             </Button>

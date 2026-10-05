@@ -384,6 +384,7 @@ export const ProductDetail = () => {
                     variant="outlined"
                     color="primary"
                     size="large"
+                    data-testid="product-add-to-cart-btn"
                     onClick={handleAddToCart}
                     disabled={
                       !selectedVariant ||
@@ -418,6 +419,7 @@ export const ProductDetail = () => {
                     fullWidth
                     variant="contained"
                     size="large"
+                    data-testid="product-buy-now-btn"
                     onClick={handleBuyNow}
                     disabled={
                       !selectedVariant ||

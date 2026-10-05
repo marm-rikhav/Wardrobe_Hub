@@ -75,6 +75,7 @@ export const LoginForm = ({ onSuccess }) => {
           onClose={() => setServerError('')}
           severity="error"
           variant="filled"
+          data-testid="login-error-alert"
           sx={{ width: '100%' }}
         >
           {serverError}
@@ -89,6 +90,8 @@ export const LoginForm = ({ onSuccess }) => {
         label="Email Address"
         autoComplete="email"
         autoFocus
+        inputProps={{ 'data-testid': 'login-email-input' }}
+        FormHelperTextProps={{ 'data-testid': 'login-email-error' }}
         error={Boolean(errors.email)}
         helperText={errors.email?.message}
         {...register('email')}
@@ -102,6 +105,8 @@ export const LoginForm = ({ onSuccess }) => {
         type={showPassword ? 'text' : 'password'}
         id="password"
         autoComplete="current-password"
+        inputProps={{ 'data-testid': 'login-password-input' }}
+        FormHelperTextProps={{ 'data-testid': 'login-password-error' }}
         error={Boolean(errors.password)}
         helperText={errors.password?.message}
         {...register('password')}
@@ -110,6 +115,7 @@ export const LoginForm = ({ onSuccess }) => {
             <InputAdornment position="end">
               <IconButton
                 aria-label="toggle password visibility"
+                data-testid="toggle-password-visibility-btn"
                 onClick={() => setShowPassword(!showPassword)}
                 edge="end"
               >
@@ -127,6 +133,7 @@ export const LoginForm = ({ onSuccess }) => {
         color="primary"
         size="large"
         disabled={isSubmitting}
+        data-testid="login-submit-btn"
         sx={{ mt: 3, mb: 2, py: 1.3, fontWeight: 600 }}
       >
         {isSubmitting ? 'Signing in...' : 'Sign In'}

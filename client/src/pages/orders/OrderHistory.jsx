@@ -117,6 +117,10 @@ export const OrderHistory = () => {
               <Paper
                 key={order.id}
                 elevation={0}
+                data-testid="order-history-card"
+                data-order-id={order.id}
+                data-order-number={order.orderNumber}
+                data-order-status={order.status}
                 sx={{
                   borderRadius: 2,
                   border: '1px solid',
@@ -193,6 +197,8 @@ export const OrderHistory = () => {
                       variant="contained"
                       size="small"
                       color="primary"
+                      data-testid="order-view-details-btn"
+                      data-order-id={order.id}
                       endIcon={<ChevronRightIcon fontSize="small" />}
                       sx={{ textTransform: 'none', fontWeight: 600, fontSize: '0.85rem' }}
                     >

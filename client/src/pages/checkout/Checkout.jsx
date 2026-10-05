@@ -200,6 +200,7 @@ export const Checkout = () => {
                 <Button
                   size="small"
                   startIcon={<AddIcon />}
+                  data-testid="checkout-add-address-btn"
                   onClick={() => setAddressFormOpen(true)}
                   sx={{ textTransform: 'none', fontWeight: 600 }}
                 >
@@ -225,6 +226,7 @@ export const Checkout = () => {
                     variant="contained"
                     color="primary"
                     startIcon={<AddIcon />}
+                    data-testid="checkout-add-delivery-address-btn"
                     onClick={() => setAddressFormOpen(true)}
                   >
                     Add Delivery Address
@@ -238,6 +240,8 @@ export const Checkout = () => {
                       <Grid item xs={12} sm={6} key={addr.id}>
                         <Paper
                           elevation={0}
+                          data-testid="checkout-address-option"
+                          data-address-id={addr.id}
                           onClick={() => setSelectedAddressId(addr.id)}
                           sx={{
                             p: 2,

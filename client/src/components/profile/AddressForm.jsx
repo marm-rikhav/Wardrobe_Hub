@@ -102,6 +102,8 @@ export const AddressForm = ({
                 size="small"
                 id="name"
                 label="Full Name"
+                inputProps={{ 'data-testid': 'address-name-input' }}
+                FormHelperTextProps={{ 'data-testid': 'address-name-error' }}
                 error={Boolean(errors.name)}
                 helperText={errors.name?.message}
                 {...register('name')}
@@ -119,7 +121,9 @@ export const AddressForm = ({
                   maxLength: 10,
                   inputMode: 'numeric',
                   pattern: '[0-9]*',
+                  'data-testid': 'address-phone-input',
                 }}
+                FormHelperTextProps={{ 'data-testid': 'address-phone-error' }}
                 error={Boolean(errors.phone)}
                 helperText={errors.phone?.message}
                 {...register('phone', {
@@ -139,6 +143,8 @@ export const AddressForm = ({
                 multiline
                 minRows={1}
                 maxRows={2}
+                inputProps={{ 'data-testid': 'address-street-input' }}
+                FormHelperTextProps={{ 'data-testid': 'address-street-error' }}
                 error={Boolean(errors.address)}
                 helperText={errors.address?.message}
                 {...register('address')}
@@ -151,6 +157,8 @@ export const AddressForm = ({
                 size="small"
                 id="city"
                 label="City"
+                inputProps={{ 'data-testid': 'address-city-input' }}
+                FormHelperTextProps={{ 'data-testid': 'address-city-error' }}
                 error={Boolean(errors.city)}
                 helperText={errors.city?.message}
                 {...register('city')}
@@ -163,6 +171,8 @@ export const AddressForm = ({
                 size="small"
                 id="state"
                 label="State / Province"
+                inputProps={{ 'data-testid': 'address-state-input' }}
+                FormHelperTextProps={{ 'data-testid': 'address-state-error' }}
                 error={Boolean(errors.state)}
                 helperText={errors.state?.message}
                 {...register('state')}
@@ -180,7 +190,9 @@ export const AddressForm = ({
                   maxLength: 6,
                   inputMode: 'numeric',
                   pattern: '[0-9]*',
+                  'data-testid': 'address-postal-code-input',
                 }}
+                FormHelperTextProps={{ 'data-testid': 'address-postal-code-error' }}
                 error={Boolean(errors.postalCode)}
                 helperText={errors.postalCode?.message}
                 {...register('postalCode', {
@@ -197,6 +209,7 @@ export const AddressForm = ({
                 id="country"
                 label="Country"
                 defaultValue="India"
+                inputProps={{ 'data-testid': 'address-country-input' }}
                 error={Boolean(errors.country)}
                 helperText={errors.country?.message}
                 {...register('country')}
@@ -225,6 +238,7 @@ export const AddressForm = ({
             type="submit"
             variant="contained"
             color="primary"
+            data-testid="address-submit-btn"
             disabled={isSubmitting}
             sx={{ fontWeight: 600 }}
           >

@@ -97,6 +97,7 @@ export const AddressList = () => {
           color="primary"
           startIcon={<AddIcon />}
           onClick={handleOpenAdd}
+          data-testid="add-new-address-btn"
           sx={{ fontWeight: 600 }}
         >
           Add New Address

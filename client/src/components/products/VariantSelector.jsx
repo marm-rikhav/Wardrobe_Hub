@@ -74,6 +74,7 @@ export const VariantSelector = ({
                 key={color}
                 label={color}
                 clickable
+                data-testid={`variant-color-${color}`}
                 onClick={() => onSelectColor(color)}
                 color={isSelected ? 'primary' : 'default'}
                 variant={isSelected ? 'filled' : 'outlined'}
@@ -111,6 +112,7 @@ export const VariantSelector = ({
                 key={size}
                 variant={isSelected ? 'contained' : 'outlined'}
                 color={isSelected ? 'primary' : 'inherit'}
+                data-testid={`variant-size-${size}`}
                 onClick={() => onSelectSize(size)}
                 disabled={!available && !isSelected}
                 sx={{

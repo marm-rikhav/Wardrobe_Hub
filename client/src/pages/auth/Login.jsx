@@ -87,6 +87,7 @@ export const Login = () => {
               underline="hover"
               color="primary.main"
               fontWeight={600}
+              data-testid="go-to-register-link"
             >
               Register here
             </MuiLink>

@@ -27,6 +27,7 @@ export const OrderSummaryCard = ({
   return (
     <Card
       elevation={0}
+      data-testid="order-summary-card"
       sx={{
         borderRadius: 2,
         border: '1px solid',
@@ -47,7 +48,7 @@ export const OrderSummaryCard = ({
             <Typography variant="body2" color="text.secondary">
               Items ({totalItems})
             </Typography>
-            <Typography variant="body2" fontWeight={600}>
+            <Typography variant="body2" fontWeight={600} data-testid="order-summary-subtotal">
               {formatPrice(subtotal)}
             </Typography>
           </Box>
@@ -84,6 +85,7 @@ export const OrderSummaryCard = ({
           <Typography
             variant="h5"
             fontWeight={700}
+            data-testid="order-summary-total"
             sx={{ color: 'accent.main', fontSize: '1.5rem' }}
           >
             {formatPrice(finalTotal)}
@@ -97,6 +99,7 @@ export const OrderSummaryCard = ({
             variant="contained"
             color="primary"
             size="large"
+            data-testid="order-summary-action-btn"
             onClick={onAction}
             disabled={actionDisabled || actionLoading}
             startIcon={

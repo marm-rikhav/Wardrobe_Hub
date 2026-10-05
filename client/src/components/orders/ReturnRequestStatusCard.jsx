@@ -52,6 +52,7 @@ export const ReturnRequestStatusCard = ({ request }) => {
   return (
     <Paper
       elevation={0}
+      data-testid="return-request-status-card"
       sx={{
         p: { xs: 2.5, sm: 3 },
         mb: 3,

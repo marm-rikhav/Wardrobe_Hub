@@ -68,6 +68,7 @@ export const ProfileForm = () => {
         fullWidth
         id="name"
         label="Full Name"
+        inputProps={{ 'data-testid': 'profile-name-input' }}
         error={Boolean(errors.name)}
         helperText={errors.name?.message}
         {...register('name')}
@@ -93,6 +94,7 @@ export const ProfileForm = () => {
           maxLength: 10,
           inputMode: 'numeric',
           pattern: '[0-9]*',
+          'data-testid': 'profile-phone-input',
         }}
         error={Boolean(errors.phone)}
         helperText={errors.phone?.message}
@@ -109,6 +111,7 @@ export const ProfileForm = () => {
           type="submit"
           variant="contained"
           color="primary"
+          data-testid="profile-submit-btn"
           disabled={isSubmitting || !isDirty || loading}
           sx={{ px: 4, py: 1.2, fontWeight: 600 }}
         >
@@ -144,6 +147,7 @@ export const ProfileForm = () => {
           onClose={() => setSuccessMessage('')}
           severity="success"
           variant="filled"
+          data-testid="profile-success-alert"
           sx={{ width: '100%' }}
         >
           {successMessage}

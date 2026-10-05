@@ -15,6 +15,8 @@ export const AddressCard = ({
 
   return (
     <Card
+      data-testid="address-card"
+      data-address-id={address.id}
       sx={{
         height: '100%',
         display: 'flex',
@@ -28,7 +30,7 @@ export const AddressCard = ({
     >
       <CardContent sx={{ p: 2.5, flexGrow: 1 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
-          <Typography variant="subtitle1" fontWeight={700}>
+          <Typography variant="subtitle1" fontWeight={700} data-testid="address-card-name">
             {address.name}
           </Typography>
           {address.isDefault && (
@@ -77,6 +79,7 @@ export const AddressCard = ({
           <Button
             size="small"
             color="primary"
+            data-testid="address-set-default-btn"
             onClick={() => onSetDefault(address.id)}
             sx={{ fontSize: '0.8rem', p: 0 }}
           >
@@ -85,12 +88,13 @@ export const AddressCard = ({
         )}
 
         <Box sx={{ display: 'flex', gap: 1 }}>
-          <IconButton size="small" onClick={() => onEdit(address)} title="Edit Address">
+          <IconButton size="small" data-testid="address-edit-btn" onClick={() => onEdit(address)} title="Edit Address">
             <EditOutlinedIcon fontSize="small" />
           </IconButton>
           <IconButton
             size="small"
             color="error"
+            data-testid="address-delete-btn"
             onClick={() => onDelete(address.id)}
             title="Delete Address"
           >
