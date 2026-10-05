@@ -11,8 +11,8 @@ Before running the tests, ensure both the backend server and frontend client are
 1. **Backend Server:** `http://localhost:5000`
 2. **Frontend Client:** `http://localhost:3000`
 3. **Test Account:**
-   - **Email:** `test@gmail.com`
-   - **Password:** `test@123`
+   - **Email:** ``
+   - **Password:** ``
 
 > **Note:** All commands must be executed from the `client/` directory:
 > ```powershell
