@@ -156,6 +156,10 @@ export const Login = () => {
                 disabled={isSubmitting}
                 inputProps={{
                   'aria-label': 'Admin Email Address',
+                  'data-testid': 'admin-email-input',
+                }}
+                FormHelperTextProps={{
+                  'data-testid': 'admin-email-error',
                 }}
               />
 
@@ -195,6 +199,10 @@ export const Login = () => {
                 }}
                 inputProps={{
                   'aria-label': 'Admin Password',
+                  'data-testid': 'admin-password-input',
+                }}
+                FormHelperTextProps={{
+                  'data-testid': 'admin-password-error',
                 }}
               />
 
@@ -205,6 +213,7 @@ export const Login = () => {
                 variant="contained"
                 color="primary"
                 size="large"
+                data-testid="admin-login-submit-btn"
                 disabled={isSubmitting}
                 sx={{
                   mt: 1,
@@ -249,6 +258,7 @@ export const Login = () => {
           onClose={() => setBackendError('')}
           severity="error"
           variant="filled"
+          data-testid="admin-login-error-alert"
           sx={{ width: '100%' }}
         >
           {backendError}

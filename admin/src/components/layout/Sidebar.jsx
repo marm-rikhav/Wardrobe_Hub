@@ -153,7 +153,11 @@ const SidebarNavItem = ({ item, isCompact, showLabels, isActive, onClick }) => {
   return (
     <ListItem disablePadding>
       <Tooltip title={tooltipTitle} placement="right">
-        <ListItemButton onClick={onClick} sx={getNavItemStyles(isActive, isCompact)}>
+        <ListItemButton
+          onClick={onClick}
+          data-testid={item.testId || `admin-nav-${item.label.toLowerCase().replace(/[^a-z0-9]/g, '-')}`}
+          sx={getNavItemStyles(isActive, isCompact)}
+        >
           <ListItemIcon sx={getIconStyles(isActive, isCompact)}>
             <IconComponent fontSize="small" />
           </ListItemIcon>
@@ -197,7 +201,11 @@ const CatalogNavGroup = ({
   return (
     <ListItem disablePadding sx={{ display: 'block' }}>
       <Tooltip title={isCompact ? 'Catalog' : ''} placement="right">
-        <ListItemButton onClick={onToggleCatalog} sx={getNavItemStyles(isCatalogActive, isCompact)}>
+        <ListItemButton
+          onClick={onToggleCatalog}
+          data-testid="admin-nav-catalog"
+          sx={getNavItemStyles(isCatalogActive, isCompact)}
+        >
           <ListItemIcon sx={getIconStyles(isCatalogActive, isCompact)}>
             <CategoryOutlined fontSize="small" />
           </ListItemIcon>
@@ -222,6 +230,7 @@ const CatalogNavGroup = ({
           <ListItem disablePadding>
             <ListItemButton
               onClick={() => onNavigate('/admin/categories')}
+              data-testid="admin-nav-categories"
               sx={getNavItemStyles(isCategoriesCurrent, false)}
             >
               <ListItemIcon sx={getIconStyles(isCategoriesCurrent, false)}>
@@ -240,6 +249,7 @@ const CatalogNavGroup = ({
           <ListItem disablePadding>
             <ListItemButton
               onClick={() => onNavigate('/admin/subcategories')}
+              data-testid="admin-nav-subcategories"
               sx={getNavItemStyles(isSubcategoriesCurrent, false)}
             >
               <ListItemIcon sx={getIconStyles(isSubcategoriesCurrent, false)}>
@@ -313,6 +323,7 @@ const UserFooter = ({ user, isCompact, showLabels, onLogout }) => {
         <Tooltip title={isCompact ? 'Logout' : ''} placement="right">
           <ListItemButton
             onClick={onLogout}
+            data-testid="admin-logout-btn"
             sx={{
               ...getNavItemStyles(false, isCompact),
               mx: 0,
