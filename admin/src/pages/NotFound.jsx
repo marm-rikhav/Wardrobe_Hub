@@ -65,6 +65,7 @@ export const NotFound = ({
 
         <Typography
           variant="h1"
+          data-testid="admin-not-found-code"
           sx={{
             fontWeight: 900,
             letterSpacing: '-0.03em',
@@ -77,11 +78,11 @@ export const NotFound = ({
           404
         </Typography>
 
-        <Typography variant="h5" component="h2" fontWeight={700} gutterBottom>
+        <Typography variant="h5" component="h2" fontWeight={700} gutterBottom data-testid="admin-not-found-title">
           {title}
         </Typography>
 
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 4, maxWidth: 440, mx: 'auto' }}>
+        <Typography variant="body1" color="text.secondary" sx={{ mb: 4, maxWidth: 440, mx: 'auto' }} data-testid="admin-not-found-message">
           {message}
         </Typography>
 
@@ -96,6 +97,7 @@ export const NotFound = ({
             startIcon={<ArrowBackIcon />}
             onClick={handleBack}
             sx={{ px: 3, py: 1.25, fontWeight: 600 }}
+            data-testid="admin-not-found-back-btn"
           >
             {backLabel}
           </Button>
@@ -106,6 +108,7 @@ export const NotFound = ({
             startIcon={<DashboardOutlined />}
             onClick={() => navigate('/admin')}
             sx={{ px: 3.5, py: 1.25, fontWeight: 600 }}
+            data-testid="admin-not-found-dashboard-btn"
           >
             Go to Dashboard
           </Button>
