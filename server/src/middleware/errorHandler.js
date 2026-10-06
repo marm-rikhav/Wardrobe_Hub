@@ -106,9 +106,12 @@ export const errorHandler = (err, req, res, next) => {
     }
   }
 
-  // Log non-operational or unexpected errors in development
-  if (process.env.NODE_ENV !== "production") {
-    console.error(`[Error] ${req.method} ${req.originalUrl}:`, err);
+  // Only log genuine server errors (5xx) or unexpected unhandled errors with full stack trace
+  // Operational client errors (4xx like validation, not found, conflicts) should not flood terminal during testing
+  if (statusCode >= 500) {
+    console.error(`[Server Error ${statusCode}] ${req.method} ${req.originalUrl}:`, err);
+  } else if (process.env.DEBUG_ERRORS === "true") {
+    console.warn(`[Client ${statusCode}] ${req.method} ${req.originalUrl} - ${message}`);
   }
 
   const response = {

@@ -35,27 +35,33 @@ app.use(
 );
 
 // Rate limiting middleware
-const isTestEnv = process.env.NODE_ENV === "test";
+const isTestOrDev = process.env.NODE_ENV !== "production";
 
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  limit: isTestEnv ? 10000 : 300,
+  limit: isTestOrDev ? 50000 : 300,
   standardHeaders: true,
   legacyHeaders: false,
   message: {
     success: false,
     message: "Too many requests from this IP, please try again after 15 minutes",
   },
+  skip: (req) => {
+    return process.env.NODE_ENV === "test" || process.env.DISABLE_RATE_LIMIT === "true";
+  },
 });
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: isTestEnv ? 10000 : 60,
+  limit: isTestOrDev ? 10000 : 60,
   standardHeaders: true,
   legacyHeaders: false,
   message: {
     success: false,
     message: "Too many authentication requests, please try again after 15 minutes",
+  },
+  skip: (req) => {
+    return process.env.NODE_ENV === "test" || process.env.DISABLE_RATE_LIMIT === "true";
   },
 });
 
