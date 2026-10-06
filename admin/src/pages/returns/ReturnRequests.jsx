@@ -63,14 +63,10 @@ export const ReturnRequests = () => {
   };
 
   const handleRefresh = useCallback(() => {
-    const params = {};
-    if (statusFilter && statusFilter !== 'ALL') {
-      params.status = statusFilter;
-    }
-    if (typeFilter && typeFilter !== 'ALL') {
-      params.type = typeFilter;
-    }
-    fetchRequests(params);
+    fetchRequests({
+      status: statusFilter,
+      type: typeFilter,
+    });
   }, [fetchRequests, statusFilter, typeFilter]);
 
   useEffect(() => {
@@ -152,7 +148,7 @@ export const ReturnRequests = () => {
         }}
       >
         <Box>
-          <Typography variant="h5" component="h1" fontWeight={700} gutterBottom>
+          <Typography variant="h5" component="h1" fontWeight={700} gutterBottom data-testid="admin-returns-title">
             Return & Exchange Requests
           </Typography>
           <Typography variant="body2" color="text.secondary">
@@ -167,6 +163,7 @@ export const ReturnRequests = () => {
           onClick={handleRefresh}
           disabled={loading}
           sx={{ flexShrink: 0 }}
+          data-testid="admin-returns-refresh-btn"
         >
           Refresh Requests
         </Button>
@@ -184,6 +181,7 @@ export const ReturnRequests = () => {
                 onChange={(e) => setSearch(e.target.value)}
                 size="small"
                 fullWidth
+                inputProps={{ 'data-testid': 'admin-returns-search-input' }}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -203,6 +201,7 @@ export const ReturnRequests = () => {
                   label="Filter Status"
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
+                  data-testid="admin-returns-status-select"
                 >
                   <MenuItem value="ALL">All Statuses</MenuItem>
                   <MenuItem value="PENDING">Pending</MenuItem>
@@ -221,6 +220,7 @@ export const ReturnRequests = () => {
                   label="Filter Type"
                   value={typeFilter}
                   onChange={(e) => setTypeFilter(e.target.value)}
+                  data-testid="admin-returns-type-select"
                 >
                   <MenuItem value="ALL">All Types</MenuItem>
                   <MenuItem value="RETURN">Return</MenuItem>
@@ -266,6 +266,7 @@ export const ReturnRequests = () => {
         autoHideDuration={4000}
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        data-testid="admin-returns-snackbar"
       >
         <Alert
           onClose={handleCloseSnackbar}

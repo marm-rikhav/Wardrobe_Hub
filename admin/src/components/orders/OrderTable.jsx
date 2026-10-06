@@ -134,6 +134,7 @@ export const OrderTable = ({
           borderColor: 'divider',
           bgcolor: 'background.paper',
         }}
+        data-testid="admin-orders-empty"
       >
         <ShoppingBagOutlined sx={{ fontSize: 52, color: 'text.secondary', mb: 1.5 }} />
         <Typography variant="h6" fontWeight={600} gutterBottom>
@@ -149,7 +150,7 @@ export const OrderTable = ({
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden', border: '1px solid', borderColor: 'divider' }}>
       <TableContainer sx={{ maxHeight: 680 }}>
-        <Table stickyHeader aria-label="admin orders table">
+        <Table stickyHeader aria-label="admin orders table" data-testid="admin-orders-table">
           <TableHead>
             <TableRow>
               <TableCell sx={{ fontWeight: 700, bgcolor: 'background.paper' }}>Order</TableCell>
@@ -178,6 +179,7 @@ export const OrderTable = ({
                 <TableRow
                   key={order.id}
                   hover
+                  data-testid="admin-order-row"
                   sx={{
                     '&:last-child td, &:last-child th': { border: 0 },
                     cursor: 'pointer',
@@ -188,6 +190,7 @@ export const OrderTable = ({
                   <TableCell>
                     <Typography
                       variant="body2"
+                      data-testid="admin-order-number"
                       sx={{
                         fontFamily: 'monospace',
                         fontWeight: 700,
@@ -201,7 +204,7 @@ export const OrderTable = ({
                   {/* Customer Info */}
                   <TableCell>
                     <Box sx={{ minWidth: 0 }}>
-                      <Typography variant="body2" fontWeight={600} noWrap>
+                      <Typography variant="body2" fontWeight={600} noWrap data-testid="admin-order-customer-name">
                         {customerName}
                       </Typography>
                       {customerEmail && (
@@ -209,6 +212,7 @@ export const OrderTable = ({
                           variant="caption"
                           color="text.secondary"
                           noWrap
+                          data-testid="admin-order-customer-email"
                           sx={{ display: 'block' }}
                         >
                           {customerEmail}
@@ -219,14 +223,14 @@ export const OrderTable = ({
 
                   {/* Date */}
                   <TableCell>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" color="text.secondary" data-testid="admin-order-date">
                       {formatOrderDate(order.createdAt)}
                     </Typography>
                   </TableCell>
 
                   {/* Items Count */}
                   <TableCell align="center">
-                    <Typography variant="body2" fontWeight={500}>
+                    <Typography variant="body2" fontWeight={500} data-testid="admin-order-items-count">
                       {order.itemCount ?? (order.items?.length ?? 0)}
                     </Typography>
                   </TableCell>
@@ -236,12 +240,14 @@ export const OrderTable = ({
                     <Typography
                       variant="body2"
                       fontWeight={700}
+                      data-testid="admin-order-total"
                       sx={{ color: 'accent.main' }}
                     >
                       {formatCurrency(order.total)}
                     </Typography>
                     <Typography
                       variant="caption"
+                      data-testid="admin-order-payment-status"
                       sx={{
                         color: getPaymentStatusColor(order.paymentStatus),
                         fontWeight: 600,
@@ -267,6 +273,7 @@ export const OrderTable = ({
                       startIcon={<VisibilityOutlined />}
                       onClick={() => onViewDetail?.(order.id)}
                       sx={{ minWidth: 100 }}
+                      data-testid="admin-order-view-btn"
                     >
                       View
                     </Button>

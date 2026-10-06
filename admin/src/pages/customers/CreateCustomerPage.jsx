@@ -129,13 +129,14 @@ export const CreateCustomerPage = () => {
           startIcon={<ArrowBackIcon />}
           onClick={() => navigate('/admin/customers')}
           sx={{ mb: 1.5, color: 'text.secondary', fontWeight: 600 }}
+          data-testid="admin-customer-create-back-btn"
         >
           Back to Customers
         </Button>
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
           <Box>
-            <Typography variant="h5" component="h1" fontWeight={700}>
+            <Typography variant="h5" component="h1" fontWeight={700} data-testid="admin-customer-create-title">
               Create Customer
             </Typography>
             <Typography variant="body2" color="text.secondary">
@@ -163,7 +164,8 @@ export const CreateCustomerPage = () => {
         sx={{ mb: 3, borderRadius: 2 }}
       >
         Per application policy, newly created customer accounts are set to <strong>Inactive (Deactivated)</strong> upon creation. The customer will not be able to log in until an administrator explicitly activates their account.
-</Alert>
+      </Alert>
+
       {/* Form Card */}
       <Card sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
         <CardContent sx={{ p: { xs: 2.5, sm: 4 } }}>
@@ -183,6 +185,8 @@ export const CreateCustomerPage = () => {
                   {...register('name')}
                   error={Boolean(errors.name)}
                   helperText={errors.name?.message}
+                  inputProps={{ 'data-testid': 'admin-customer-create-name-input' }}
+                  FormHelperTextProps={{ 'data-testid': 'admin-customer-create-name-error' }}
                 />
               </Grid>
 
@@ -196,6 +200,8 @@ export const CreateCustomerPage = () => {
                   {...register('email')}
                   error={Boolean(errors.email)}
                   helperText={errors.email?.message}
+                  inputProps={{ 'data-testid': 'admin-customer-create-email-input' }}
+                  FormHelperTextProps={{ 'data-testid': 'admin-customer-create-email-error' }}
                 />
               </Grid>
 
@@ -209,6 +215,8 @@ export const CreateCustomerPage = () => {
                   {...register('password')}
                   error={Boolean(errors.password)}
                   helperText={errors.password?.message || 'Minimum 6 characters'}
+                  inputProps={{ 'data-testid': 'admin-customer-create-password-input' }}
+                  FormHelperTextProps={{ 'data-testid': 'admin-customer-create-password-error' }}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
@@ -234,6 +242,8 @@ export const CreateCustomerPage = () => {
                   {...register('phone')}
                   error={Boolean(errors.phone)}
                   helperText={errors.phone?.message || 'Optional, exactly 10 digits'}
+                  inputProps={{ 'data-testid': 'admin-customer-create-phone-input' }}
+                  FormHelperTextProps={{ 'data-testid': 'admin-customer-create-phone-error' }}
                 />
               </Grid>
             </Grid>
@@ -248,6 +258,7 @@ export const CreateCustomerPage = () => {
                   INITIAL SHIPPING ADDRESS
                 </Typography>
               </Box>
+
               <Controller
                 name="includeAddress"
                 control={control}
@@ -258,6 +269,7 @@ export const CreateCustomerPage = () => {
                         checked={field.value}
                         onChange={(e) => field.onChange(e.target.checked)}
                         color="primary"
+                        inputProps={{ 'data-testid': 'admin-customer-create-include-address-checkbox' }}
                       />
                     }
                     label={
@@ -281,6 +293,7 @@ export const CreateCustomerPage = () => {
                     {...register('addressName')}
                     error={Boolean(errors.addressName)}
                     helperText={errors.addressName?.message || 'Defaults to customer name if blank'}
+                    inputProps={{ 'data-testid': 'admin-customer-create-address-name-input' }}
                   />
                 </Grid>
 
@@ -293,6 +306,7 @@ export const CreateCustomerPage = () => {
                     {...register('addressPhone')}
                     error={Boolean(errors.addressPhone)}
                     helperText={errors.addressPhone?.message || 'Defaults to customer phone if blank'}
+                    inputProps={{ 'data-testid': 'admin-customer-create-address-phone-input' }}
                   />
                 </Grid>
 
@@ -307,6 +321,8 @@ export const CreateCustomerPage = () => {
                     {...register('address')}
                     error={Boolean(errors.address)}
                     helperText={errors.address?.message}
+                    inputProps={{ 'data-testid': 'admin-customer-create-address-input' }}
+                    FormHelperTextProps={{ 'data-testid': 'admin-customer-create-address-error' }}
                   />
                 </Grid>
 
@@ -319,6 +335,8 @@ export const CreateCustomerPage = () => {
                     {...register('city')}
                     error={Boolean(errors.city)}
                     helperText={errors.city?.message}
+                    inputProps={{ 'data-testid': 'admin-customer-create-city-input' }}
+                    FormHelperTextProps={{ 'data-testid': 'admin-customer-create-city-error' }}
                   />
                 </Grid>
 
@@ -331,6 +349,8 @@ export const CreateCustomerPage = () => {
                     {...register('state')}
                     error={Boolean(errors.state)}
                     helperText={errors.state?.message}
+                    inputProps={{ 'data-testid': 'admin-customer-create-state-input' }}
+                    FormHelperTextProps={{ 'data-testid': 'admin-customer-create-state-error' }}
                   />
                 </Grid>
 
@@ -343,6 +363,8 @@ export const CreateCustomerPage = () => {
                     {...register('postalCode')}
                     error={Boolean(errors.postalCode)}
                     helperText={errors.postalCode?.message}
+                    inputProps={{ 'data-testid': 'admin-customer-create-postal-code-input' }}
+                    FormHelperTextProps={{ 'data-testid': 'admin-customer-create-postal-code-error' }}
                   />
                 </Grid>
 
@@ -354,6 +376,7 @@ export const CreateCustomerPage = () => {
                     {...register('country')}
                     error={Boolean(errors.country)}
                     helperText={errors.country?.message}
+                    inputProps={{ 'data-testid': 'admin-customer-create-country-input' }}
                   />
                 </Grid>
               </Grid>
@@ -376,6 +399,7 @@ export const CreateCustomerPage = () => {
                 disabled={loading}
                 startIcon={loading ? <CircularProgress size={16} color="inherit" /> : <PersonAddOutlined />}
                 sx={{ px: 3, fontWeight: 600 }}
+                data-testid="admin-customer-create-submit-btn"
               >
                 {loading ? 'Creating...' : 'Create Customer (Deactivated)'}
               </Button>
@@ -390,6 +414,7 @@ export const CreateCustomerPage = () => {
         autoHideDuration={6000}
         onClose={() => setServerError('')}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        data-testid="admin-customer-create-snackbar"
       >
         <Alert
           onClose={() => setServerError('')}

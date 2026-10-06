@@ -62,7 +62,7 @@ export const StockUpdateDialog = ({
       fullWidth
       PaperProps={{ sx: { borderRadius: 2, p: 1 } }}
     >
-      <DialogTitle sx={{ fontWeight: 700, pb: 1 }}>
+      <DialogTitle sx={{ fontWeight: 700, pb: 1 }} data-testid="admin-stock-dialog-title">
         Update Variant Stock
       </DialogTitle>
 
@@ -85,7 +85,7 @@ export const StockUpdateDialog = ({
               borderColor: 'divider',
             }}
           >
-            <Typography variant="subtitle2" fontWeight={700} gutterBottom>
+            <Typography variant="subtitle2" fontWeight={700} gutterBottom data-testid="admin-stock-dialog-product-name">
               {product?.name}
             </Typography>
 
@@ -93,6 +93,7 @@ export const StockUpdateDialog = ({
               <Chip
                 size="small"
                 label={`SKU: ${variant?.sku}`}
+                data-testid="admin-stock-dialog-sku"
                 sx={{ fontFamily: 'monospace', fontWeight: 600 }}
               />
               <Chip size="small" label={`Size: ${variant?.size}`} />
@@ -103,7 +104,7 @@ export const StockUpdateDialog = ({
 
             <Typography variant="body2" color="text.secondary">
               Current Stock:{' '}
-              <strong style={{ color: variant?.stock === 0 ? '#C0392B' : '#111111' }}>
+              <strong style={{ color: variant?.stock === 0 ? '#C0392B' : '#111111' }} data-testid="admin-stock-dialog-current">
                 {variant?.stock ?? 0} units
               </strong>
             </Typography>
@@ -117,7 +118,8 @@ export const StockUpdateDialog = ({
             required
             autoFocus
             disabled={loading}
-            inputProps={{ min: 0, step: 1 }}
+            inputProps={{ min: 0, step: 1, 'data-testid': 'admin-stock-input' }}
+            FormHelperTextProps={{ 'data-testid': 'admin-stock-input-error' }}
             {...register('stock')}
             error={Boolean(errors.stock)}
             helperText={errors.stock?.message || 'Stock must be an integer 0 or greater'}
@@ -125,7 +127,7 @@ export const StockUpdateDialog = ({
         </DialogContent>
 
         <DialogActions sx={{ px: 3, py: 2 }}>
-          <Button onClick={onClose} disabled={loading} color="inherit">
+          <Button onClick={onClose} disabled={loading} color="inherit" data-testid="admin-stock-cancel-btn">
             Cancel
           </Button>
           <Button
@@ -134,6 +136,7 @@ export const StockUpdateDialog = ({
             color="primary"
             disabled={loading}
             startIcon={loading ? <CircularProgress size={16} color="inherit" /> : null}
+            data-testid="admin-stock-save-btn"
           >
             {loading ? 'Updating...' : 'Save Stock'}
           </Button>

@@ -56,7 +56,7 @@ export const CustomerInfoCard = ({ customer = null }) => {
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
               Full Name
             </Typography>
-            <Typography variant="body2" fontWeight={600}>
+            <Typography variant="body2" fontWeight={600} data-testid="admin-order-customer-name">
               {customer.name || 'N/A'}
             </Typography>
           </Box>
@@ -68,7 +68,7 @@ export const CustomerInfoCard = ({ customer = null }) => {
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
               Email Address
             </Typography>
-            <Typography variant="body2" fontWeight={500}>
+            <Typography variant="body2" fontWeight={500} data-testid="admin-order-customer-email">
               {customer.email || 'N/A'}
             </Typography>
           </Box>
@@ -81,7 +81,7 @@ export const CustomerInfoCard = ({ customer = null }) => {
               <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
                 Phone
               </Typography>
-              <Typography variant="body2" fontWeight={500}>
+              <Typography variant="body2" fontWeight={500} data-testid="admin-order-customer-phone">
                 {customer.phone}
               </Typography>
             </Box>

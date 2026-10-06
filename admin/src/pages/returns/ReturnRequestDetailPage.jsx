@@ -162,6 +162,7 @@ export const ReturnRequestDetailPage = () => {
           startIcon={<ArrowBackIcon />}
           onClick={() => navigate('/admin/returns')}
           sx={{ mb: 1.5, color: 'text.secondary', fontWeight: 600 }}
+          data-testid="admin-return-detail-back-btn"
         >
           Back to Return Requests
         </Button>
@@ -177,7 +178,7 @@ export const ReturnRequestDetailPage = () => {
         >
           <Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap', mb: 0.5 }}>
-              <Typography variant="h5" component="h1" fontWeight={700}>
+              <Typography variant="h5" component="h1" fontWeight={700} data-testid="admin-return-detail-title">
                 {request.type === 'RETURN' ? 'Return Request' : 'Exchange Request'}
               </Typography>
               <Chip
@@ -193,8 +194,11 @@ export const ReturnRequestDetailPage = () => {
                 variant="outlined"
                 color={request.type === 'RETURN' ? 'primary' : 'secondary'}
                 sx={{ fontWeight: 700 }}
+                data-testid="admin-return-detail-type-chip"
               />
-              {renderStatusChip(request.status)}
+              <Box component="span" data-testid="admin-return-detail-status-chip">
+                {renderStatusChip(request.status)}
+              </Box>
             </Box>
             <Typography variant="body2" color="text.secondary">
               Submitted on {formatOrderDate(request.createdAt)}
@@ -209,6 +213,7 @@ export const ReturnRequestDetailPage = () => {
                 onClick={() => setRejectOpen(true)}
                 disabled={actionLoading}
                 sx={{ fontWeight: 600, px: 2.5 }}
+                data-testid="admin-return-detail-reject-btn"
               >
                 Reject Request
               </Button>
@@ -218,6 +223,7 @@ export const ReturnRequestDetailPage = () => {
                 onClick={() => setApproveOpen(true)}
                 disabled={actionLoading}
                 sx={{ fontWeight: 600, px: 2.5 }}
+                data-testid="admin-return-detail-approve-btn"
               >
                 Approve Request
               </Button>
@@ -248,6 +254,7 @@ export const ReturnRequestDetailPage = () => {
                     endIcon={<OpenInNewIcon fontSize="small" />}
                     onClick={() => navigate(`/admin/orders/${request.orderId}`)}
                     sx={{ fontWeight: 600 }}
+                    data-testid="admin-return-detail-view-order-btn"
                   >
                     View Order
                   </Button>
@@ -260,7 +267,7 @@ export const ReturnRequestDetailPage = () => {
                   <Typography variant="caption" color="text.secondary" display="block">
                     Order Number
                   </Typography>
-                  <Typography variant="body1" fontWeight={700} sx={{ fontFamily: 'monospace' }}>
+                  <Typography variant="body1" fontWeight={700} sx={{ fontFamily: 'monospace' }} data-testid="admin-return-detail-order-number">
                     {request.orderNumber || 'N/A'}
                   </Typography>
                 </Grid>
@@ -288,7 +295,7 @@ export const ReturnRequestDetailPage = () => {
                 <Typography variant="caption" color="text.secondary" display="block">
                   Primary Reason
                 </Typography>
-                <Typography variant="body1" fontWeight={600} sx={{ mt: 0.5 }}>
+                <Typography variant="body1" fontWeight={600} sx={{ mt: 0.5 }} data-testid="admin-return-detail-reason">
                   {request.reason}
                 </Typography>
               </Box>
@@ -298,7 +305,7 @@ export const ReturnRequestDetailPage = () => {
                   <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
                     Additional Customer Comments
                   </Typography>
-                  <Typography variant="body2" sx={{ whiteSpace: 'pre-line' }}>
+                  <Typography variant="body2" sx={{ whiteSpace: 'pre-line' }} data-testid="admin-return-detail-comments">
                     {request.details}
                   </Typography>
                 </Box>
@@ -325,7 +332,7 @@ export const ReturnRequestDetailPage = () => {
                   <Typography variant="caption" color="text.secondary" display="block">
                     Customer Name
                   </Typography>
-                  <Typography variant="body1" fontWeight={600}>
+                  <Typography variant="body1" fontWeight={600} data-testid="admin-return-detail-customer-name">
                     {request.customerName || 'N/A'}
                   </Typography>
                 </Box>
@@ -338,7 +345,7 @@ export const ReturnRequestDetailPage = () => {
                         Email Address
                       </Typography>
                     </Box>
-                    <Typography variant="body2" fontWeight={600} sx={{ mt: 0.25, wordBreak: 'break-all' }}>
+                    <Typography variant="body2" fontWeight={600} sx={{ mt: 0.25, wordBreak: 'break-all' }} data-testid="admin-return-detail-customer-email">
                       {request.customerEmail}
                     </Typography>
                   </Box>
@@ -352,7 +359,7 @@ export const ReturnRequestDetailPage = () => {
                         Phone Number
                       </Typography>
                     </Box>
-                    <Typography variant="body2" fontWeight={600} sx={{ mt: 0.25 }}>
+                    <Typography variant="body2" fontWeight={600} sx={{ mt: 0.25 }} data-testid="admin-return-detail-customer-phone">
                       {request.customerPhone}
                     </Typography>
                   </Box>
@@ -370,7 +377,7 @@ export const ReturnRequestDetailPage = () => {
               <Divider sx={{ mb: 2 }} />
 
               {request.status === 'PENDING' && (
-                <Alert severity="warning" sx={{ borderRadius: 1.5 }}>
+                <Alert severity="warning" sx={{ borderRadius: 1.5 }} data-testid="admin-return-detail-resolution-alert">
                   <Typography variant="body2" fontWeight={600}>
                     Action Required
                   </Typography>
@@ -381,7 +388,7 @@ export const ReturnRequestDetailPage = () => {
               )}
 
               {request.status === 'APPROVED' && (
-                <Alert severity="success" sx={{ borderRadius: 1.5 }}>
+                <Alert severity="success" sx={{ borderRadius: 1.5 }} data-testid="admin-return-detail-resolution-alert">
                   <Typography variant="body2" fontWeight={700}>
                     Request Approved
                   </Typography>
@@ -400,7 +407,7 @@ export const ReturnRequestDetailPage = () => {
               )}
 
               {request.status === 'REJECTED' && (
-                <Alert severity="error" sx={{ borderRadius: 1.5 }}>
+                <Alert severity="error" sx={{ borderRadius: 1.5 }} data-testid="admin-return-detail-resolution-alert">
                   <Typography variant="body2" fontWeight={700}>
                     Request Rejected
                   </Typography>
@@ -445,6 +452,7 @@ export const ReturnRequestDetailPage = () => {
         autoHideDuration={4000}
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        data-testid="admin-return-detail-snackbar"
       >
         <Alert
           onClose={handleCloseSnackbar}

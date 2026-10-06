@@ -80,7 +80,7 @@ export const Orders = () => {
         }}
       >
         <Box>
-          <Typography variant="h5" component="h1" fontWeight={700} gutterBottom>
+          <Typography variant="h5" component="h1" fontWeight={700} gutterBottom data-testid="admin-orders-title">
             Orders Management
           </Typography>
           <Typography variant="body2" color="text.secondary">
@@ -95,6 +95,7 @@ export const Orders = () => {
           onClick={handleRefresh}
           disabled={loading}
           sx={{ flexShrink: 0 }}
+          data-testid="admin-orders-refresh-btn"
         >
           Refresh Orders
         </Button>
@@ -112,6 +113,7 @@ export const Orders = () => {
                 onChange={(e) => setSearch(e.target.value)}
                 size="small"
                 fullWidth
+                inputProps={{ 'data-testid': 'admin-orders-search-input' }}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -131,6 +133,7 @@ export const Orders = () => {
                   label="Filter Status"
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
+                  data-testid="admin-orders-status-select"
                 >
                   <MenuItem value="ALL">All Orders</MenuItem>
                   {ORDER_STATUSES.map((status) => (

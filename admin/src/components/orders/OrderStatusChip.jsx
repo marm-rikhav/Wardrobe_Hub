@@ -16,6 +16,7 @@ export const OrderStatusChip = ({ status = 'PENDING', size = 'small' }) => {
       size={size}
       color={color}
       label={label}
+      data-testid="admin-order-status-chip"
       sx={{
         fontWeight: 700,
         fontSize: size === 'small' ? '0.75rem' : '0.85rem',

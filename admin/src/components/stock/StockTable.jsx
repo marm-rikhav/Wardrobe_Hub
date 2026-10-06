@@ -97,6 +97,7 @@ export const StockTable = ({
           borderColor: 'divider',
           bgcolor: 'background.paper',
         }}
+        data-testid="admin-stock-empty"
       >
         <WarehouseOutlined sx={{ fontSize: 48, color: 'text.secondary', mb: 1.5 }} />
         <Typography variant="h6" fontWeight={600} gutterBottom>
@@ -112,7 +113,7 @@ export const StockTable = ({
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden', border: '1px solid', borderColor: 'divider' }}>
       <TableContainer sx={{ maxHeight: 650 }}>
-        <Table stickyHeader aria-label="stock table">
+        <Table stickyHeader aria-label="stock table" data-testid="admin-stock-table">
           <TableHead>
             <TableRow>
               <TableCell sx={{ fontWeight: 700, bgcolor: 'background.paper' }}>Product</TableCell>
@@ -142,6 +143,7 @@ export const StockTable = ({
                   size="small"
                   label="In Stock"
                   color="success"
+                  data-testid="admin-stock-badge"
                   sx={{
                     bgcolor: 'rgba(47, 125, 79, 0.12)',
                     color: '#2F7D4F',
@@ -156,6 +158,7 @@ export const StockTable = ({
                     size="small"
                     label="Out of Stock"
                     color="error"
+                    data-testid="admin-stock-badge"
                     sx={{ fontWeight: 700, fontSize: '0.75rem' }}
                   />
                 );
@@ -164,6 +167,7 @@ export const StockTable = ({
                   <Chip
                     size="small"
                     label="Low Stock"
+                    data-testid="admin-stock-badge"
                     sx={{
                       bgcolor: 'rgba(211, 84, 0, 0.12)',
                       color: '#D35400',
@@ -178,6 +182,7 @@ export const StockTable = ({
                 <TableRow
                   key={variant.id || `${product.id}-${variant.sku}`}
                   hover
+                  data-testid="admin-stock-row"
                   sx={{
                     '&:last-child td, &:last-child th': { border: 0 },
                     bgcolor: isOutOfStock ? 'rgba(192, 57, 43, 0.03)' : 'inherit',
@@ -202,7 +207,7 @@ export const StockTable = ({
                         {product.name.charAt(0).toUpperCase()}
                       </Avatar>
                       <Box sx={{ minWidth: 0, maxWidth: 200 }}>
-                        <Typography variant="body2" fontWeight={600} noWrap>
+                        <Typography variant="body2" fontWeight={600} noWrap data-testid="admin-stock-product-name">
                           {product.name}
                         </Typography>
                         <Typography variant="caption" color="text.secondary" noWrap sx={{ display: 'block' }}>
@@ -214,19 +219,19 @@ export const StockTable = ({
 
                   {/* SKU */}
                   <TableCell>
-                    <Typography variant="body2" sx={{ fontFamily: 'monospace', fontWeight: 600 }}>
+                    <Typography variant="body2" sx={{ fontFamily: 'monospace', fontWeight: 600 }} data-testid="admin-stock-sku">
                       {variant.sku}
                     </Typography>
                   </TableCell>
 
                   {/* Size */}
                   <TableCell>
-                    <Typography variant="body2">{variant.size}</Typography>
+                    <Typography variant="body2" data-testid="admin-stock-size">{variant.size}</Typography>
                   </TableCell>
 
                   {/* Color */}
                   <TableCell>
-                    <Typography variant="body2">{variant.color}</Typography>
+                    <Typography variant="body2" data-testid="admin-stock-color">{variant.color}</Typography>
                   </TableCell>
 
                   {/* Current Stock */}
@@ -234,6 +239,7 @@ export const StockTable = ({
                     <Typography
                       variant="body2"
                       fontWeight={700}
+                      data-testid="admin-stock-units"
                       sx={{
                         color: stockTextColor,
                       }}
@@ -256,6 +262,7 @@ export const StockTable = ({
                       startIcon={<EditOutlined />}
                       onClick={() => onUpdateStock({ product, variant })}
                       sx={{ minWidth: 90 }}
+                      data-testid="admin-stock-update-btn"
                     >
                       Update
                     </Button>

@@ -33,7 +33,7 @@ export const StatusConfirmDialog = ({
         },
       }}
     >
-      <DialogTitle sx={{ fontWeight: 700, pb: 1 }}>
+      <DialogTitle sx={{ fontWeight: 700, pb: 1 }} data-testid="admin-order-confirm-dialog-title">
         Confirm Status Update
       </DialogTitle>
       <DialogContent>
@@ -67,6 +67,7 @@ export const StatusConfirmDialog = ({
           color="inherit"
           disabled={loading}
           sx={{ fontWeight: 600 }}
+          data-testid="admin-order-confirm-cancel-btn"
         >
           Cancel
         </Button>
@@ -77,6 +78,7 @@ export const StatusConfirmDialog = ({
           disabled={loading}
           startIcon={loading ? <CircularProgress size={16} color="inherit" /> : null}
           sx={{ minWidth: 100, fontWeight: 600 }}
+          data-testid="admin-order-confirm-submit-btn"
         >
           {loading ? 'Updating...' : 'Confirm'}
         </Button>

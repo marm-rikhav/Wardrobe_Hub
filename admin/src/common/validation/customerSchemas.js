@@ -98,7 +98,7 @@ export const addressSchema = z.object({
     .min(1, 'Phone number is required')
     .refine(
       (val) => validateStrictPhone(val).isValid,
-      (val) => ({ message: validateStrictPhone(val).message || 'Invalid phone number' })
+      { message: 'Invalid phone number' }
     ),
   address: z
     .string()
@@ -143,7 +143,7 @@ export const createCustomerSchema = z
       .min(1, 'Email is required')
       .refine(
         (val) => validateStrictEmail(val).isValid,
-        (val) => ({ message: validateStrictEmail(val).message || 'Invalid email address' })
+        { message: 'Invalid email address' }
       ),
     password: z
       .string()
@@ -162,7 +162,7 @@ export const createCustomerSchema = z
           }
           return true;
         },
-        (val) => ({ message: validateStrictPhone(val, true).message || 'Invalid phone number' })
+        { message: 'Invalid phone number' }
       ),
     includeAddress: z.boolean().default(true),
     addressName: z.string().trim().optional().or(z.literal('')),
@@ -196,7 +196,7 @@ export const customerEditSchema = z
       .min(1, 'Email is required')
       .refine(
         (val) => validateStrictEmail(val).isValid,
-        (val) => ({ message: validateStrictEmail(val).message || 'Invalid email address' })
+        { message: 'Invalid email address' }
       ),
     phone: z
       .string()
@@ -210,7 +210,7 @@ export const customerEditSchema = z
           }
           return true;
         },
-        (val) => ({ message: validateStrictPhone(val, true).message || 'Invalid phone number' })
+        { message: 'Invalid phone number' }
       ),
     isActive: z.boolean().default(true),
     addressId: z.string().optional().or(z.literal('')),

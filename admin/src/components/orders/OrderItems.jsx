@@ -53,7 +53,7 @@ export const OrderItems = ({ items = [] }) => {
                 const initial = (item.productName || 'P').charAt(0).toUpperCase();
 
                 return (
-                  <TableRow key={item.id} hover>
+                  <TableRow key={item.id} hover data-testid="admin-order-item-row">
                     {/* Item Thumbnail & Name Snapshot */}
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -73,7 +73,7 @@ export const OrderItems = ({ items = [] }) => {
                           {initial}
                         </Avatar>
                         <Box sx={{ minWidth: 0 }}>
-                          <Typography variant="body2" fontWeight={600}>
+                          <Typography variant="body2" fontWeight={600} data-testid="admin-order-item-name">
                             {item.productName}
                           </Typography>
                         </Box>
@@ -84,6 +84,7 @@ export const OrderItems = ({ items = [] }) => {
                     <TableCell>
                       <Typography
                         variant="body2"
+                        data-testid="admin-order-item-sku"
                         sx={{ fontFamily: 'monospace', fontSize: '0.8rem' }}
                       >
                         {item.sku || '—'}
@@ -109,7 +110,7 @@ export const OrderItems = ({ items = [] }) => {
 
                     {/* Quantity */}
                     <TableCell align="center">
-                      <Typography variant="body2" fontWeight={600}>
+                      <Typography variant="body2" fontWeight={600} data-testid="admin-order-item-qty">
                         {item.quantity}
                       </Typography>
                     </TableCell>

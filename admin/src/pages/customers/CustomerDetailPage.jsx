@@ -174,6 +174,7 @@ export const CustomerDetailPage = () => {
           startIcon={<ArrowBackIcon />}
           onClick={() => navigate('/admin/customers')}
           sx={{ mb: 1.5, color: 'text.secondary', fontWeight: 600 }}
+          data-testid="admin-customer-detail-back-btn"
         >
           Back to Customers
         </Button>
@@ -203,7 +204,7 @@ export const CustomerDetailPage = () => {
             </Avatar>
             <Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
-                <Typography variant="h5" component="h1" fontWeight={700}>
+                <Typography variant="h5" component="h1" fontWeight={700} data-testid="admin-customer-detail-name">
                   {customer.name || 'Unnamed Customer'}
                 </Typography>
                 <Chip
@@ -215,6 +216,7 @@ export const CustomerDetailPage = () => {
                     bgcolor: customer.isActive ? 'rgba(47, 125, 79, 0.12)' : 'rgba(192, 57, 43, 0.12)',
                     color: customer.isActive ? '#2F7D4F' : '#C0392B',
                   }}
+                  data-testid="admin-customer-detail-status-chip"
                 />
               </Box>
               <Typography variant="caption" color="text.secondary">
@@ -230,6 +232,7 @@ export const CustomerDetailPage = () => {
               color="primary"
               startIcon={<EditIcon />}
               onClick={() => navigate(`/admin/customers/${customer.id}/edit`)}
+              data-testid="admin-customer-detail-edit-btn"
             >
               Edit Customer
             </Button>
@@ -239,6 +242,7 @@ export const CustomerDetailPage = () => {
               color={customer.isActive ? 'warning' : 'success'}
               startIcon={customer.isActive ? <BlockOutlined /> : <CheckCircleOutline />}
               onClick={handleToggleStatus}
+              data-testid="admin-customer-detail-toggle-status-btn"
             >
               {customer.isActive ? 'Deactivate' : 'Activate'}
             </Button>
@@ -257,6 +261,7 @@ export const CustomerDetailPage = () => {
                   disabled={customer.totalOrders > 0}
                   startIcon={<DeleteOutline />}
                   onClick={() => setDeleteDialogOpen(true)}
+                  data-testid="admin-customer-detail-delete-btn"
                 >
                   Delete
                 </Button>
@@ -280,7 +285,7 @@ export const CustomerDetailPage = () => {
                   <Typography variant="caption" color="text.secondary">
                     Full Name
                   </Typography>
-                  <Typography variant="body1" fontWeight={600}>
+                  <Typography variant="body1" fontWeight={600} data-testid="admin-customer-detail-info-name">
                     {customer.name || '—'}
                   </Typography>
                 </Grid>
@@ -291,7 +296,7 @@ export const CustomerDetailPage = () => {
                   </Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
                     <EmailOutlined sx={{ fontSize: 16, color: 'text.secondary' }} />
-                    <Typography variant="body1">{customer.email}</Typography>
+                    <Typography variant="body1" data-testid="admin-customer-detail-info-email">{customer.email}</Typography>
                   </Box>
                 </Grid>
 
@@ -301,7 +306,7 @@ export const CustomerDetailPage = () => {
                   </Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
                     <PhoneOutlined sx={{ fontSize: 16, color: 'text.secondary' }} />
-                    <Typography variant="body1">{customer.phone || '—'}</Typography>
+                    <Typography variant="body1" data-testid="admin-customer-detail-info-phone">{customer.phone || '—'}</Typography>
                   </Box>
                 </Grid>
 
@@ -321,7 +326,7 @@ export const CustomerDetailPage = () => {
 
         {/* Saved Addresses Section */}
         <Grid item xs={12}>
-          <Card sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
+          <Card sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2 }} data-testid="admin-customer-detail-addresses-card">
             <CardContent sx={{ p: 3 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                 <HomeOutlined sx={{ fontSize: 22, color: 'text.secondary' }} />
@@ -526,6 +531,7 @@ export const CustomerDetailPage = () => {
           severity={snackbar.severity}
           variant="filled"
           sx={{ width: '100%', fontWeight: 600 }}
+          data-testid="admin-customer-detail-snackbar"
         >
           {snackbar.message}
         </Alert>

@@ -25,7 +25,7 @@ export const ApproveConfirmDialog = ({
       fullWidth
       aria-labelledby="approve-dialog-title"
     >
-      <DialogTitle id="approve-dialog-title" sx={{ pb: 1, fontWeight: 700, color: 'success.main' }}>
+      <DialogTitle id="approve-dialog-title" sx={{ pb: 1, fontWeight: 700, color: 'success.main' }} data-testid="admin-return-approve-dialog-title">
         Approve {request?.type === 'RETURN' ? 'Return' : 'Exchange'} Request
       </DialogTitle>
 
@@ -37,7 +37,7 @@ export const ApproveConfirmDialog = ({
       </DialogContent>
 
       <DialogActions sx={{ px: 3, py: 2 }}>
-        <Button onClick={onClose} color="inherit" disabled={loading} sx={{ fontWeight: 600 }}>
+        <Button onClick={onClose} color="inherit" disabled={loading} sx={{ fontWeight: 600 }} data-testid="admin-return-approve-cancel-btn">
           Cancel
         </Button>
         <Button
@@ -47,6 +47,7 @@ export const ApproveConfirmDialog = ({
           onClick={onConfirm}
           startIcon={loading ? <CircularProgress size={18} color="inherit" /> : null}
           sx={{ fontWeight: 600 }}
+          data-testid="admin-return-approve-confirm-btn"
         >
           {loading ? 'Approving...' : 'Confirm Approval'}
         </Button>

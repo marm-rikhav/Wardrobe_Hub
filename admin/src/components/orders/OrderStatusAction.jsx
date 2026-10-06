@@ -60,7 +60,7 @@ export const OrderStatusAction = ({
   // If order is completed or terminal (DELIVERED, CANCELLED, RETURNED) and no primary action exists
   if (!primaryAction && !canCancel) {
     return (
-      <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+      <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }} data-testid="admin-order-no-actions">
         No further status updates available for this order.
       </Typography>
     );
@@ -77,6 +77,7 @@ export const OrderStatusAction = ({
           onClick={() => handleOpenConfirm(primaryAction.targetStatus)}
           disabled={isUpdating}
           sx={{ fontWeight: 600 }}
+          data-testid="admin-order-action-primary-btn"
         >
           {primaryAction.label}
         </Button>
@@ -91,6 +92,7 @@ export const OrderStatusAction = ({
           onClick={() => handleOpenConfirm('CANCELLED')}
           disabled={isUpdating}
           sx={{ fontWeight: 600 }}
+          data-testid="admin-order-action-cancel-btn"
         >
           Cancel Order
         </Button>

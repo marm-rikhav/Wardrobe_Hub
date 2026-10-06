@@ -55,7 +55,7 @@ export const RejectConfirmDialog = ({
       aria-labelledby="reject-dialog-title"
     >
       <form onSubmit={handleSubmit(onFormSubmit)}>
-        <DialogTitle id="reject-dialog-title" sx={{ pb: 1, fontWeight: 700, color: 'error.main' }}>
+        <DialogTitle id="reject-dialog-title" sx={{ pb: 1, fontWeight: 700, color: 'error.main' }} data-testid="admin-return-reject-dialog-title">
           Reject {request?.type === 'RETURN' ? 'Return' : 'Exchange'} Request
         </DialogTitle>
 
@@ -74,13 +74,15 @@ export const RejectConfirmDialog = ({
             {...register('reason')}
             error={Boolean(errors.reason)}
             helperText={errors.reason?.message || `${reasonValue.length}/1000 characters`}
+            inputProps={{ 'data-testid': 'admin-return-reject-reason-input' }}
+            FormHelperTextProps={{ 'data-testid': 'admin-return-reject-reason-error' }}
             disabled={loading}
             autoFocus
           />
         </DialogContent>
 
         <DialogActions sx={{ px: 3, py: 2 }}>
-          <Button onClick={onClose} color="inherit" disabled={loading} sx={{ fontWeight: 600 }}>
+          <Button onClick={onClose} color="inherit" disabled={loading} sx={{ fontWeight: 600 }} data-testid="admin-return-reject-cancel-btn">
             Cancel
           </Button>
           <Button
@@ -90,6 +92,7 @@ export const RejectConfirmDialog = ({
             disabled={loading}
             startIcon={loading ? <CircularProgress size={18} color="inherit" /> : null}
             sx={{ fontWeight: 600 }}
+            data-testid="admin-return-reject-confirm-btn"
           >
             {loading ? 'Rejecting...' : 'Confirm Rejection'}
           </Button>

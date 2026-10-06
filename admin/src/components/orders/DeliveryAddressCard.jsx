@@ -39,7 +39,7 @@ export const DeliveryAddressCard = ({ address = null }) => {
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
               Recipient Name
             </Typography>
-            <Typography variant="body2" fontWeight={600}>
+            <Typography variant="body2" fontWeight={600} data-testid="admin-order-shipping-name">
               {address.name || 'N/A'}
             </Typography>
           </Box>
@@ -47,7 +47,7 @@ export const DeliveryAddressCard = ({ address = null }) => {
 
         <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
           <LocationOnOutlined fontSize="small" sx={{ color: 'text.secondary', mt: 0.3 }} />
-          <Box>
+          <Box data-testid="admin-order-shipping-address">
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
               Shipping Destination
             </Typography>

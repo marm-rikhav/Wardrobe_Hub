@@ -128,6 +128,7 @@ export const OrderDetail = () => {
           onClick={() => navigate('/admin/orders')}
           color="inherit"
           sx={{ fontWeight: 600 }}
+          data-testid="admin-order-detail-back-btn"
         >
           Back to Orders
         </Button>
@@ -146,7 +147,7 @@ export const OrderDetail = () => {
       >
         <Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.5 }}>
-            <Typography variant="h5" component="h1" fontWeight={700}>
+            <Typography variant="h5" component="h1" fontWeight={700} data-testid="admin-order-detail-title">
               Order #{order.orderNumber}
             </Typography>
             <OrderStatusChip status={order.status} size="medium" />
@@ -186,7 +187,7 @@ export const OrderDetail = () => {
                   <Typography variant="body2" color="text.secondary">
                     Subtotal
                   </Typography>
-                  <Typography variant="body2" fontWeight={600}>
+                  <Typography variant="body2" fontWeight={600} data-testid="admin-order-detail-subtotal">
                     {formatCurrency(order.subtotal)}
                   </Typography>
                 </Box>
@@ -209,6 +210,7 @@ export const OrderDetail = () => {
                   <Typography
                     variant="h6"
                     fontWeight={800}
+                    data-testid="admin-order-detail-total"
                     sx={{ color: 'accent.main' }}
                   >
                     {formatCurrency(order.total)}
@@ -237,6 +239,7 @@ export const OrderDetail = () => {
                     </Typography>
                     <Box
                       component="span"
+                      data-testid="admin-order-detail-payment-status"
                       sx={{
                         color: getPaymentStatusColor(order.paymentStatus),
                         fontWeight: 700,
@@ -299,6 +302,7 @@ export const OrderDetail = () => {
         autoHideDuration={4000}
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        data-testid="admin-order-snackbar"
       >
         <Alert
           onClose={handleCloseSnackbar}

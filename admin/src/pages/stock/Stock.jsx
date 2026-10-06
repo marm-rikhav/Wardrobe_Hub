@@ -160,7 +160,7 @@ export const Stock = () => {
         }}
       >
         <Box>
-          <Typography variant="h5" component="h1" fontWeight={700} gutterBottom>
+          <Typography variant="h5" component="h1" fontWeight={700} gutterBottom data-testid="admin-stock-title">
             Stock Management
           </Typography>
           <Typography variant="body2" color="text.secondary">
@@ -175,6 +175,7 @@ export const Stock = () => {
           onClick={fetchStockData}
           disabled={loading}
           sx={{ flexShrink: 0 }}
+          data-testid="admin-stock-refresh-btn"
         >
           Refresh Stock
         </Button>
@@ -192,6 +193,7 @@ export const Stock = () => {
                 onChange={(e) => setSearch(e.target.value)}
                 size="small"
                 fullWidth
+                inputProps={{ 'data-testid': 'admin-stock-search-input' }}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -211,6 +213,7 @@ export const Stock = () => {
                   label="Filter Category"
                   value={categoryId}
                   onChange={(e) => setCategoryId(e.target.value)}
+                  data-testid="admin-stock-category-select"
                 >
                   <MenuItem value="">
                     <em>All Categories</em>
@@ -233,6 +236,7 @@ export const Stock = () => {
                   label="Stock Status"
                   value={stockFilter}
                   onChange={(e) => setStockFilter(e.target.value)}
+                  data-testid="admin-stock-status-select"
                 >
                   <MenuItem value="all">All Inventory</MenuItem>
                   <MenuItem value="in_stock">In Stock (&gt; 5)</MenuItem>
@@ -268,6 +272,7 @@ export const Stock = () => {
         autoHideDuration={4000}
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        data-testid="admin-stock-snackbar"
       >
         <Alert
           onClose={handleCloseSnackbar}

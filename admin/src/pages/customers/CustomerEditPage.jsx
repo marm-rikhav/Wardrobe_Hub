@@ -182,6 +182,7 @@ export const CustomerEditPage = () => {
           startIcon={<ArrowBackIcon />}
           onClick={() => navigate(`/admin/customers/${id}`)}
           sx={{ mb: 1.5, color: 'text.secondary', fontWeight: 600 }}
+          data-testid="admin-customer-edit-back-btn"
         >
           Back to Customer Details
         </Button>
@@ -243,6 +244,8 @@ export const CustomerEditPage = () => {
                   {...register('name')}
                   error={Boolean(errors.name)}
                   helperText={errors.name?.message}
+                  inputProps={{ 'data-testid': 'admin-customer-edit-name-input' }}
+                  FormHelperTextProps={{ 'data-testid': 'admin-customer-edit-name-error' }}
                   disabled={saving}
                 />
               </Grid>
@@ -257,6 +260,8 @@ export const CustomerEditPage = () => {
                   {...register('email')}
                   error={Boolean(errors.email)}
                   helperText={errors.email?.message}
+                  inputProps={{ 'data-testid': 'admin-customer-edit-email-input' }}
+                  FormHelperTextProps={{ 'data-testid': 'admin-customer-edit-email-error' }}
                   disabled={saving}
                 />
               </Grid>
@@ -270,6 +275,8 @@ export const CustomerEditPage = () => {
                   {...register('phone')}
                   error={Boolean(errors.phone)}
                   helperText={errors.phone?.message || 'Optional 10-digit mobile number'}
+                  inputProps={{ 'data-testid': 'admin-customer-edit-phone-input' }}
+                  FormHelperTextProps={{ 'data-testid': 'admin-customer-edit-phone-error' }}
                   disabled={saving}
                 />
               </Grid>
@@ -286,6 +293,7 @@ export const CustomerEditPage = () => {
                           onChange={(e) => field.onChange(e.target.checked)}
                           color="success"
                           disabled={saving}
+                          data-testid="admin-customer-edit-status-switch"
                         />
                       }
                       label={
@@ -441,6 +449,7 @@ export const CustomerEditPage = () => {
               color="inherit"
               onClick={() => navigate(`/admin/customers/${id}`)}
               disabled={saving}
+              data-testid="admin-customer-edit-cancel-btn"
             >
               Cancel
             </Button>
@@ -451,6 +460,7 @@ export const CustomerEditPage = () => {
               disabled={saving}
               startIcon={saving ? <CircularProgress size={16} color="inherit" /> : <SaveIcon />}
               sx={{ px: 3.5, fontWeight: 700 }}
+              data-testid="admin-customer-edit-submit-btn"
             >
               {saving ? 'Saving Changes...' : 'Save Changes (1-Click)'}
             </Button>
@@ -470,6 +480,7 @@ export const CustomerEditPage = () => {
           severity="error"
           variant="filled"
           sx={{ width: '100%' }}
+          data-testid="admin-customer-edit-snackbar"
         >
           {saveError}
         </Alert>

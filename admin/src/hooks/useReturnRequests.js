@@ -13,7 +13,7 @@ export const useReturnRequests = (initialParams = {}) => {
     setLoading(true);
     setError(null);
     if (params) {
-      paramsRef.current = { ...paramsRef.current, ...params };
+      paramsRef.current = { ...params };
     }
     try {
       const data = await returnRequestService.getReturnRequests(paramsRef.current);

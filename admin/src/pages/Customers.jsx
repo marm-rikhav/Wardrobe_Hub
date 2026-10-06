@@ -154,7 +154,7 @@ export const Customers = () => {
     );
   } else if (customers.length === 0) {
     customersContent = (
-      <Box sx={{ py: 8, px: 3, textAlign: 'center' }}>
+      <Box sx={{ py: 8, px: 3, textAlign: 'center' }} data-testid="admin-customers-empty">
         <PeopleOutlineIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 1.5, opacity: 0.5 }} />
         <Typography variant="h6" fontWeight={600} gutterBottom>
           {activeSearch ? 'No matching customers found' : 'No customers registered yet'}
@@ -165,7 +165,7 @@ export const Customers = () => {
             : 'Customer profiles will appear here once users register on the storefront.'}
         </Typography>
         {activeSearch && (
-          <Button variant="outlined" size="small" onClick={handleClearSearch}>
+          <Button variant="outlined" size="small" onClick={handleClearSearch} data-testid="admin-customers-empty-clear-btn">
             Clear Search Filter
           </Button>
         )}
@@ -187,7 +187,7 @@ export const Customers = () => {
         }}
       >
         <Box>
-          <Typography variant="h5" component="h1" fontWeight={700} gutterBottom>
+          <Typography variant="h5" component="h1" fontWeight={700} gutterBottom data-testid="admin-customers-title">
             Customers
           </Typography>
           <Typography variant="body2" color="text.secondary">
@@ -202,6 +202,7 @@ export const Customers = () => {
             startIcon={<RefreshIcon />}
             onClick={fetchCustomers}
             disabled={loading}
+            data-testid="admin-customers-refresh-btn"
           >
             Refresh
           </Button>
@@ -211,6 +212,7 @@ export const Customers = () => {
             color="primary"
             startIcon={<PersonAddOutlined />}
             onClick={() => navigate('/admin/customers/create')}
+            data-testid="admin-customers-create-btn"
           >
             Create Customer
           </Button>
@@ -237,6 +239,7 @@ export const Customers = () => {
                   setPagination((prev) => ({ ...prev, page: 1 }));
                 }
               }}
+              inputProps={{ 'data-testid': 'admin-customers-search-input' }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -245,7 +248,7 @@ export const Customers = () => {
                 ),
                 endAdornment: searchInput && (
                   <InputAdornment position="end">
-                    <IconButton size="small" onClick={handleClearSearch}>
+                    <IconButton size="small" onClick={handleClearSearch} data-testid="admin-customers-search-clear-btn">
                       <ClearIcon fontSize="small" />
                     </IconButton>
                   </InputAdornment>
@@ -257,6 +260,7 @@ export const Customers = () => {
               variant="contained"
               color="primary"
               sx={{ flexShrink: 0, px: 3 }}
+              data-testid="admin-customers-search-submit-btn"
             >
               Search
             </Button>
@@ -269,7 +273,7 @@ export const Customers = () => {
         {customersContent || (
           <>
             <TableContainer component={Paper} elevation={0}>
-              <Table sx={{ minWidth: 800 }}>
+              <Table sx={{ minWidth: 800 }} data-testid="admin-customers-table">
                 <TableHead>
                   <TableRow sx={{ bgcolor: 'rgba(191, 168, 138, 0.08)' }}>
                     <TableCell sx={{ fontWeight: 600 }}>Customer</TableCell>
@@ -282,7 +286,7 @@ export const Customers = () => {
                 </TableHead>
                 <TableBody>
                   {customers.map((customer) => (
-                    <TableRow key={customer.id} hover>
+                    <TableRow key={customer.id} hover data-testid="admin-customer-row">
                       {/* Name & Avatar */}
                       <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -299,7 +303,7 @@ export const Customers = () => {
                             {(customer.name || customer.email || 'C').charAt(0).toUpperCase()}
                           </Avatar>
                           <Box>
-                            <Typography variant="body2" fontWeight={600}>
+                            <Typography variant="body2" fontWeight={600} data-testid="admin-customer-name">
                               {customer.name}
                             </Typography>
                             <Typography variant="caption" color="text.secondary">
@@ -314,12 +318,12 @@ export const Customers = () => {
                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.3 }}>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
                             <EmailOutlined sx={{ fontSize: 14, color: 'text.secondary' }} />
-                            <Typography variant="body2">{customer.email}</Typography>
+                            <Typography variant="body2" data-testid="admin-customer-email">{customer.email}</Typography>
                           </Box>
                           {customer.phone && (
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
                               <PhoneOutlined sx={{ fontSize: 14, color: 'text.secondary' }} />
-                              <Typography variant="caption" color="text.secondary">
+                              <Typography variant="caption" color="text.secondary" data-testid="admin-customer-phone">
                                 {customer.phone}
                               </Typography>
                             </Box>
@@ -338,6 +342,7 @@ export const Customers = () => {
                             bgcolor: customer.totalOrders > 0 ? 'rgba(191, 168, 138, 0.2)' : 'rgba(0, 0, 0, 0.04)',
                             color: customer.totalOrders > 0 ? '#8A6F4E' : 'text.secondary',
                           }}
+                          data-testid="admin-customer-orders-count"
                         />
                       </TableCell>
 
@@ -359,6 +364,7 @@ export const Customers = () => {
                             bgcolor: customer.isActive ? 'rgba(47, 125, 79, 0.12)' : 'rgba(192, 57, 43, 0.12)',
                             color: customer.isActive ? '#2F7D4F' : '#C0392B',
                           }}
+                          data-testid="admin-customer-status-chip"
                         />
                       </TableCell>
 
@@ -370,6 +376,7 @@ export const Customers = () => {
                               size="small"
                               color="primary"
                               onClick={() => navigate(`/admin/customers/${customer.id}`)}
+                              data-testid="admin-customer-view-btn"
                             >
                               <VisibilityOutlined fontSize="small" />
                             </IconButton>
@@ -380,6 +387,7 @@ export const Customers = () => {
                               size="small"
                               color={customer.isActive ? 'warning' : 'success'}
                               onClick={() => handleToggleStatus(customer)}
+                              data-testid="admin-customer-toggle-status-btn"
                             >
                               {customer.isActive ? (
                                 <BlockOutlined fontSize="small" />
@@ -402,6 +410,7 @@ export const Customers = () => {
                                 color="error"
                                 disabled={customer.totalOrders > 0}
                                 onClick={() => handleOpenDelete(customer)}
+                                data-testid="admin-customer-delete-btn"
                               >
                                 <DeleteOutline fontSize="small" />
                               </IconButton>
@@ -468,6 +477,7 @@ export const Customers = () => {
         autoHideDuration={4500}
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        data-testid="admin-customers-snackbar"
       >
         <Alert
           onClose={handleCloseSnackbar}

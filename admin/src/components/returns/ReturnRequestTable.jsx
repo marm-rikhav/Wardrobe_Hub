@@ -110,6 +110,7 @@ export const ReturnRequestTable = ({
           borderColor: 'divider',
           bgcolor: 'background.paper',
         }}
+        data-testid="admin-returns-empty"
       >
         <AssignmentReturnOutlined sx={{ fontSize: 52, color: 'text.secondary', mb: 1.5 }} />
         <Typography variant="h6" fontWeight={600} gutterBottom>
@@ -133,6 +134,7 @@ export const ReturnRequestTable = ({
             color="success"
             variant="filled"
             sx={{ fontWeight: 600 }}
+            data-testid="admin-return-status-chip"
           />
         );
       case 'REJECTED':
@@ -144,6 +146,7 @@ export const ReturnRequestTable = ({
             color="error"
             variant="filled"
             sx={{ fontWeight: 600 }}
+            data-testid="admin-return-status-chip"
           />
         );
       case 'PENDING':
@@ -156,6 +159,7 @@ export const ReturnRequestTable = ({
             color="warning"
             variant="filled"
             sx={{ fontWeight: 600 }}
+            data-testid="admin-return-status-chip"
           />
         );
     }
@@ -164,7 +168,7 @@ export const ReturnRequestTable = ({
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden', border: '1px solid', borderColor: 'divider' }}>
       <TableContainer sx={{ maxHeight: 680 }}>
-        <Table stickyHeader aria-label="admin return requests table">
+        <Table stickyHeader aria-label="admin return requests table" data-testid="admin-returns-table">
           <TableHead>
             <TableRow>
               <TableCell sx={{ fontWeight: 700, bgcolor: 'background.paper' }}>Order #</TableCell>
@@ -185,6 +189,7 @@ export const ReturnRequestTable = ({
               <TableRow
                 key={req.id}
                 hover
+                data-testid="admin-return-row"
                 sx={{
                   '&:last-child td, &:last-child th': { border: 0 },
                   cursor: 'pointer',
@@ -195,6 +200,7 @@ export const ReturnRequestTable = ({
                 <TableCell>
                   <Typography
                     variant="body2"
+                    data-testid="admin-return-order-number"
                     sx={{
                       fontFamily: 'monospace',
                       fontWeight: 700,
@@ -208,7 +214,7 @@ export const ReturnRequestTable = ({
                 {/* Customer Name (No Customer ID displayed) */}
                 <TableCell>
                   <Box sx={{ minWidth: 0 }}>
-                    <Typography variant="body2" fontWeight={600} noWrap>
+                    <Typography variant="body2" fontWeight={600} noWrap data-testid="admin-return-customer-name">
                       {req.customerName || 'Customer'}
                     </Typography>
                     {req.customerEmail && (
@@ -216,6 +222,7 @@ export const ReturnRequestTable = ({
                         variant="caption"
                         color="text.secondary"
                         noWrap
+                        data-testid="admin-return-customer-email"
                         sx={{ display: 'block' }}
                       >
                         {req.customerEmail}
@@ -239,12 +246,13 @@ export const ReturnRequestTable = ({
                     variant="outlined"
                     color={req.type === 'RETURN' ? 'primary' : 'secondary'}
                     sx={{ fontWeight: 600 }}
+                    data-testid="admin-return-type-chip"
                   />
                 </TableCell>
 
                 {/* Reason */}
                 <TableCell>
-                  <Typography variant="body2" noWrap sx={{ maxWidth: 220 }}>
+                  <Typography variant="body2" noWrap sx={{ maxWidth: 220 }} data-testid="admin-return-reason">
                     {req.reason}
                   </Typography>
                 </TableCell>
@@ -256,7 +264,7 @@ export const ReturnRequestTable = ({
 
                 {/* Date */}
                 <TableCell>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body2" color="text.secondary" data-testid="admin-return-date">
                     {formatOrderDate(req.createdAt)}
                   </Typography>
                 </TableCell>
@@ -270,6 +278,7 @@ export const ReturnRequestTable = ({
                         color="primary"
                         onClick={() => onViewDetail(req)}
                         aria-label="View request details"
+                        data-testid="admin-return-view-btn"
                       >
                         <VisibilityOutlined fontSize="small" />
                       </IconButton>
@@ -283,6 +292,7 @@ export const ReturnRequestTable = ({
                           color="success"
                           onClick={() => onApprove(req)}
                           sx={{ textTransform: 'none', fontWeight: 600, py: 0.25, px: 1.25 }}
+                          data-testid="admin-return-approve-btn"
                         >
                           Approve
                         </Button>
@@ -292,6 +302,7 @@ export const ReturnRequestTable = ({
                           color="error"
                           onClick={() => onReject(req)}
                           sx={{ textTransform: 'none', fontWeight: 600, py: 0.25, px: 1.25 }}
+                          data-testid="admin-return-reject-btn"
                         >
                           Reject
                         </Button>
