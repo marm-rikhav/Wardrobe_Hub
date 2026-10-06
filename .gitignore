@@ -34,5 +34,6 @@ server/tests/
 *.spec.tsx
 mochawesome-report/
 client/TESTING_COMMANDS.md
+admin/TESTING_COMMANDS.md
 
 
