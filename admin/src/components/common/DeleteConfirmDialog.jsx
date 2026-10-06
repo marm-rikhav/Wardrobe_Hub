@@ -81,6 +81,7 @@ export const DeleteConfirmDialog = ({
           color="inherit"
           disabled={loading}
           sx={{ fontWeight: 600 }}
+          data-testid="admin-delete-cancel-btn"
         >
           Cancel
         </Button>
@@ -91,6 +92,7 @@ export const DeleteConfirmDialog = ({
           disabled={loading}
           startIcon={loading ? <CircularProgress size={16} color="inherit" /> : null}
           sx={{ minWidth: 100, fontWeight: 600 }}
+          data-testid="admin-delete-confirm-btn"
         >
           {loading ? 'Deleting...' : 'Delete'}
         </Button>

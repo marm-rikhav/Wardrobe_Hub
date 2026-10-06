@@ -102,7 +102,7 @@ export const CategoryDialog = ({
       <form onSubmit={handleSubmit(onFormSubmit)} noValidate>
         <DialogContent dividers sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, py: 2.5 }}>
           {error && (
-            <Alert severity="error" sx={{ mb: 1 }}>
+            <Alert severity="error" sx={{ mb: 1 }} data-testid="admin-category-dialog-error">
               {error}
             </Alert>
           )}
@@ -115,6 +115,7 @@ export const CategoryDialog = ({
             required
             autoFocus
             disabled={loading}
+            inputProps={{ 'data-testid': 'admin-category-name-input' }}
             {...register('name')}
             error={Boolean(errors.name)}
             helperText={errors.name?.message}
@@ -126,6 +127,7 @@ export const CategoryDialog = ({
             placeholder="e.g. men, women (auto-generated if empty)"
             fullWidth
             disabled={loading}
+            inputProps={{ 'data-testid': 'admin-category-slug-input' }}
             {...register('slug')}
             error={Boolean(errors.slug)}
             helperText={
@@ -140,6 +142,7 @@ export const CategoryDialog = ({
             placeholder="https://example.com/category-image.jpg"
             fullWidth
             disabled={loading}
+            inputProps={{ 'data-testid': 'admin-category-image-input' }}
             {...register('imageUrl')}
             error={Boolean(errors.imageUrl)}
             helperText={errors.imageUrl?.message}
@@ -166,6 +169,7 @@ export const CategoryDialog = ({
                       onChange={(e) => field.onChange(e.target.checked)}
                       disabled={loading}
                       color="secondary"
+                      data-testid="admin-category-status-switch"
                     />
                   }
                   label={field.value ? 'Active' : 'Inactive'}
@@ -176,7 +180,7 @@ export const CategoryDialog = ({
         </DialogContent>
 
         <DialogActions sx={{ px: 3, py: 2 }}>
-          <Button onClick={onClose} disabled={loading} color="inherit">
+          <Button onClick={onClose} disabled={loading} color="inherit" data-testid="admin-category-cancel-btn">
             Cancel
           </Button>
           <Button
@@ -185,6 +189,7 @@ export const CategoryDialog = ({
             color="primary"
             disabled={loading}
             startIcon={loading ? <CircularProgress size={16} color="inherit" /> : null}
+            data-testid="admin-category-submit-btn"
           >
             {submitButtonLabel}
           </Button>

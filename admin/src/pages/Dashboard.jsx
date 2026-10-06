@@ -62,7 +62,7 @@ export const Dashboard = () => {
         }}
       >
         <CheckCircleOutlineIcon sx={{ fontSize: 44, color: 'success.main', mb: 1 }} />
-        <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+        <Typography variant="subtitle1" fontWeight={600} gutterBottom data-testid="admin-inventory-healthy-title">
           Inventory is Healthy
         </Typography>
         <Typography variant="body2" color="text.secondary" maxWidth={360}>
@@ -83,7 +83,7 @@ export const Dashboard = () => {
     );
   } else if (!stats?.recentOrders || stats.recentOrders.length === 0) {
     recentOrdersContent = (
-      <Box sx={{ py: 6, px: 3, textAlign: 'center' }}>
+      <Box sx={{ py: 6, px: 3, textAlign: 'center' }} data-testid="admin-no-recent-orders">
         <ShoppingBagOutlined sx={{ fontSize: 44, color: 'text.secondary', mb: 1, opacity: 0.5 }} />
         <Typography variant="subtitle1" fontWeight={600} gutterBottom>
           No Orders Yet
@@ -109,7 +109,7 @@ export const Dashboard = () => {
         }}
       >
         <Box>
-          <Typography variant="h5" component="h1" fontWeight={700} gutterBottom>
+          <Typography variant="h5" component="h1" fontWeight={700} gutterBottom data-testid="admin-dashboard-title">
             Overview & Analytics
           </Typography>
           <Typography variant="body2" color="text.secondary">
@@ -124,6 +124,7 @@ export const Dashboard = () => {
           onClick={fetchDashboardData}
           disabled={loading}
           sx={{ flexShrink: 0 }}
+          data-testid="admin-dashboard-refresh-btn"
         >
           Refresh Data
         </Button>
@@ -167,7 +168,7 @@ export const Dashboard = () => {
               {loading ? (
                 <Skeleton variant="text" width="60%" height={40} />
               ) : (
-                <Typography variant="h4" fontWeight={700}>
+                <Typography variant="h4" fontWeight={700} data-testid="admin-kpi-total-orders">
                   {stats?.totalOrders ?? 0}
                 </Typography>
               )}
@@ -178,6 +179,7 @@ export const Dashboard = () => {
                 endIcon={<ArrowForwardIcon sx={{ fontSize: 16 }} />}
                 onClick={() => navigate('/admin/orders')}
                 sx={{ p: 0, color: 'accent.main', fontWeight: 600, '&:hover': { bgcolor: 'transparent', textDecoration: 'underline' } }}
+                data-testid="admin-kpi-link-orders"
               >
                 View all orders
               </Button>
@@ -219,7 +221,7 @@ export const Dashboard = () => {
               {loading ? (
                 <Skeleton variant="text" width="80%" height={40} />
               ) : (
-                <Typography variant="h4" fontWeight={700} sx={{ color: 'accent.main' }}>
+                <Typography variant="h4" fontWeight={700} sx={{ color: 'accent.main' }} data-testid="admin-kpi-total-revenue">
                   {formatCurrency(stats?.totalRevenue ?? 0)}
                 </Typography>
               )}
@@ -271,6 +273,7 @@ export const Dashboard = () => {
                     variant="h4"
                     fontWeight={700}
                     color={stats?.lowStockCount > 0 ? 'error.main' : 'success.main'}
+                    data-testid="admin-kpi-low-stock"
                   >
                     {stats?.lowStockCount ?? 0}
                   </Typography>
@@ -286,6 +289,7 @@ export const Dashboard = () => {
                 endIcon={<ArrowForwardIcon sx={{ fontSize: 16 }} />}
                 onClick={() => navigate('/admin/stock')}
                 sx={{ p: 0, color: 'accent.main', fontWeight: 600, '&:hover': { bgcolor: 'transparent', textDecoration: 'underline' } }}
+                data-testid="admin-kpi-link-stock"
               >
                 Manage stock
               </Button>
@@ -327,7 +331,7 @@ export const Dashboard = () => {
               {loading ? (
                 <Skeleton variant="text" width="60%" height={40} />
               ) : (
-                <Typography variant="h4" fontWeight={700}>
+                <Typography variant="h4" fontWeight={700} data-testid="admin-kpi-total-customers">
                   {stats?.totalCustomers ?? 0}
                 </Typography>
               )}
@@ -338,6 +342,7 @@ export const Dashboard = () => {
                 endIcon={<ArrowForwardIcon sx={{ fontSize: 16 }} />}
                 onClick={() => navigate('/admin/customers')}
                 sx={{ p: 0, color: 'accent.main', fontWeight: 600, '&:hover': { bgcolor: 'transparent', textDecoration: 'underline' } }}
+                data-testid="admin-kpi-link-customers"
               >
                 View all customers
               </Button>
@@ -373,6 +378,7 @@ export const Dashboard = () => {
                 size="small"
                 variant="outlined"
                 onClick={() => navigate('/admin/stock')}
+                data-testid="admin-inventory-view-all-btn"
               >
                 View All
               </Button>
@@ -479,13 +485,14 @@ export const Dashboard = () => {
                 size="small"
                 variant="outlined"
                 onClick={() => navigate('/admin/orders')}
+                data-testid="admin-recent-orders-view-all-btn"
               >
                 View All
               </Button>
             </Box>
 
             {recentOrdersContent || (
-              <TableContainer sx={{ maxHeight: 360 }}>
+              <TableContainer sx={{ maxHeight: 360 }} data-testid="admin-recent-orders-table">
                 <Table size="small" stickyHeader>
                   <TableHead>
                     <TableRow>
@@ -498,7 +505,7 @@ export const Dashboard = () => {
                   </TableHead>
                   <TableBody>
                     {stats.recentOrders.map((order) => (
-                      <TableRow key={order.id} hover>
+                      <TableRow key={order.id} hover data-testid="admin-recent-order-row">
                         <TableCell>
                           <Typography variant="body2" fontWeight={600}>
                             #{order.orderNumber}
@@ -529,6 +536,7 @@ export const Dashboard = () => {
                               size="small"
                               onClick={() => navigate(`/admin/orders/${order.id}`)}
                               sx={{ color: 'accent.main' }}
+                              data-testid="admin-recent-order-action-btn"
                             >
                               <ArrowForwardIcon fontSize="small" />
                             </IconButton>

@@ -150,16 +150,7 @@ export const ProductFormPage = () => {
       basePrice: '',
       discountPrice: '',
       isActive: true,
-      variants: [
-        {
-          sku: '',
-          size: '',
-          color: '',
-          price: '',
-          stock: 0,
-          isActive: true,
-        },
-      ],
+      variants: [],
     },
   });
 
@@ -424,6 +415,7 @@ export const ProductFormPage = () => {
                   fullWidth
                   required
                   disabled={submitting}
+                  inputProps={{ 'data-testid': 'admin-product-name-input' }}
                   {...register('name')}
                   error={Boolean(errors.name)}
                   helperText={errors.name?.message}
@@ -437,6 +429,7 @@ export const ProductFormPage = () => {
                   fullWidth
                   required
                   disabled={submitting}
+                  inputProps={{ 'data-testid': 'admin-product-brand-input' }}
                   {...register('brand')}
                   error={Boolean(errors.brand)}
                   helperText={errors.brand?.message}
@@ -472,6 +465,7 @@ export const ProductFormPage = () => {
                   multiline
                   rows={3}
                   disabled={submitting}
+                  inputProps={{ 'data-testid': 'admin-product-description-input' }}
                   {...register('description')}
                   error={Boolean(errors.description)}
                   helperText={errors.description?.message}
@@ -497,6 +491,7 @@ export const ProductFormPage = () => {
                   <Select
                     labelId="product-parent-cat-label"
                     label="Parent Category"
+                    data-testid="admin-product-category-select"
                     value={selectedParentCategoryId}
                     onChange={(e) => handleParentCategoryChange(e.target.value)}
                   >
@@ -530,6 +525,7 @@ export const ProductFormPage = () => {
                       <Select
                         labelId="product-subcat-label"
                         label={selectedParentCategoryId ? 'Subcategory' : 'Select Parent Category first'}
+                        data-testid="admin-product-subcategory-select"
                         {...field}
                       >
                         {filteredSubcategories.map((sub) => (
@@ -564,7 +560,7 @@ export const ProductFormPage = () => {
                   placeholder="0.00"
                   fullWidth
                   required
-                  inputProps={{ inputMode: 'decimal', maxLength: 8 }}
+                  inputProps={{ 'data-testid': 'admin-product-base-price-input', inputMode: 'decimal', maxLength: 8 }}
                   disabled={submitting}
                   {...register('basePrice', {
                     onChange: (e) => {
@@ -583,7 +579,7 @@ export const ProductFormPage = () => {
                   label="Discount Price (₹) (Optional)"
                   placeholder="Must be <= Base Price"
                   fullWidth
-                  inputProps={{ inputMode: 'decimal', maxLength: 8 }}
+                  inputProps={{ 'data-testid': 'admin-product-discount-price-input', inputMode: 'decimal', maxLength: 8 }}
                   disabled={submitting}
                   {...register('discountPrice', {
                     onChange: (e) => {
@@ -670,6 +666,7 @@ export const ProductFormPage = () => {
             disabled={submitting}
             startIcon={submitting ? <CircularProgress size={18} color="inherit" /> : <SaveOutlined />}
             sx={{ px: 4 }}
+            data-testid="admin-product-submit-btn"
           >
             {submitButtonLabel}
           </Button>

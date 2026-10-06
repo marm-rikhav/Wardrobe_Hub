@@ -132,6 +132,7 @@ export const SubcategoryTable = ({
               <TableRow
                 key={sub.id}
                 hover
+                data-testid="admin-subcategory-row"
                 sx={{
                   '&:last-child td, &:last-child th': { border: 0 },
                   opacity: sub.isActive ? 1 : 0.65,
@@ -139,7 +140,7 @@ export const SubcategoryTable = ({
               >
                 {/* Name */}
                 <TableCell>
-                  <Typography variant="body2" fontWeight={600}>
+                  <Typography variant="body2" fontWeight={600} data-testid="admin-subcategory-name">
                     {sub.name}
                   </Typography>
                 </TableCell>
@@ -151,13 +152,14 @@ export const SubcategoryTable = ({
                     label={sub.category?.name || 'Unassigned'}
                     color="secondary"
                     variant="outlined"
+                    data-testid="admin-subcategory-parent-chip"
                     sx={{ fontWeight: 600 }}
                   />
                 </TableCell>
 
                 {/* Slug */}
                 <TableCell>
-                  <Typography variant="body2" color="text.secondary" sx={{ fontFamily: 'monospace' }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ fontFamily: 'monospace' }} data-testid="admin-subcategory-slug">
                     {sub.slug}
                   </Typography>
                 </TableCell>
@@ -178,6 +180,7 @@ export const SubcategoryTable = ({
                     size="small"
                     label={sub.isActive ? 'Active' : 'Inactive'}
                     color={sub.isActive ? 'success' : 'default'}
+                    data-testid="admin-subcategory-status-chip"
                     sx={{
                       fontWeight: 600,
                       bgcolor: sub.isActive ? 'rgba(47, 125, 79, 0.12)' : 'rgba(0, 0, 0, 0.08)',
@@ -195,6 +198,7 @@ export const SubcategoryTable = ({
                         color="primary"
                         onClick={() => onEdit(sub)}
                         aria-label={`Edit ${sub.name}`}
+                        data-testid="admin-subcategory-edit-btn"
                       >
                         <EditOutlined fontSize="small" />
                       </IconButton>
@@ -206,6 +210,7 @@ export const SubcategoryTable = ({
                         color={sub.isActive ? 'error' : 'success'}
                         onClick={() => onToggleStatus(sub)}
                         aria-label={sub.isActive ? `Deactivate ${sub.name}` : `Activate ${sub.name}`}
+                        data-testid="admin-subcategory-toggle-status-btn"
                       >
                         {sub.isActive ? (
                           <HighlightOffOutlined fontSize="small" />
@@ -221,6 +226,7 @@ export const SubcategoryTable = ({
                         color="error"
                         onClick={() => onDelete?.(sub)}
                         aria-label={`Delete ${sub.name}`}
+                        data-testid="admin-subcategory-delete-btn"
                       >
                         <DeleteOutline fontSize="small" />
                       </IconButton>

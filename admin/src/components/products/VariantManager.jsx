@@ -190,13 +190,14 @@ export const VariantManager = ({
           startIcon={<AddIcon />}
           onClick={handleOpenAdd}
           disabled={disabled}
+          data-testid="admin-add-variant-btn"
         >
           Add Variant
         </Button>
       </Box>
 
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
+        <Alert severity="error" sx={{ mb: 2 }} data-testid="admin-variants-error">
           {error}
         </Alert>
       )}
@@ -324,7 +325,7 @@ export const VariantManager = ({
         >
           <DialogContent dividers sx={{ py: 2.5 }}>
             {variantFormError && (
-              <Alert severity="error" sx={{ mb: 2 }}>
+              <Alert severity="error" sx={{ mb: 2 }} data-testid="admin-variant-form-error">
                 {variantFormError}
               </Alert>
             )}
@@ -340,7 +341,7 @@ export const VariantManager = ({
                   {...register('sku')}
                   error={Boolean(errors.sku)}
                   helperText={errors.sku?.message}
-                  inputProps={{ style: { textTransform: 'uppercase' } }}
+                  inputProps={{ 'data-testid': 'admin-variant-sku-input', style: { textTransform: 'uppercase' } }}
                 />
               </Grid>
 
@@ -352,7 +353,7 @@ export const VariantManager = ({
                   placeholder="0"
                   fullWidth
                   required
-                  inputProps={{ min: 0, step: 1 }}
+                  inputProps={{ 'data-testid': 'admin-variant-stock-input', min: 0, step: 1 }}
                   {...register('stock')}
                   error={Boolean(errors.stock)}
                   helperText={errors.stock?.message || 'Must be 0 or greater'}
@@ -366,6 +367,7 @@ export const VariantManager = ({
                   placeholder="e.g. S, M, L, XL, 32, One Size"
                   fullWidth
                   required
+                  inputProps={{ 'data-testid': 'admin-variant-size-input' }}
                   {...register('size')}
                   error={Boolean(errors.size)}
                   helperText={errors.size?.message}
@@ -379,6 +381,7 @@ export const VariantManager = ({
                   placeholder="e.g. Black, White, Navy Blue"
                   fullWidth
                   required
+                  inputProps={{ 'data-testid': 'admin-variant-color-input' }}
                   {...register('color')}
                   error={Boolean(errors.color)}
                   helperText={errors.color?.message}
@@ -392,7 +395,7 @@ export const VariantManager = ({
                   type="number"
                   placeholder="Leave empty to use base price"
                   fullWidth
-                  inputProps={{ min: 0.01, step: 0.01 }}
+                  inputProps={{ 'data-testid': 'admin-variant-price-input', min: 0.01, step: 0.01 }}
                   {...register('price')}
                   error={Boolean(errors.price)}
                   helperText={errors.price?.message}
@@ -422,13 +425,14 @@ export const VariantManager = ({
           </DialogContent>
 
           <DialogActions sx={{ px: 3, py: 2 }}>
-            <Button type="button" onClick={handleCloseModal} color="inherit">
+            <Button type="button" onClick={handleCloseModal} color="inherit" data-testid="admin-variant-cancel-btn">
               Cancel
             </Button>
             <Button
               type="button"
               variant="contained"
               color="primary"
+              data-testid="admin-variant-save-btn"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();

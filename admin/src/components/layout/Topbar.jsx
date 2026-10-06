@@ -23,6 +23,7 @@ const PAGE_TITLES = {
   '/admin/products/new': 'Add New Product',
   '/admin/stock': 'Variant Stock Management',
   '/admin/orders': 'Orders',
+  '/admin/returns': 'Returns & Exchanges',
   '/admin/customers': 'Customers',
   '/admin/customers/create': 'Create Customer',
   '/admin/settings': 'Settings',
@@ -65,6 +66,7 @@ export const Topbar = ({ onToggleMobile, onToggleCollapse, collapsed, isMobile }
             color="inherit"
             aria-label="open drawer"
             onClick={onToggleMobile}
+            data-testid="admin-toggle-sidebar-btn"
             sx={{ mr: 1.5 }}
           >
             <MenuIcon />
@@ -75,6 +77,7 @@ export const Topbar = ({ onToggleMobile, onToggleCollapse, collapsed, isMobile }
             color="inherit"
             aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             onClick={onToggleCollapse}
+            data-testid="admin-toggle-sidebar-btn"
             sx={{ mr: 2, display: { xs: 'none', md: 'inline-flex' } }}
           >
             {collapsed ? <MenuIcon /> : <MenuOpenOutlined />}
@@ -87,6 +90,7 @@ export const Topbar = ({ onToggleMobile, onToggleCollapse, collapsed, isMobile }
             variant="h6"
             component="div"
             noWrap
+            data-testid="admin-page-title"
             sx={{
               fontWeight: 700,
               fontSize: { xs: '1rem', sm: '1.25rem' },

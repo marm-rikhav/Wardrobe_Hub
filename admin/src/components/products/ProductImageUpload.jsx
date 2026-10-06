@@ -180,6 +180,7 @@ const SelectedImagePreview = ({
             label={`${sizeKb} KB (${isSizeValid ? '150–300 KB Valid' : 'Must be 150–300 KB'})`}
             color={isSizeValid ? 'success' : 'error'}
             variant="outlined"
+            data-testid="admin-image-size-chip"
             sx={{ fontWeight: 700 }}
           />
 
@@ -192,6 +193,7 @@ const SelectedImagePreview = ({
               })`}
               color={isRatioValid ? 'success' : 'error'}
               variant="outlined"
+              data-testid="admin-image-ratio-chip"
               sx={{ fontWeight: 700 }}
             />
           )}
@@ -199,7 +201,7 @@ const SelectedImagePreview = ({
       </Box>
 
       {aspectRatioWarning && (
-        <Alert severity="error" icon={<InfoOutlined />} sx={{ my: 1.5, borderRadius: 1.5 }}>
+        <Alert severity="error" icon={<InfoOutlined />} sx={{ my: 1.5, borderRadius: 1.5 }} data-testid="admin-image-aspect-warning">
           {aspectRatioWarning}
         </Alert>
       )}
@@ -266,6 +268,7 @@ const SelectedImagePreview = ({
               startIcon={uploading ? <CircularProgress size={16} color="inherit" /> : <CloudUploadOutlined />}
               onClick={onUpload}
               disabled={uploading || isSizeValid === false || imageMeta?.isValidRatio === false}
+              data-testid="admin-image-upload-btn"
             >
               {uploading ? 'Uploading to Cloudinary...' : 'Upload Image'}
             </Button>
@@ -537,6 +540,7 @@ export const ProductImageUpload = ({
             onChange={handleFileChange}
             accept={ALLOWED_TYPES.join(',')}
             style={{ display: 'none' }}
+            data-testid="admin-product-image-file-input"
           />
 
           {selectedFile ? (

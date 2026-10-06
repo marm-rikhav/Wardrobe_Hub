@@ -7,8 +7,8 @@ const removeTestIds = () => ({
   transform(code, id) {
     if (id.includes('node_modules')) return null;
     let transformed = code
-      .replace(/["']?data-testid["']?\s*:\s*["`'][^"`']*["`'],?\s*/g, '')
-      .replace(/data-testid\s*=\s*({[^}]*}|"[^"]*"|'[^']*')\s*/g, '');
+      .replaceAll(/["']?data-testid["']?\s*:\s*["`'][^"`']*["`'],?\s*/g, '')
+      .replaceAll(/data-testid\s*=\s*({[^}]*}|"[^"]*"|'[^']*')\s*/g, '');
     return {
       code: transformed,
       map: null,

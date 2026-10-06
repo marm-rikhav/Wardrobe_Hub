@@ -196,7 +196,7 @@ export const Products = () => {
         }}
       >
         <Box>
-          <Typography variant="h5" component="h1" fontWeight={700} gutterBottom>
+          <Typography variant="h5" component="h1" fontWeight={700} gutterBottom data-testid="admin-products-title">
             Products
           </Typography>
           <Typography variant="body2" color="text.secondary">
@@ -212,6 +212,7 @@ export const Products = () => {
             onClick={() => fetchProducts(pagination.page)}
             disabled={loading}
             sx={{ flexShrink: 0 }}
+            data-testid="admin-products-refresh-btn"
           >
             Refresh
           </Button>
@@ -225,6 +226,7 @@ export const Products = () => {
               flexShrink: 0,
               flexGrow: { xs: 1, sm: 0 },
             }}
+            data-testid="admin-add-product-btn"
           >
             Add Product
           </Button>
@@ -243,6 +245,7 @@ export const Products = () => {
                 onChange={(e) => setSearch(e.target.value)}
                 size="small"
                 fullWidth
+                inputProps={{ 'data-testid': 'admin-products-search-input' }}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -261,6 +264,7 @@ export const Products = () => {
                   labelId="filter-cat-label"
                   label="Category"
                   value={categoryId}
+                  data-testid="admin-products-category-filter"
                   onChange={(e) => {
                     setCategoryId(e.target.value);
                     setSubcategoryId('');
@@ -386,6 +390,7 @@ export const Products = () => {
         autoHideDuration={4000}
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        data-testid="admin-product-snackbar"
       >
         <Alert
           onClose={handleCloseSnackbar}

@@ -133,6 +133,7 @@ export const CategoryTable = ({
               <TableRow
                 key={cat.id}
                 hover
+                data-testid="admin-category-row"
                 sx={{
                   '&:last-child td, &:last-child th': { border: 0 },
                   opacity: cat.isActive ? 1 : 0.65,
@@ -156,7 +157,7 @@ export const CategoryTable = ({
                       {cat.name.charAt(0).toUpperCase()}
                     </Avatar>
                     <Box>
-                      <Typography variant="body2" fontWeight={600}>
+                      <Typography variant="body2" fontWeight={600} data-testid="admin-category-name">
                         {cat.name}
                       </Typography>
                     </Box>
@@ -165,7 +166,7 @@ export const CategoryTable = ({
 
                 {/* Slug */}
                 <TableCell>
-                  <Typography variant="body2" color="text.secondary" sx={{ fontFamily: 'monospace' }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ fontFamily: 'monospace' }} data-testid="admin-category-slug">
                     {cat.slug}
                   </Typography>
                 </TableCell>
@@ -186,6 +187,7 @@ export const CategoryTable = ({
                     size="small"
                     label={cat.isActive ? 'Active' : 'Inactive'}
                     color={cat.isActive ? 'success' : 'default'}
+                    data-testid="admin-category-status-chip"
                     sx={{
                       fontWeight: 600,
                       bgcolor: cat.isActive ? 'rgba(47, 125, 79, 0.12)' : 'rgba(0, 0, 0, 0.08)',
@@ -203,6 +205,7 @@ export const CategoryTable = ({
                         color="primary"
                         onClick={() => onEdit(cat)}
                         aria-label={`Edit ${cat.name}`}
+                        data-testid="admin-category-edit-btn"
                       >
                         <EditOutlined fontSize="small" />
                       </IconButton>
@@ -214,6 +217,7 @@ export const CategoryTable = ({
                         color={cat.isActive ? 'error' : 'success'}
                         onClick={() => onToggleStatus(cat)}
                         aria-label={cat.isActive ? `Deactivate ${cat.name}` : `Activate ${cat.name}`}
+                        data-testid="admin-category-toggle-status-btn"
                       >
                         {cat.isActive ? (
                           <HighlightOffOutlined fontSize="small" />

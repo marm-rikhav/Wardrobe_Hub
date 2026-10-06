@@ -33,5 +33,6 @@ server/tests/
 *.spec.ts
 *.spec.tsx
 mochawesome-report/
+client/TESTING_COMMANDS.md
 
 

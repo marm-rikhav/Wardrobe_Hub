@@ -175,7 +175,7 @@ export const Subcategories = () => {
         }}
       >
         <Box>
-          <Typography variant="h5" component="h1" fontWeight={700} gutterBottom>
+          <Typography variant="h5" component="h1" fontWeight={700} gutterBottom data-testid="admin-subcategories-title">
             Subcategories
           </Typography>
           <Typography variant="body2" color="text.secondary">
@@ -191,6 +191,7 @@ export const Subcategories = () => {
             onClick={fetchData}
             disabled={loading}
             sx={{ flexShrink: 0 }}
+            data-testid="admin-subcategories-refresh-btn"
           >
             Refresh
           </Button>
@@ -205,6 +206,7 @@ export const Subcategories = () => {
               flexShrink: 0,
               flexGrow: { xs: 1, sm: 0 },
             }}
+            data-testid="admin-add-subcategory-btn"
           >
             Add Subcategory
           </Button>
@@ -222,6 +224,7 @@ export const Subcategories = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 size="small"
                 fullWidth
+                inputProps={{ 'data-testid': 'admin-subcategories-search-input' }}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -239,6 +242,7 @@ export const Subcategories = () => {
                   label="Filter by Category"
                   value={selectedCategoryId}
                   onChange={(e) => setSelectedCategoryId(e.target.value)}
+                  data-testid="admin-subcategories-category-filter"
                 >
                   <MenuItem value="">
                     <em>All Categories</em>
@@ -292,6 +296,7 @@ export const Subcategories = () => {
         autoHideDuration={4000}
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        data-testid="admin-subcategory-snackbar"
       >
         <Alert
           onClose={handleCloseSnackbar}

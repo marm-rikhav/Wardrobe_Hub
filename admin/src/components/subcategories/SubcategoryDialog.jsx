@@ -121,7 +121,7 @@ export const SubcategoryDialog = ({
       <form onSubmit={handleSubmit(onFormSubmit)} noValidate>
         <DialogContent dividers sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, py: 2.5 }}>
           {error && (
-            <Alert severity="error" sx={{ mb: 1 }}>
+            <Alert severity="error" sx={{ mb: 1 }} data-testid="admin-subcategory-dialog-error">
               {error}
             </Alert>
           )}
@@ -136,6 +136,7 @@ export const SubcategoryDialog = ({
                 <Select
                   labelId="parent-category-label"
                   label="Parent Category"
+                  data-testid="admin-subcategory-category-select"
                   {...field}
                 >
                   {categories.map((cat) => (
@@ -158,6 +159,7 @@ export const SubcategoryDialog = ({
             fullWidth
             required
             disabled={loading}
+            inputProps={{ 'data-testid': 'admin-subcategory-name-input' }}
             {...register('name')}
             error={Boolean(errors.name)}
             helperText={errors.name?.message}
@@ -170,6 +172,7 @@ export const SubcategoryDialog = ({
             fullWidth
             required
             disabled={loading}
+            inputProps={{ 'data-testid': 'admin-subcategory-slug-input' }}
             {...register('slug')}
             onChange={(e) => {
               setIsSlugManuallyEdited(true);
@@ -203,6 +206,7 @@ export const SubcategoryDialog = ({
                       onChange={(e) => field.onChange(e.target.checked)}
                       disabled={loading}
                       color="secondary"
+                      data-testid="admin-subcategory-status-switch"
                     />
                   }
                   label={field.value ? 'Active' : 'Inactive'}
@@ -213,7 +217,7 @@ export const SubcategoryDialog = ({
         </DialogContent>
 
         <DialogActions sx={{ px: 3, py: 2 }}>
-          <Button onClick={onClose} disabled={loading} color="inherit">
+          <Button onClick={onClose} disabled={loading} color="inherit" data-testid="admin-subcategory-cancel-btn">
             Cancel
           </Button>
           <Button
@@ -222,6 +226,7 @@ export const SubcategoryDialog = ({
             color="primary"
             disabled={loading}
             startIcon={loading ? <CircularProgress size={16} color="inherit" /> : null}
+            data-testid="admin-subcategory-submit-btn"
           >
             {submitButtonLabel}
           </Button>

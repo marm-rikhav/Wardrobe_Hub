@@ -129,6 +129,7 @@ export const ProductTable = ({
                 <TableRow
                   key={prod.id}
                   hover
+                  data-testid="admin-product-row"
                   sx={{
                     '&:last-child td, &:last-child th': { border: 0 },
                     opacity: prod.isActive ? 1 : 0.65,
@@ -152,7 +153,7 @@ export const ProductTable = ({
                         {prod.name.charAt(0).toUpperCase()}
                       </Avatar>
                       <Box sx={{ minWidth: 0, maxWidth: 220 }}>
-                        <Typography variant="body2" fontWeight={600} noWrap>
+                        <Typography variant="body2" fontWeight={600} noWrap data-testid="admin-product-name">
                           {prod.name}
                         </Typography>
                         <Typography
@@ -227,6 +228,7 @@ export const ProductTable = ({
                       size="small"
                       label={prod.isActive ? 'Active' : 'Inactive'}
                       color={prod.isActive ? 'success' : 'default'}
+                      data-testid="admin-product-status-chip"
                       sx={{
                         fontWeight: 600,
                         bgcolor: prod.isActive ? 'rgba(47, 125, 79, 0.12)' : 'rgba(0, 0, 0, 0.08)',
@@ -244,6 +246,7 @@ export const ProductTable = ({
                           color="secondary"
                           onClick={() => onManageImages(prod)}
                           aria-label={`Images for ${prod.name}`}
+                          data-testid="admin-product-images-btn"
                         >
                           <PhotoCameraOutlined fontSize="small" />
                         </IconButton>
@@ -255,6 +258,7 @@ export const ProductTable = ({
                           color="primary"
                           onClick={() => onEdit(prod)}
                           aria-label={`Edit ${prod.name}`}
+                          data-testid="admin-product-edit-btn"
                         >
                           <EditOutlined fontSize="small" />
                         </IconButton>
@@ -266,6 +270,7 @@ export const ProductTable = ({
                           color={prod.isActive ? 'error' : 'success'}
                           onClick={() => onToggleStatus(prod)}
                           aria-label={prod.isActive ? `Deactivate ${prod.name}` : `Activate ${prod.name}`}
+                          data-testid="admin-product-toggle-status-btn"
                         >
                           {prod.isActive ? (
                             <HighlightOffOutlined fontSize="small" />
@@ -281,6 +286,7 @@ export const ProductTable = ({
                           color="error"
                           onClick={() => onDelete?.(prod)}
                           aria-label={`Delete ${prod.name}`}
+                          data-testid="admin-product-delete-btn"
                         >
                           <DeleteOutline fontSize="small" />
                         </IconButton>

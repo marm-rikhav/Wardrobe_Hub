@@ -155,7 +155,7 @@ const SidebarNavItem = ({ item, isCompact, showLabels, isActive, onClick }) => {
       <Tooltip title={tooltipTitle} placement="right">
         <ListItemButton
           onClick={onClick}
-          data-testid={item.testId || `admin-nav-${item.label.toLowerCase().replace(/[^a-z0-9]/g, '-')}`}
+          data-testid={item.testId || `admin-nav-${item.path.replaceAll(/^\/admin\/?/g, '') || 'dashboard'}`}
           sx={getNavItemStyles(isActive, isCompact)}
         >
           <ListItemIcon sx={getIconStyles(isActive, isCompact)}>
@@ -179,6 +179,7 @@ SidebarNavItem.propTypes = {
     path: PropTypes.string.isRequired,
     tooltip: PropTypes.string,
     icon: PropTypes.elementType.isRequired,
+    testId: PropTypes.string,
   }).isRequired,
   isCompact: PropTypes.bool.isRequired,
   showLabels: PropTypes.bool.isRequired,
